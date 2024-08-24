@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Activities</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <script src=" https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js "></script>
+
+    <!--Template for card for Handlebars-->
+    <script id="card-handlebars" type="text/x-handlebars-template">
+        <button type="button" data-bs-toggle="modal" data-bs-target="#a{{id}}" class="list-button">
+            <div class="container rounded-2 p-3 list-item">
+                <div class="row align-items-start">
+                    <div class="col-md-7 list-title">
+                        {{Organisation}}
+                    </div>
+                    <div id ="sub_category" class="col-md-3 list-type">
+                        {{Category}}
+                    </div>
+                    <div id="sub_distance" class="col-md-1 list-distance">
+                        {{Distance}}km
+                    </div>
+                </div>
+            </div>
+        </button>
+    </script>
+
+    <!--Template for modal for Handlebars-->
+    <script id="modal-handlebars" type="text/x-handlebars-template">
+        <div class="modal fade" id="a{{id}}">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header list-title">
+                        {{Organisation}}
+                    </div>
+                    <div class="modal-body">
+                        <table class="table">
+                            <thead>
+                                <tr><th style="width:18%;">Details:</th><td></td></tr>
+                            </thead>
+                            <tr>
+                                <td>Type:</td>
+                                <td>{{Type}}</td>
+                            </tr>
+                            <tr>
+                                <td>Distance:</td>
+                                <td>{{Distance}}km</td>
+                            </tr>
+                            <tr>
+                                <td>Category:</td>
+                                <td>{{Category}}</td>
+                            </tr>
+                            <tr>
+                                <td>Cost:</td>
+                                <td>{{Cost}}</td>
+                            </tr>
+                            <tr>
+                                <td>Parking:</td>
+                                <td>{{Parking}}</td>
+                            </tr>
+                            <tr>
+                                <td>Toilets:</td>
+                                <td>{{Toilets}}</td>
+                            </tr>
+                            <tr>
+                                <td>Contact:</td>
+                                <td>{{Contact}}</td>
+                            </tr>
+                            <tr>
+                                <td>Location:</td>
+                                <td>{{Location}}</td>
+                            </tr>
+                        </table>
+                        <div>
+                            Description:<br>
+                            {{Description}}<br><br>
+                            Restrictions:<br>
+                            {{Restrictions}}<br><br>
+                            Notes:<br>
+                            {{Notes}}<br><br>
+                            Additional notes:<br>
+                            {{Misc_Notes}}<br><br>
+                            Last updated (UNIX): {{Last_Updated}}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+</head>
+<body onload="render_all('panama')">
+    <div class="wrapper">
+        <div class="sidebar">
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <img class="nav-logo" src="./logo.jpg">
+                </li>
+                <hr>
+                <li class="nav-item">
+                    <a class="nav-link" href="./bradford.html">Bradford</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">Panama</a>
+                </li>
+                <hr>
+                <li class>
+                    Distance:
+                    <br>
+                    <select class="form-select mb" id="distance">
+                        <option value="-1">All</option>
+                        <option value="7">~7km</option>
+                        <option value="14">~14km</option>
+                        <option value="21">~21km</option>
+                    </select>
+                </li>
+                <br>
+                <li>
+                    Activity type:
+                    <br>
+                    <select class="form-select mb" id="category">
+                        <option select>All</option>
+                        <option value="art">Art</option>
+                        <option value="museum">Museum</option>
+                        <option value="motor">Motor</option>
+                        <option value="park">Park</option>
+                        <option value="play">Playground</option>
+                        <option value="recreation">Recreation</option>
+                        <option value="sensory">Sensory</option>
+                        <option value="sport">Sport</option>
+                    </select>
+                </li>
+            </ul>
+        </div>
+        <!--The div below acts as a blank flexbox that allows for easier content formatting
+        as a fixed position element cannot be within the flexbox.-->
+        <div class="sidebar-flex"></div>
+        
+        <!--Loading script between sidebar and body load-->
+        <script src="./script.js"></script>
+        
+        <div class="content" id="main">
+            <!--All activities content will be populated into here, the below is an example of the format-->
+            
+            <!--Template used in automatic generation for cards-->
+            <!--button type="button" data-bs-toggle="modal" data-bs-target="#a1" class="list-button">
+                <div class="container rounded-2 p-3 list-item">
+                    <div class="row align-items-start">
+                        <div class="col-md-7 list-title">
+                            BowlAbility - Hosted by Kardinya Bowling Club & Bowls WA
+                        </div>
+                        <div class="col-md-3 list-type">
+                            Park
+                        </div>
+                        <div class="col-md-1 list-distance">
+                            14km
+                        </div>
+                    </div>
+                </div>
+            </button-->
+
+            <!--Template used in automatic generation for modals-->
+            <!--div class="modal fade" id="a1">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header list-title">
+                            BowlAbility - Hosted by Kardinya Bowling Club & Bowls WA
+                        </div>
+                        <div class="modal-body">
+                            <table class="table">
+                                <thead>
+                                    <tr><th style="width:18%;">Details:</th><td></td></tr>
+                                </thead>
+                                <tr>
+                                    <td>Type:</td>
+                                    <td>Park</td>
+                                </tr>
+                                <tr>
+                                    <td>Distance:</td>
+                                    <td>14km</td>
+                                </tr>
+                                <tr>
+                                    <td>Category:</td>
+                                    <td>Bowling</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div-->
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</body>
+</html>
