@@ -128,8 +128,17 @@ def parse_workbook(path):
 
 
 ## TESTING
-"""
-specs, df = parse_workbook("./CSL_1_U.xlsx")
+
+specs, df = parse_workbook("/Users/alithealow/Desktop/YEAR 3 SEM 2/CITS3200/CSL_1_U.xlsx")
 
 print(df)
-"""
+
+### VISUALIATIONS
+import plotly.express as px 
+
+x = list(df["Axial strain"])
+y = list(df["Deviator stress"])
+
+
+fig = px.line(df, x, y)
+fig.write_html('./plots/test_fig.html', auto_open=True)
