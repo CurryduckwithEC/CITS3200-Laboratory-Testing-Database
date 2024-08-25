@@ -9,8 +9,8 @@ Wanted columns:
     - Volumetric strain
     - Excess PWP
     - p'
-    - Deviator stress
-    - Void ratio
+    - Deviator stress (q)
+    - Void ratio (w)
     - Shear induced PWP
 """
 
@@ -125,26 +125,32 @@ def parse_workbook(path):
 
     return specs, df
 
+### VISUALIATIONS
 
+specs, df = parse_workbook("./CSL_1_U.xlsx")
+specs2, df2 = parse_workbook("./CSL_2_U.xlsx")
+specs3, df3 = parse_workbook("./CSL_3_D.xlsx")
 
-## TESTING
-
-specs, df = parse_workbook("/Users/alithealow/Desktop/YEAR 3 SEM 2/CITS3200/CSL_1_U.xlsx")
-specs2, df2 = parse_workbook("/Users/alithealow/Desktop/YEAR 3 SEM 2/CITS3200/CSL_2_U.xlsx")
-
+# Add Test column to differenciate different tests
 df['Test'] = 'Test1'
 df2['Test'] = 'Test2'
+df3['Test'] = 'Test3'
 
-df_combined = pd.concat([df, df2])
+df_combined = pd.concat([df, df2, df3])
 
-print(df_combined)
+#print(df_combined)
 
-### VISUALIATIONS
 import plotly.express as px 
 
+# Deviator Stress VS Axial Strain 
 axial_deviator_fig = px.line(df_combined, x="Axial strain", y="Deviator stress", color="Test")
-axial_deviator_fig.write_html('./plots/axial_deviator_fig.html', auto_open=False)
+axial_deviator_fig.write_html('./plots/axial_deviator_fig.html')
 
+# Axial Strain VS Time 
 # Some issues with the column "Time start of stage", error says that is expected 'Time start of stage ' with space at the back
-time_axial_vol = px.line(df, x='Time start of stage ', y=["Axial strain", "Volumetric strain"])
-time_axial_vol.write_html('./plots/time_axial_vol.html', auto_open=False)
+time_axial_vol = px.line(df_combined, x='Time start of stage ', y=["Axial strain", "Volumetric strain"],color="Test")
+time_axial_vol.write_html('./plots/time_axial_vol.html')
+
+# Sheer-Induced Pore Pressure VS Axial Strain
+time_pwp = px.line(df_combined, x="Axial strain", y="Shear induced PWP",color="Test")
+time_pwp.write_html('./plots/time_pwp.html')
