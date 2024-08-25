@@ -130,15 +130,21 @@ def parse_workbook(path):
 ## TESTING
 
 specs, df = parse_workbook("/Users/alithealow/Desktop/YEAR 3 SEM 2/CITS3200/CSL_1_U.xlsx")
+specs2, df2 = parse_workbook("/Users/alithealow/Desktop/YEAR 3 SEM 2/CITS3200/CSL_2_U.xlsx")
 
-print(df)
+df['Test'] = 'Test1'
+df2['Test'] = 'Test2'
+
+df_combined = pd.concat([df, df2])
+
+print(df_combined)
 
 ### VISUALIATIONS
 import plotly.express as px 
 
-x = list(df["Axial strain"])
-y = list(df["Deviator stress"])
+axial_deviator_fig = px.line(df_combined, x="Axial strain", y="Deviator stress", color="Test")
+axial_deviator_fig.write_html('./plots/axial_deviator_fig.html', auto_open=False)
 
-
-fig = px.line(df, x, y)
-fig.write_html('./plots/test_fig.html', auto_open=True)
+# Some issues with the column "Time start of stage", error says that is expected 'Time start of stage ' with space at the back
+time_axial_vol = px.line(df, x='Time start of stage ', y=["Axial strain", "Volumetric strain"])
+time_axial_vol.write_html('./plots/time_axial_vol.html', auto_open=False)
