@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+    <!-- need to run `npm install bootstrap --save` -->
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="./styles.css" rel="stylesheet">
     <title>Hello World!</title>
   </head>
@@ -12,6 +14,81 @@
     We are using Node.js <span id="node-version"></span>,
     Chromium <span id="chrome-version"></span>,
     and Electron <span id="electron-version"></span>.
+
+    <!-- Testing out some UI --> 
+     <h1>Lab Database App</h1>
+
+     <div class="row">
+      <div id="filter-panel" class="col-6 bg-success">
+        <!-- Test Filters --> 
+        <div class="filters"><h2>Filters</h2>
+          <form id="filterForm" action="index.html" method="post"> 
+            <h3>Test</h3>
+              <fieldset>
+                <legend>Drainage</legend>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="filter-drained" name="drainage[]" value="drained">
+                  <label class="form-check-label" for="filter-drained">Drained</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="filter-undrained" name="drainage[]" value="undrained">
+                  <label class="form-check-label"  for="filter-undrained">Undrained</label>
+                </div>
+              </fieldset>
+              <legend>Shearing</legend>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="filter-compression" name="shearing[]" value="compression">
+                  <label class="form-check-label" for="filter-compression">Compression</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="filter-extension" name="shearing[]" value="extension">
+                  <label class="form-check-label" for="filter-extension">Extension</label>
+                </div>
+              </fieldset>
+              <legend>Anisotropy</legend>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="filter-isotropic" name="anisotropy[]" value="isotropic">
+                  <label class="form-check-label" for="filter-isotropic">Isotropic</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="filter-anisotropic" name="anisotropy[]" value="anisotropic">
+                  <label class="form-check-label" for="filter-anisotropic">Anisotropic</label>
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <label for="filter-aniso-min">Min</label>
+                    <input type="number" id="filter-aniso-min" name="anisotropy-num[]" min="0.3" max="1.0" step="0.1">
+                  </div>  
+                  <div class="col">
+                    <label for="filter-aniso-max">Max</label>
+                    <input type="number" id="filter-con-max" name="anisotropy-num[]" min="0.3" max="1.0" step="0.1">
+                  </div>
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend>Consolidation</legend>
+                <div class="row">
+                  <div class="col">
+                    <label for="filter-con-min">Min</label>
+                    <input type="number" id="filter-con-min" name="consolidation[]" min="10" max="1000">
+                  </div>  
+                  <div class="col">
+                    <label for="filter-con-max">Max</label>
+                    <input type="number" id="filter-con-max" name="consolidation[]" min="10" max="1000">
+                  </div>
+                </div>
+              </fieldset>
+              <button class="btn btn-light" type="button" id="apply">Apply Filters</button>
+          </form>
+        </div>
+      </div>
+      <div class="col-6 bg-warning">
+        <div class="result" id="result">
+          <h2>Selected Filters</h2>
+          <div id="filterOutput"></div>
+        </div>
+      </div>
+    </div>
 
     <!-- You can also require other files to run in this process -->
     <script src="./renderer.js"></script>
