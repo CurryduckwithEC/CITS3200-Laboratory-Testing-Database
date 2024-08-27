@@ -22,6 +22,21 @@ npm install
 npm start
 ```
 
+## Branch naming standards
+For easy tracking of branches, please use the following structure for branches:
+```
+'branch_type'/descriptive name
+```
+Branch types are as follows:
+```
+feature/
+bugfix/
+hotfix/
+docs/
+stable_X.X.X/
+```
+
+
 ## Project structure
 All backend code will be in ```/api```. The functions will be exposed as endpoints in the ```api.py``` file that runs the Zerorpc server which will be connected to in Javascript.
 
