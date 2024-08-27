@@ -1,0 +1,84 @@
+*, html{
+    font-family: monospace;
+    scroll-behavior: smooth !important;
+}
+body {
+    background-color: rgb(230, 230, 230);
+    margin: 0px;
+}
+table{
+    width: 100%;
+}
+tbody tr:nth-child(odd) {
+    background-color: #4C8BF5;
+    color: #fff;
+}
+.hidden{
+    display: none;
+}
+.sidenav{
+    width: 250px;
+    background-color: white;
+    position: fixed;
+    top: 130px;
+    right: calc(50% + 360px);
+    overflow-x: hidden;
+    padding-top: 0px;
+}
+.nav_title{
+    padding: 20px 10px;
+    font-size: 16px;
+    color: black;
+}
+.nav_title:hover{
+    background-color:#7ab8ff;
+    color:white;
+}
+.header{
+    display: flex;
+    box-shadow: 0px 5px 10px 0px rgba(101, 101, 101, 0.49);
+    position: fixed;
+    width: 100%;
+    top: 0px;
+    /* ITS OVER 9000!!!! */
+    z-index: 9001; 
+}
+.left_details{
+    padding: 0.5%;
+    flex: 1;
+    color: white;
+    font-size: 20px;
+    background-color: #0077ff;
+}
+.right_details{
+    padding: 0.5%;
+    flex: 1;
+    color: white;
+    font-size: 20px;
+    text-align: right;
+    background-color: #0077ff;
+}
+.introduction_header{
+    font-size: 38px;
+    font-weight: bold;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    margin-left: auto;
+    margin-right: auto;
+    width: 600px;
+    padding: 33px 33px 0px;
+}
+.content_body{
+    font-size: 16px;
+    font-family: 'Georgia';
+    margin-left: auto;
+    margin-right: auto;
+    width: 600px;
+    text-align: justify;
+    background-color: white;
+    padding: 0px 33px 33px;
+    position: relative;
+}
