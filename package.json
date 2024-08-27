@@ -1,0 +1,21 @@
+{
+  "name": "test",
+  "version": "0.1",
+  "description": "Database access app for soil samples",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CurryduckwithEC/CITS3200-Laboratory-Testing-Database"
+  },
+  "keywords": [
+  ],
+  "author": "GitHub",
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/CurryduckwithEC/CITS3200-Laboratory-Testing-Database/issues"
+  },
+  "homepage": "https://github.com/CurryduckwithEC/CITS3200-Laboratory-Testing-Database"
+}
