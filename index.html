@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Website</title>
+
+    <link rel="stylesheet" href="styles.css">
+    <script src="preload.js" charset="utf-8"></script>
+    <script src="https://cdn.plot.ly/plotly-2.34.0.min.js" charset="utf-8"></script>
+</head>
+
+<body onload="renderData('tab', 'plot')">
+    <!--- I think the shadow at the top of the page really ties it together. It looks really bad without it. -->
+    <div class="sidenav">
+        <div><a style="text-decoration: none;" href="#intro">
+            <div class="nav_title">
+                Top
+            </div>
+        </a></div>
+        <div><a style="text-decoration: none;" href="#table">
+            <div class="nav_title">
+                Table
+            </div>
+        </a></div>
+    </div>
+    <div class="header">
+        <div class="left_details">
+            PLACEHOLDER
+        </div>
+        <div class="right_details">
+            PLACEHOLDER
+        </div>
+    </div>
+    <div id="intro" class="introduction_header">
+        <div>
+            EXAMPLE GRAPH
+        </div>
+    </div>
+    <div class="content_body">
+            example
+        <br><br>
+        <div id="plot">
+            
+        </div>
+    </div>
+    <div id="table" class="introduction_header">
+        <div>
+            EXAMPLE TABLE
+        </div>
+    </div>
+    <div class="content_body" id="tab">
+        example
+    </div>
+
+</body>
+</html>
