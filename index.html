@@ -13,8 +13,10 @@
     <link rel="stylesheet" href="styles.css">
     <link href="node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet"/>
     <script src="preload.js" charset="utf-8"></script>
+    <script src="./renderer.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.34.0.min.js" charset="utf-8"></script>
     <script src=node_modules/bootstrap/dist/js/bootstrap.js></script>
+    
 </head>
 
 <body onload="renderData('tab', 'plot')">
@@ -43,6 +45,8 @@
                 Table
             </div>
         </a></div>
+
+        <!-- Accordian Panels for Filter -->
         <div class="filter_panel">
             <div class="nav_title">Search Filters</div>
             <div class="accordion" id="accordionPanelsFilter">
@@ -154,7 +158,6 @@
                 </div>
               </div>
         </div>
-
     </div>
 
     <div class="header">
@@ -166,6 +169,17 @@
         </div>
     </div>
    
+    <div id="check-filters-output" class="introduction_header">
+        <div>
+            EXAMPLE FILTERS
+        </div>
+    </div>
+        <div class="content_body">
+        <br><br>
+        <div id="filter-output">
+            
+        </div>
+    </div>
     <div id="intro" class="introduction_header">
 
         
