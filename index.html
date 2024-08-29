@@ -21,18 +21,6 @@
 
 <body onload="renderData('tab', 'plot')">
     <!--- I think the shadow at the top of the page really ties it together. It looks really bad without it. -->
-    <div class="sidenav">
-        <div><a style="text-decoration: none;" href="#intro">
-            <div class="nav_title">
-                Top
-            </div>
-        </a></div>
-        <div><a style="text-decoration: none;" href="#table">
-            <div class="nav_title">
-                Table
-            </div>
-        </a></div>
-    </div>
 
     <div class="sidenav">
         <div><a style="text-decoration: none;" href="#intro">
@@ -47,8 +35,9 @@
         </a></div>
 
         <!-- Accordian Panels for Filter -->
-        <div class="filter_panel">
+        <div class="filter_panel"><a style="text-decoration: none;" href="#check-filters-output">
             <div class="nav_title">Search Filters</div>
+        </a>
             <div class="accordion" id="accordionPanelsFilter">
                 <div class="accordion-item">
                   <h2 class="accordion-header">
@@ -94,11 +83,11 @@
                                   <div class="row">
                                     <div class="col">
                                       <label for="filter-aniso-min">Min</label>
-                                      <input type="number" id="filter-aniso-min" name="anisotropy-num[]" min="0.3" max="1.0" step="0.1">
+                                      <input type="number" id="filter-aniso-min" name="anisotropy-num[]" min="0.3" max="1.0" step="0.1" value="0.3">
                                     </div>  
                                     <div class="col">
                                       <label for="filter-aniso-max">Max</label>
-                                      <input type="number" id="filter-aniso-max" name="anisotropy-num[]" min="0.3" max="1.0" step="0.1">
+                                      <input type="number" id="filter-aniso-max" name="anisotropy-num[]" min="0.3" max="1.0" step="0.1" value="1.0">
                                     </div>
                                   </div>
                                 </fieldset>
@@ -107,11 +96,11 @@
                                   <div class="row">
                                     <div class="col">
                                       <label for="filter-con-min">Min</label>
-                                      <input type="number" id="filter-con-min" name="consolidation[]" min="10" max="1500">
+                                      <input type="number" id="filter-con-min" name="consolidation[]" min="10" max="1500" value="10">
                                     </div>  
                                     <div class="col">
                                       <label for="filter-con-max">Max</label>
-                                      <input type="number" id="filter-con-max" name="consolidation[]" min="10" max="1500">
+                                      <input type="number" id="filter-con-max" name="consolidation[]" min="10" max="1500" value="1500">
                                     </div>
                                   </div>
                                 </fieldset>

@@ -13,6 +13,10 @@ tbody tr:nth-child(odd) {
     background-color: #4C8BF5;
     color: #fff;
 }
+#filterForm legend {
+    font-size: 14px;
+    font-weight: bold;
+}
 .hidden{
     display: none;
 }
