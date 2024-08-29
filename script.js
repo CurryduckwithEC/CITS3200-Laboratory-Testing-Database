@@ -19,8 +19,9 @@ async function renderData() {
        
             // 1. Stress (kPa) vs. Time (hours)
             Plotly.newPlot('stress_vs_time', [
-                { x: time, y: sigma1, mode: 'lines', name: "σ'1" },
-                { x: time, y: sigma3, mode: 'lines', name: "σ'3" }
+                { x: axialStrain, y: pPrime, mode: 'lines', name: "p'" },
+                { x: axialStrain, y: q, mode: 'lines', name: 'q' },
+                { x: axialStrain, y: shearPWP, mode: 'lines', name: 'PWP' }
             ]);
 
             // 2. Axial and Volumetric Strain (%) vs. Time (hours)
@@ -29,7 +30,7 @@ async function renderData() {
                 { x: time, y: volStrain, mode: 'lines', name: 'Volumetric Strain (%)' }
             ]);
 
-            // 3. Deviator and Mean Effective Stress (q and  p') vs. Axial Strain, ea (%)
+            // 3. Deviator and Mean Effective Stress (q and p') vs. Axial Strain, ea (%)
             Plotly.newPlot('stress_vs_axial_strain', [
                 { x: axialStrain, y: pPrime, mode: 'lines', name: 'Mean Effective Stress (p\')' },
                 { x: axialStrain, y: q, mode: 'lines', name: 'Deviator Stress (q)' }
