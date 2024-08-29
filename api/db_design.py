@@ -17,6 +17,7 @@ def create_connection(db_name, db_user, db_password, db_host, db_port):
         print(f"The error '{e}' occurred")
     return connection
 
+
 db_database="Project"
 db_user="postgres"
 db_password="Kpgg3677!" #change this to sys.argv[i]

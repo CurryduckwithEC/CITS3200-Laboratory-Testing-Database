@@ -8,7 +8,8 @@ import psycopg2
 # Reading Excel file, returning DataFrame of specified sheet
 def read_excel(file_name, sheet_name):
     return pd.read_excel(file_name, sheet_name, header = None)
-    
+
+
 # Find the starting index where data begins and the columns indices of the wanted columns in the data frame
 # Returns Dicionary with column of indices and wanted values and starting index
 def organising_columns(dataframe, wanted_columns):
@@ -41,6 +42,8 @@ def organising_columns(dataframe, wanted_columns):
     sorted_dict = {key: value_to_col_idx[key] for key in sorted(value_to_col_idx, key=value_to_col_idx.get)}
 
     return sorted_dict, starting_data_val
+
+
 
 def find_categories(dataframe, starting_val="drainage"):
     column_index = dataframe.columns.get_loc(dataframe.columns[(dataframe.iloc[0] == 'drainage')][0])
