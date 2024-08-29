@@ -21,7 +21,7 @@ tbody tr:nth-child(odd) {
     display: none;
 }
 .sidenav{
-    width: 250px;
+    width: 280px;
     background-color: white;
     position: fixed;
     top: 130px;
