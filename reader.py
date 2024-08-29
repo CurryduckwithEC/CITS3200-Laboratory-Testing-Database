@@ -138,19 +138,43 @@ df3['Test'] = 'Test3'
 
 df_combined = pd.concat([df, df2, df3])
 
+df_combined["Stress ratio"] = df_combined["Deviator stress"]/df_combined["p'"]
+
 #print(df_combined)
 
 import plotly.express as px 
 
-# Deviator Stress VS Axial Strain 
-axial_deviator_fig = px.line(df_combined, x="Axial strain", y="Deviator stress", color="Test")
+### Deviator Stress & Mean effective stress (p') VS Axial Strain 
+axial_deviator_fig = px.line(
+    df_combined, x="Axial strain", y=["Deviator stress", "p'"], labels={'x': 'Axial strain', 'value':"Deviator Stress & Mean Effective Stress, p'"}, color="Test", title="Deviator and Mean Effective Stress (kPa) vs. Axial Strain (%)")
 axial_deviator_fig.write_html('./plots/axial_deviator_fig.html')
 
-# Axial Strain VS Time 
-# Some issues with the column "Time start of stage", error says that is expected 'Time start of stage ' with space at the back
-time_axial_vol = px.line(df_combined, x='Time start of stage ', y=["Axial strain", "Volumetric strain"],color="Test")
-time_axial_vol.write_html('./plots/time_axial_vol.html')
+### Shear induced PWP VS Axial Strain
+axial_pwp = px.line(
+    df_combined, x="Axial strain", y="Shear induced PWP",color="Test", title="Shear Induced Pore Pressure (kPa) vs. Axial Strain (%)")
+axial_pwp.write_html('./plots/axial_pwp.html')
 
-# Sheer-Induced Pore Pressure VS Axial Strain
-time_pwp = px.line(df_combined, x="Axial strain", y="Shear induced PWP",color="Test")
-time_pwp.write_html('./plots/time_pwp.html')
+### Deviator Stress (q) VS Mean effective stress (p')
+q_p = px.line(
+    df_combined, x="p'", y="Deviator stress",color="Test", title="Deviator Stress, q (kPa) vs. Mean Effective Stress, p' (kPa)")
+q_p.write_html('./plots/q_p.html')
+
+### Volumetric Strain VS Axial Strain
+axial_vol = px.line(
+    df_combined, x="Axial strain", y="Volumetric strain",color="Test", title="Volumetric Stress (%) vs. Axial Strain (%)")
+axial_vol.write_html('./plots/axial_vol.html')
+
+### Stress ratio (q/p') VS Axial Strain
+axial_stressratio = px.line(
+    df_combined, x="Axial strain", y="Stress ratio",color="Test", title="Stress Ratio, q/p' vs. Axial Strain (%)")
+axial_stressratio.write_html('./plots/axial_stressratio.html')
+
+### Deviator Stress (q) VS Mean Effective Stress
+#axial_stressratio = px.line(df_combined, x="Axial strain", y="Stress ratio",color="Test")
+#axial_stressratio.write_html('./plots/time_pwp.html')
+
+
+### Axial Strain VS Time 
+# Some issues with the column "Time start of stage", error says that is expected 'Time start of stage ' with space at the back
+#time_axial_vol = px.line(df_combined, x='Time start of stage ', y=["Axial strain", "Volumetric strain"],color="Test")
+#time_axial_vol.write_html('./plots/time_axial_vol.html')
