@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Simple Website</title>
-
+    <script>
+        window.nodeRequire = require;
+        delete window.require;
+        delete window.exports;
+        delete window.module;
+        </script>
+        <script type="text/javascript" src="jquery.js"></script>
     <link rel="stylesheet" href="styles.css">
+    <link href="node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet"/>
     <script src="preload.js" charset="utf-8"></script>
     <script src="https://cdn.plot.ly/plotly-2.34.0.min.js" charset="utf-8"></script>
+    <script src=node_modules/bootstrap/dist/js/bootstrap.js></script>
 </head>
 
 <body onload="renderData('tab', 'plot')">
@@ -23,6 +31,132 @@
             </div>
         </a></div>
     </div>
+
+    <div class="sidenav">
+        <div><a style="text-decoration: none;" href="#intro">
+            <div class="nav_title">
+                Top
+            </div>
+        </a></div>
+        <div><a style="text-decoration: none;" href="#table">
+            <div class="nav_title">
+                Table
+            </div>
+        </a></div>
+        <div class="filter_panel">
+            <div class="nav_title">Search Filters</div>
+            <div class="accordion" id="accordionPanelsFilter">
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#accordian-test" aria-expanded="true" aria-controls="accordian-test">
+                      Test
+                    </button>
+                  </h2>
+                  <div id="accordian-test" class="accordion-collapse collapse show">
+                    <div class="accordion-body">
+                        <div class="filters">
+                            <form id="filterForm" action="index.html" method="post"> 
+                              
+                                <fieldset>
+                                  <legend>Drainage</legend>
+                                  <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="filter-drained" name="drainage[]" value="drained">
+                                    <label class="form-check-label" for="filter-drained">Drained</label>
+                                  </div>
+                                  <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="filter-undrained" name="drainage[]" value="undrained">
+                                    <label class="form-check-label"  for="filter-undrained">Undrained</label>
+                                  </div>
+                                </fieldset>
+                                <legend>Shearing</legend>
+                                  <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="filter-compression" name="shearing[]" value="compression">
+                                    <label class="form-check-label" for="filter-compression">Compression</label>
+                                  </div>
+                                  <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="filter-extension" name="shearing[]" value="extension">
+                                    <label class="form-check-label" for="filter-extension">Extension</label>
+                                  </div>
+                                </fieldset>
+                                <legend>Anisotropy</legend>
+                                  <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="filter-isotropic" name="anisotropy[]" value="isotropic">
+                                    <label class="form-check-label" for="filter-isotropic">Isotropic</label>
+                                  </div>
+                                  <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="filter-anisotropic" name="anisotropy[]" value="anisotropic">
+                                    <label class="form-check-label" for="filter-anisotropic">Anisotropic</label>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col">
+                                      <label for="filter-aniso-min">Min</label>
+                                      <input type="number" id="filter-aniso-min" name="anisotropy-num[]" min="0.3" max="1.0" step="0.1">
+                                    </div>  
+                                    <div class="col">
+                                      <label for="filter-aniso-max">Max</label>
+                                      <input type="number" id="filter-aniso-max" name="anisotropy-num[]" min="0.3" max="1.0" step="0.1">
+                                    </div>
+                                  </div>
+                                </fieldset>
+                                <fieldset>
+                                  <legend>Consolidation</legend>
+                                  <div class="row">
+                                    <div class="col">
+                                      <label for="filter-con-min">Min</label>
+                                      <input type="number" id="filter-con-min" name="consolidation[]" min="10" max="1500">
+                                    </div>  
+                                    <div class="col">
+                                      <label for="filter-con-max">Max</label>
+                                      <input type="number" id="filter-con-max" name="consolidation[]" min="10" max="1500">
+                                    </div>
+                                  </div>
+                                </fieldset>
+                                <fieldset>
+                                    <legend>Availability</legend>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="filter-public" name="availability[]" value="public">
+                                        <label class="form-check-label" for="filter-public">Public</label>
+                                      </div>
+                                      <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="filter-confidential" name="availability[]" value="confidential">
+                                        <label class="form-check-label" for="filter-confidential">Confidential</label>
+                                      </div>
+                                  </fieldset>
+                                <button class="btn btn-light" type="button" id="check-btn">Check Filters</button>
+                            </form>
+                          </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordian-sample" aria-expanded="false" aria-controls="accordian-sample">
+                      Sample
+                    </button>
+                  </h2>
+                  <div id="accordian-sample" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        Sample Filters Here
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordian-variables" aria-expanded="false" aria-controls="accordian-variables">
+                      Variables
+                    </button>
+                  </h2>
+                  <div id="accordian-variables" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                      Variable Filters Here
+                    </div>
+                  </div>
+                </div>
+              </div>
+        </div>
+
+    </div>
+
     <div class="header">
         <div class="left_details">
             PLACEHOLDER
@@ -31,7 +165,10 @@
             PLACEHOLDER
         </div>
     </div>
+   
     <div id="intro" class="introduction_header">
+
+        
         <div>
             EXAMPLE GRAPH
         </div>
