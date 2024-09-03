@@ -7,6 +7,15 @@ import plotly.express as px
 import pandas as pd
 
 import sys
+import signal
+
+# Define the exit behaviour of Dash
+# Normally SIGINT would leave an orphaned Flask process running
+def termination_handler(sig, frame):
+    print("SIGINT received: terminating Flask server.")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, termination_handler)
 
 df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminderDataFiveYear.csv')
 
