@@ -10,7 +10,8 @@ const path = require('node:path')
 //  Defines the path to the Python api file
 const API = './api/api'
 const DASH = './dash/page'
-const PORT = 18018
+const API_PORT = 18018
+const DASH_PORT = 18019
 
 let pyProc = null
 let dashProc = null
@@ -68,14 +69,14 @@ const createPyProc = () => {
     
     // if we are building the package, use the bin
     if(buildPackage()){
-        pyProc = require("child_process").execFile(api_path, [PORT])
+        pyProc = require("child_process").execFile(api_path, [API_PORT])
     }
     else{
-        pyProc = require("child_process").spawn("python", [api_path, PORT])
+        pyProc = require("child_process").spawn("python", [api_path, API_PORT])
     }
 
     if(pyProc != null) {
-        console.log('child process success on port ' + PORT)
+        console.log('child process success on port ' + API_PORT)
     }
 }
 
@@ -93,7 +94,7 @@ const createDashProc = () => {
 
     dashPath = getDashPath()
 
-    dashProc = require("child_process").spawn("python", [dashPath])
+    dashProc = require("child_process").spawn("python", [dashPath, DASH_PORT])
 
     if(dashProc != null) {
         console.log('dash process success')
@@ -128,7 +129,7 @@ function createWindow () {
 
     // and load the index.html of the app.
     //mainWindow.loadFile('index.html')
-    mainWindow.loadURL('http://127.0.0.1:1235/')
+    mainWindow.loadURL('http://127.0.0.1:' + DASH_PORT)
 
 
     // Open the DevTools.

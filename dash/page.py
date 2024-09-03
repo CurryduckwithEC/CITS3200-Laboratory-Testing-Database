@@ -6,6 +6,8 @@ import plotly.express as px
 
 import pandas as pd
 
+import sys
+
 df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminderDataFiveYear.csv')
 
 app = Dash(__name__)
@@ -35,5 +37,10 @@ def update_figure(selected_year):
 
     return fig
 
+port = "18019"
 
-app.run_server(port=1235, debug=True)
+
+if len(sys.argv) > 1:
+    port = sys.argv[1]
+
+app.run_server(port=port, debug=True)
