@@ -169,6 +169,14 @@ app.layout = html.Div(
                     value=[0,500], #df["Axial strain"].min(),
                     id='p_slider'
                 ), 
+                html.H2("Induced PWP Filter"),
+                dcc.RangeSlider(
+                    0,
+                    500,
+                    step=None,
+                    value=[0,500], #df["Axial strain"].min(),
+                    id='pwp_slider'
+                ),
                 html.H2("Drainage"),
                 dcc.Dropdown(
                     options=["Drained", "Undrained"],
@@ -191,12 +199,14 @@ app.layout = html.Div(
     [Output("axial_deviator_fig", "figure"),
      Output("axial_pwp_fig", "figure")],
     [Input("axial_slider", "value"), 
-     Input("p_slider", "value")], 
+     Input("p_slider", "value"), 
+     Input("pwp_slider", "value")], 
      )
-def update_figure(selected_axial, selected_p):
+def update_figure(selected_axial, selected_p, selected_pwp):
     filtered_df = df_combined[
         (df_combined["Axial strain"]>=selected_axial[0]) & (df_combined["Axial strain"]<=selected_axial[1])
-        & (df_combined["p'"]>=selected_p[0]) & (df_combined["p'"]<=selected_p[1])]
+        & (df_combined["p'"]>=selected_p[0]) & (df_combined["p'"]<=selected_p[1])
+        & (df_combined["Shear induced PWP"]>=selected_pwp[0]) & (df_combined["Shear induced PWP"]<=selected_pwp[1])]
 
     axial_deviator_fig = px.line(
         filtered_df, 
