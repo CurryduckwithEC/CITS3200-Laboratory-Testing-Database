@@ -134,6 +134,8 @@ specs, df = parse_workbook("./data/CSL_1_U.xlsx")
 specs2, df2 = parse_workbook("./data/CSL_2_U.xlsx")
 specs3, df3 = parse_workbook("./data/CSL_3_D.xlsx")
 
+print(specs2)
+
 # Add Test column to differenciate tests
 df['Test'] = 'Test1'
 df2['Test'] = 'Test2'
@@ -145,30 +147,51 @@ df_combined["Stress ratio"] = df_combined["Deviator stress"]/df_combined["p'"]
 
 app = Dash(__name__)
 
-app.layout = html.Div([
-    dcc.Graph(id="axial_deviator_fig"), 
-    html.H2("Axial Strain Filter"),
-    dcc.RangeSlider(
-        0,
-        0.5,
-        step=None,
-        value=[0,0.5], #df["Axial strain"].min(),
-        id='axial-slider'
-    ),
-    html.H2("p' Filter"),
-    dcc.RangeSlider(
-        0,
-        500,
-        step=None,
-        value=[0,500], #df["Axial strain"].min(),
-        id='p-slider'
-    )
-])
+app.layout = html.Div(
+    id = "app-container",
+    children = [   
+        html.Div(
+            id = "filters",
+            children = [
+                html.H2("Axial Strain Filter"),
+                dcc.RangeSlider(
+                    0,
+                    0.5,
+                    step=None,
+                    value=[0,0.5], #df["Axial strain"].min(),
+                    id='axial_slider'
+                ),
+                html.H2("p' Filter"),
+                dcc.RangeSlider(
+                    0,
+                    500,
+                    step=None,
+                    value=[0,500], #df["Axial strain"].min(),
+                    id='p_slider'
+                ), 
+                html.H2("Drainage"),
+                dcc.Dropdown(
+                    options=["Drained", "Undrained"],
+                    value="Drained",
+                    id="drainage-dropdown"
+                )
+            ]
+        ), 
+        html.Div(
+            id = "dashboard",
+            children = [
+                dcc.Graph(id="axial_deviator_fig"),
+                dcc.Graph(id="axial_pwp_fig")
+            ]
+        )
+    ]
+)
 
 @app.callback(
-    Output("axial_deviator_fig", "figure"),
-    [Input("axial-slider", "value"), 
-     Input("p-slider", "value")]
+    [Output("axial_deviator_fig", "figure"),
+     Output("axial_pwp_fig", "figure")],
+    [Input("axial_slider", "value"), 
+     Input("p_slider", "value")], 
      )
 def update_figure(selected_axial, selected_p):
     filtered_df = df_combined[
@@ -176,9 +199,22 @@ def update_figure(selected_axial, selected_p):
         & (df_combined["p'"]>=selected_p[0]) & (df_combined["p'"]<=selected_p[1])]
 
     axial_deviator_fig = px.line(
-    filtered_df, x="Axial strain", y=["Deviator stress", "p'"], labels={'x': 'Axial strain', 'value':"Deviator Stress & Mean Effective Stress, p'"}, color="Test", title="Deviator and Mean Effective Stress (kPa) vs. Axial Strain (%)")
+        filtered_df, 
+        x="Axial strain", 
+        y=["Deviator stress", "p'"], 
+        labels={'x': 'Axial strain', 'value':"Deviator Stress & Mean Effective Stress, p'"}, 
+        color="Test", 
+        title="Deviator and Mean Effective Stress (kPa) vs. Axial Strain (%)")
 
-    return axial_deviator_fig
+
+    axial_pwp_fig = px.line(
+        filtered_df, 
+        x="Axial strain", 
+        y="Shear induced PWP",
+        color="Test", 
+        title="Shear Induced Pore Pressure (kPa) vs. Axial Strain (%)")
+    
+    return axial_deviator_fig, axial_pwp_fig
 
 
 port = "18019"
