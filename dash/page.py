@@ -154,6 +154,7 @@ app.layout = html.Div(
             id = "filters",
             children = [
                 html.H2("Axial Strain Filter"),
+                html.P(id="axial_value"),
                 dcc.RangeSlider(
                     0,
                     0.5,
@@ -162,6 +163,7 @@ app.layout = html.Div(
                     id='axial_slider'
                 ),
                 html.H2("p' Filter"),
+                html.P(id="p_value"),
                 dcc.RangeSlider(
                     0,
                     500,
@@ -170,6 +172,7 @@ app.layout = html.Div(
                     id='p_slider'
                 ), 
                 html.H2("Induced PWP Filter"),
+                html.P(id="pwp_value"),
                 dcc.RangeSlider(
                     0,
                     500,
@@ -224,8 +227,18 @@ def update_figure(selected_axial, selected_p, selected_pwp):
         color="Test", 
         title="Shear Induced Pore Pressure (kPa) vs. Axial Strain (%)")
     
-    return axial_deviator_fig, axial_pwp_fig
+    return axial_deviator_fig, axial_pwp_fig,
 
+@app.callback(
+    [Output("axial_value", "children"),
+     Output("p_value", "children"),
+     Output("pwp_value", "children")],
+    [Input("axial_slider", "value"), 
+     Input("p_slider", "value"), 
+     Input("pwp_slider", "value")], 
+     )
+def update_filters(selected_axial, selected_p, selected_pwp): 
+    return f'Selected range: {selected_axial[0]} to {selected_axial[1]}', f'Selected range: {selected_p[0]} to {selected_p[1]}', f'Selected range: {selected_pwp[0]} to {selected_pwp[1]}'
 
 port = "18019"
 
