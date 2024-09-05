@@ -128,8 +128,6 @@ def parse_workbook(path):
 
     return specs, df
 
-### Create Visualisations
-
 specs, df = parse_workbook("./data/CSL_1_U.xlsx")
 specs2, df2 = parse_workbook("./data/CSL_2_U.xlsx")
 specs3, df3 = parse_workbook("./data/CSL_3_D.xlsx")
@@ -145,13 +143,22 @@ df_combined = pd.concat([df, df2, df3])
 
 df_combined["Stress ratio"] = df_combined["Deviator stress"]/df_combined["p'"]
 
+### Create Visualisations
+
 app = Dash(__name__)
 
 app.layout = html.Div(
     id = "app-container",
+    style = {
+        "display": "flex",
+        "margin": "5px"},
     children = [   
         html.Div(
             id = "filters",
+            style = {
+                "backgroundColor": "lightGrey",
+                "padding": "5px"
+            },
             children = [
                 html.H2("Axial Strain Filter"),
                 html.P(id="axial_value"),
@@ -211,6 +218,7 @@ def update_figure(selected_axial, selected_p, selected_pwp):
         & (df_combined["p'"]>=selected_p[0]) & (df_combined["p'"]<=selected_p[1])
         & (df_combined["Shear induced PWP"]>=selected_pwp[0]) & (df_combined["Shear induced PWP"]<=selected_pwp[1])]
 
+    # Deviator Stress & Mean effective stress (p') VS Axial Strain 
     axial_deviator_fig = px.line(
         filtered_df, 
         x="Axial strain", 
@@ -219,7 +227,7 @@ def update_figure(selected_axial, selected_p, selected_pwp):
         color="Test", 
         title="Deviator and Mean Effective Stress (kPa) vs. Axial Strain (%)")
 
-
+    # Shear induced PWP VS Axial Strain
     axial_pwp_fig = px.line(
         filtered_df, 
         x="Axial strain", 
