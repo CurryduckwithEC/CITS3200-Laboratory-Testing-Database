@@ -3,39 +3,183 @@
 
 from dash import Dash, dcc, html, Input, Output
 import plotly.express as px
-
 import pandas as pd
-
 import sys
+import openpyxl
 
-df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminderDataFiveYear.csv')
+### Read Data 
+
+"""
+Wanted columns:
+    - Time start of stage
+    - Axial strain
+    - Volumetric strain
+    - Excess PWP
+    - p'
+    - Deviator stress (q)
+    - Void ratio (w)
+    - Shear induced PWP
+"""
+
+# Cutoff row for search for table start cell
+CUTOFF = 50
+
+columns = {
+    "time start of stage",
+    "axial strain",
+    "volumetric strain",
+    "excess pwp",
+    "p'",
+    "deviator stress",
+    "void ratio",
+    "shear induced pwp"
+}
+
+specs = {
+    "drainage",
+    "shearing",
+    "anisotropy",
+    "consolidation",
+    "availability",
+    "density",
+    "plasticity",
+    "psd"
+}
+
+def load_sheet(sheet_path):
+    
+    # Uses openpyxl to open and read a workbook using data_only mode to read results of eqs
+    wb = openpyxl.load_workbook(filename=sheet_path, data_only=True, read_only=True)
+    
+    # Loads specific sheet object out of workbook
+    sheet = wb[wb.sheetnames[3]]
+    
+    return sheet
+
+
+def ingest_specs(sheet) -> dict:
+
+    # counts number of hits
+    keys_populated = set()
+    spec_dict = dict()
+
+    for _, *values in sheet.iter_rows(max_row=CUTOFF):
+        for i, v in enumerate(values):
+
+            cell_value = str(v.value).lower().strip()
+
+            if cell_value in specs:
+
+                if cell_value in keys_populated:
+                    return "error"      # ERROR_CHECK
+                
+                spec_dict[cell_value] = str(values[i+1].value).lower().strip()
+                keys_populated.add(cell_value)
+
+    return spec_dict
+
+
+def ingest_table(sheet) -> pd.DataFrame:
+    
+    # Convert sheet into DataFrame object
+    df = pd.DataFrame(sheet.values)
+
+    # We first need to detect the start of the table within the sheet using "Stage no."
+    for i in range(CUTOFF):
+        if type(df.iloc[0][0]) is str and df.iloc[0][0].strip().lower() == "stage no.":
+            df = df.reset_index(drop=True)
+            break
+        else:
+            df = df.drop([i])
+
+    # Identify the columns that need to be dropped from the DataFrame
+    to_drop = []
+    for i, name in enumerate(df.iloc[0]):
+        if type(name) != str or name.lower().strip() not in columns:
+            to_drop.append(i)
+
+    df = df.drop(df.columns[to_drop], axis=1)
+    
+    # Set column names
+    df.columns = df.iloc[0]
+    
+    # Drop column names from data body after assignment
+    df = df.drop([0,1])
+    df = df.reset_index(drop=True)
+
+    # Find end of table and remove None values if excess cells occur in Excel file
+    end_table_index = 0
+    for i, value in enumerate(df[df.columns[0]]):
+        if value == None:
+            end_table_index = i
+            break
+
+    df = df[:end_table_index]
+
+    return df
+
+
+def parse_workbook(path):
+    
+    sheet = load_sheet(path)
+
+    specs = ingest_specs(sheet)
+    df = ingest_table(sheet)
+
+    return specs, df
+
+### Create Visualisations
+
+specs, df = parse_workbook("./data/CSL_1_U.xlsx")
+specs2, df2 = parse_workbook("./data/CSL_2_U.xlsx")
+specs3, df3 = parse_workbook("./data/CSL_3_D.xlsx")
+
+# Add Test column to differenciate tests
+df['Test'] = 'Test1'
+df2['Test'] = 'Test2'
+df3['Test'] = 'Test3'
+
+df_combined = pd.concat([df, df2, df3])
+
+df_combined["Stress ratio"] = df_combined["Deviator stress"]/df_combined["p'"]
 
 app = Dash(__name__)
 
 app.layout = html.Div([
-    dcc.Graph(id='graph-with-slider'),
-    dcc.Slider(
-        df['year'].min(),
-        df['year'].max(),
+    dcc.Graph(id="axial_deviator_fig"), 
+    html.H2("Axial Strain Filter"),
+    dcc.RangeSlider(
+        0,
+        0.5,
         step=None,
-        value=df['year'].min(),
-        marks={str(year): str(year) for year in df['year'].unique()},
-        id='year-slider'
+        value=[0,0.5], #df["Axial strain"].min(),
+        id='axial-slider'
+    ),
+    html.H2("p' Filter"),
+    dcc.RangeSlider(
+        0,
+        500,
+        step=None,
+        value=[0,500], #df["Axial strain"].min(),
+        id='p-slider'
     )
 ])
 
-
 @app.callback(
-    Output('graph-with-slider', 'figure'),
-    Input('year-slider', 'value'))
-def update_figure(selected_year):
-    filtered_df = df[df.year == selected_year]
+    Output("axial_deviator_fig", "figure"),
+    [Input("axial-slider", "value"), 
+     Input("p-slider", "value")]
+     )
+def update_figure(selected_axial, selected_p):
+    filtered_df = df_combined[
+        (df_combined["Axial strain"]>=selected_axial[0]) & (df_combined["Axial strain"]<=selected_axial[1])
+        & (df_combined["p'"]>=selected_p[0]) & (df_combined["p'"]<=selected_p[1])]
 
-    fig = px.scatter(filtered_df, x="gdpPercap", y="lifeExp",
-                     size="pop", color="continent", hover_name="country",
-                     log_x=True, size_max=55)
+    axial_deviator_fig = px.line(
+    filtered_df, x="Axial strain", y=["Deviator stress", "p'"], labels={'x': 'Axial strain', 'value':"Deviator Stress & Mean Effective Stress, p'"}, color="Test", title="Deviator and Mean Effective Stress (kPa) vs. Axial Strain (%)")
 
-    return fig
+    return axial_deviator_fig
+
 
 port = "18019"
 
