@@ -157,7 +157,8 @@ app.layout = html.Div(
             id = "filters",
             style = {
                 "backgroundColor": "lightGrey",
-                "padding": "5px"
+                "padding": "5px",
+                "float": "left"
             },
             children = [
                 html.H2("Axial Strain Filter"),
@@ -166,7 +167,7 @@ app.layout = html.Div(
                     0,
                     0.5,
                     step=None,
-                    value=[0,0.5], #df["Axial strain"].min(),
+                    value=[0,0.5], 
                     id='axial_slider'
                 ),
                 html.H2("p' Filter"),
@@ -175,7 +176,7 @@ app.layout = html.Div(
                     0,
                     500,
                     step=None,
-                    value=[0,500], #df["Axial strain"].min(),
+                    value=[0,500], 
                     id='p_slider'
                 ), 
                 html.H2("Induced PWP Filter"),
@@ -184,8 +185,17 @@ app.layout = html.Div(
                     0,
                     500,
                     step=None,
-                    value=[0,500], #df["Axial strain"].min(),
+                    value=[0,500], 
                     id='pwp_slider'
+                ),
+                html.H2("Deviator stress (q) Filter"),
+                html.P(id="q_value"),
+                dcc.RangeSlider(
+                    0,
+                    500,
+                    step=None,
+                    value=[0,500], 
+                    id='q_slider'
                 ),
                 html.H2("Drainage"),
                 dcc.Dropdown(
@@ -199,7 +209,9 @@ app.layout = html.Div(
             id = "dashboard",
             children = [
                 dcc.Graph(id="axial_deviator_fig"),
-                dcc.Graph(id="axial_pwp_fig")
+                dcc.Graph(id="axial_pwp_fig"), 
+                dcc.Graph(id="q_p_fig"),
+                dcc.Graph(id="axial_vol_fig")
             ]
         )
     ]
@@ -207,25 +219,29 @@ app.layout = html.Div(
 
 @app.callback(
     [Output("axial_deviator_fig", "figure"),
-     Output("axial_pwp_fig", "figure")],
+     Output("axial_pwp_fig", "figure"), 
+     Output("q_p_fig", "figure"),
+     Output("axial_vol_fig", "figure")],
     [Input("axial_slider", "value"), 
      Input("p_slider", "value"), 
-     Input("pwp_slider", "value")], 
+     Input("pwp_slider", "value"), 
+     Input("q_slider", "value")], 
      )
-def update_figure(selected_axial, selected_p, selected_pwp):
+def update_figure(selected_axial, selected_p, selected_pwp, selected_q):
     filtered_df = df_combined[
         (df_combined["Axial strain"]>=selected_axial[0]) & (df_combined["Axial strain"]<=selected_axial[1])
         & (df_combined["p'"]>=selected_p[0]) & (df_combined["p'"]<=selected_p[1])
-        & (df_combined["Shear induced PWP"]>=selected_pwp[0]) & (df_combined["Shear induced PWP"]<=selected_pwp[1])]
+        & (df_combined["Shear induced PWP"]>=selected_pwp[0]) & (df_combined["Shear induced PWP"]<=selected_pwp[1])
+        & (df_combined["Deviator stress"]>=selected_q[0]) & (df_combined["Deviator stress"]<=selected_q[1])]
 
-    # Deviator Stress & Mean effective stress (p') VS Axial Strain 
+    # Deviator Stress (q) & Mean effective stress (p') VS Axial Strain 
     axial_deviator_fig = px.line(
         filtered_df, 
         x="Axial strain", 
         y=["Deviator stress", "p'"], 
         labels={'x': 'Axial strain', 'value':"Deviator Stress & Mean Effective Stress, p'"}, 
         color="Test", 
-        title="Deviator and Mean Effective Stress (kPa) vs. Axial Strain (%)")
+        title="Deviator, q and Mean Effective Stress (kPa), p' vs. Axial Strain (%)")
 
     # Shear induced PWP VS Axial Strain
     axial_pwp_fig = px.line(
@@ -235,18 +251,36 @@ def update_figure(selected_axial, selected_p, selected_pwp):
         color="Test", 
         title="Shear Induced Pore Pressure (kPa) vs. Axial Strain (%)")
     
-    return axial_deviator_fig, axial_pwp_fig,
+    # Deviator Stress (q) VS Mean effective stress (p')
+    q_p_fig = px.line(
+        filtered_df, 
+        x="p'", 
+        y="Deviator stress",
+        color="Test", 
+        title="Deviator Stress, q (kPa) vs. Mean Effective Stress, p' (kPa)")
+    
+    ### Volumetric Strain VS Axial Strain
+    axial_vol_fig = px.line(
+        filtered_df, 
+        x="Axial strain", 
+        y="Volumetric strain",
+        color="Test", 
+        title="Volumetric Stress (%) vs. Axial Strain (%)")
+    
+    return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig
 
 @app.callback(
     [Output("axial_value", "children"),
      Output("p_value", "children"),
-     Output("pwp_value", "children")],
+     Output("pwp_value", "children"), 
+     Output("q_value", "children")],
     [Input("axial_slider", "value"), 
      Input("p_slider", "value"), 
-     Input("pwp_slider", "value")], 
+     Input("pwp_slider", "value"), 
+     Input("q_slider", "value")]
      )
-def update_filters(selected_axial, selected_p, selected_pwp): 
-    return f'Selected range: {selected_axial[0]} to {selected_axial[1]}', f'Selected range: {selected_p[0]} to {selected_p[1]}', f'Selected range: {selected_pwp[0]} to {selected_pwp[1]}'
+def update_filters(selected_axial, selected_p, selected_pwp, selected_q): 
+    return f'Selected range: {selected_axial[0]} to {selected_axial[1]}', f'Selected range: {selected_p[0]} to {selected_p[1]}', f'Selected range: {selected_pwp[0]} to {selected_pwp[1]}', f'Selected range: {selected_q[0]} to {selected_q[1]}'
 
 port = "18019"
 
