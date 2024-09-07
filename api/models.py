@@ -76,7 +76,6 @@ class TestValues(Base):
 
     drainage_type: Mapped[str] = mapped_column(String(20), nullable=False)
     shearing_type: Mapped[str] = mapped_column(String(20), nullable=False)
-    anisotropy_type: Mapped[float] = mapped_column(nullable=False)
     availability_type: Mapped[bool] = mapped_column(nullable=False)
 
     def __repr__(self) -> str:
