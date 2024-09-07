@@ -1,5 +1,7 @@
 from sqlalchemy import String, ForeignKey
-from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column
+from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column, relationship
+
+from typing import List
 
 
 # Contains the models that will be used to represent the database
@@ -47,6 +49,8 @@ class Test(Base):
     consolidation: Mapped[int] = mapped_column(nullable=False)
     anisotropy: Mapped[float] = mapped_column(nullable=False)
 
+    entries: Mapped[List["Entry"]] = relationship()
+
     def __repr__(self) -> str:
         return (
             f"<Test(test_id={self.test_id}, test_value_id={self.test_value_id}, "
@@ -63,6 +67,8 @@ class SampleValues(Base):
     plasticity_type: Mapped[str] = mapped_column(String(20), nullable=False)
     psd_type: Mapped[str] = mapped_column(String(20), nullable=False)
 
+    test: Mapped[Test] = relationship()
+
     def __repr__(self) -> str:
         return (
             f"<SampleValues(sample_value_id={self.sample_value_id}, density_type={self.density_type}, "
@@ -77,6 +83,8 @@ class TestValues(Base):
     drainage_type: Mapped[str] = mapped_column(String(20), nullable=False)
     shearing_type: Mapped[str] = mapped_column(String(20), nullable=False)
     availability_type: Mapped[bool] = mapped_column(nullable=False)
+
+    test: Mapped[Test] = relationship()
 
     def __repr__(self) -> str:
         return (
