@@ -99,6 +99,8 @@ def ingest_table(sheet) -> pd.DataFrame:
     
     # Set column names
     df.columns = df.iloc[0]
+    # Strip whitespace from column names
+    df = df.rename(columns = lambda x: x.strip())
     
     # Drop column names from data body after assignment
     df = df.drop([0,1])
