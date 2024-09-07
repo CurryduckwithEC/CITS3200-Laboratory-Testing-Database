@@ -167,12 +167,53 @@ app.layout = html.Div(
                         [
                             dbc.AccordionItem(
                                 [
+                                    # Have to go back and put in actual values used in DB
+                                    # Format Label:Value
                                     html.H2("Drainage"),
-                                    dcc.Dropdown(
-                                        options=["Drained", "Undrained"],
-                                        value="Drained",
-                                        id="drainage-dropdown"
-                                    )
+                                    dcc.Checklist(
+                                        options={
+                                            "Drained":"Drained", 
+                                            "Undrained":"Undrained"},
+                                        value=["Drained", "Undrained"],
+                                        id="drainage-checklist",
+                                        inline=True
+                                    ),
+                                    html.H2("Shearing"),
+                                    dcc.Checklist(
+                                        options={
+                                            "Compression":"Compression", 
+                                            "Extension":"Extension"},
+                                        value=["Compression", "Extension"],
+                                        id="shearing-checklist",
+                                        inline=True
+                                    ),
+                                    html.H2("Anistropy"),
+                                    dcc.Checklist(
+                                        options={
+                                            "Isotropic":"Isotropic", 
+                                            "Anisotropic":"Anisotropic"},
+                                        value=["Isotropic", "Anisotropic"],
+                                        id="anisotropy-checklist",
+                                        inline=True
+                                    ),
+                                    dcc.RangeSlider(
+                                        0.3,
+                                        1,
+                                        step=None,
+                                        value=[0.3,1.0], 
+                                        id='anisotropy-slider',
+                                        tooltip={"placement": "bottom", "always_visible": True}
+                                    ),
+                                    html.H2("Consolidation"),
+                                    html.P(id="consolidation_value"),
+                                    dcc.RangeSlider(
+                                        10,
+                                        1500,
+                                        step=None,
+                                        value=[10,1500], 
+                                        id='consolidation-slider',
+                                        tooltip={"placement": "bottom", "always_visible": True}
+                                    ),
                                 ],
                                 title="Test",
                             ),
