@@ -1,7 +1,7 @@
 # See official docs at https://dash.plotly.com
 # pip install dash pandas
 
-from dash import Dash, dcc, html, Input, Output
+from dash import Dash, dcc, html, Input, Output, ctx, callback
 import plotly.express as px
 import pandas as pd
 import sys
@@ -201,26 +201,39 @@ app.layout = html.Div(
                                         1,
                                         step=None,
                                         value=[0.3,1.0], 
-                                        id='anisotropy-slider',
+                                        id="anisotropy_slider",
                                         tooltip={"placement": "bottom", "always_visible": True}
                                     ),
+                                    "Min Value:",
+                                    dcc.Input(id="anistropy_min_value", type="number", min=0, max=1.0, value=1.0, style={'width': '80px'}),
+                                    "Max Value:",
+                                    dcc.Input(id="anistropy_max_value", type="number", min=0, max=1.0, value=0, style={'width': '80px'}),
                                     html.H2("Consolidation"),
                                     html.P(id="consolidation_value"),
                                     dcc.RangeSlider(
                                         10,
                                         1500,
-                                        step=None,
+                                        step=1,
+                                        marks={
+                                            300: "300",
+                                            600: "600",
+                                            900: "900",
+                                            1200: "1200"
+                                        },
                                         value=[10,1500], 
-                                        id='consolidation-slider',
+                                        id="consolidation_slider",
                                         tooltip={"placement": "bottom", "always_visible": True}
                                     ),
+                                    "Min Value:",
+                                    dcc.Input(id="consolidation_min_value", type="number", min=0, max=1500, value=1500, style={'width': '80px'}),
+                                    "Max Value:",
+                                    dcc.Input(id="consolidation_max_value", type="number", min=0, max=1500, value=0, style={'width': '80px'}),
                                 ],
                                 title="Test",
                             ),
                             dbc.AccordionItem(
                                 [
-                                    html.P("This is the content of the second section"),
-                                    dbc.Button("Don't click me!", color="danger"),
+                                    html.P("Sample Filters Here"),
                                 ],
                                 title="Sample",
                             ),
@@ -285,14 +298,60 @@ app.layout = html.Div(
 )
 
 @app.callback(
-    [Output("axial_deviator_fig", "figure"),
-     Output("axial_pwp_fig", "figure"), 
-     Output("q_p_fig", "figure"),
-     Output("axial_vol_fig", "figure")],
+    [
+    Output("consolidation_min_value","value"),
+    Output("consolidation_max_value","value"),
+    Output("consolidation_slider","value")    
+    ],    
+    [
+     Input("consolidation_min_value","value"),
+     Input("consolidation_max_value","value"),
+     Input("consolidation_slider","value")
+    ]   
+)
+def sync_consol_slider(start, end, slider):
+    trigger_id = ctx.triggered_id
+
+    consolidation_min_value = start if trigger_id == "consolidation_min_value" else slider[0]
+    consolidation_max_value = end if trigger_id == "consolidation_max_value" else slider[1]
+    consolidation_slider_value = slider if trigger_id == "consolidation_slider" else [consolidation_min_value, consolidation_max_value]
+
+    return consolidation_min_value, consolidation_max_value, consolidation_slider_value
+
+@app.callback(
+    [
+    Output("anistropy_min_value","value"),
+    Output("anistropy_max_value","value"),
+    Output("anisotropy_slider","value")    
+    ],    
+    [
+     Input("anistropy_min_value","value"),
+     Input("anistropy_max_value","value"),
+     Input("anisotropy_slider","value")
+    ]   
+)
+def sync_consol_slider(start, end, slider):
+    trigger_id = ctx.triggered_id
+
+    anistropy_min_value = start if trigger_id == "anistropy_min_value" else slider[0]
+    anistropy_max_value = end if trigger_id == "anistropy_max_value" else slider[1]
+    anisotropy_slider_value = slider if trigger_id == "anisotropy_slider" else [anistropy_min_value, anistropy_max_value]
+
+    return anistropy_min_value, anistropy_max_value, anisotropy_slider_value
+
+
+@app.callback(
+    [
+    Output("axial_deviator_fig", "figure"),
+    Output("axial_pwp_fig", "figure"), 
+    Output("q_p_fig", "figure"),
+    Output("axial_vol_fig", "figure")
+    ],
     [Input("axial_slider", "value"), 
      Input("p_slider", "value"), 
      Input("pwp_slider", "value"), 
-     Input("q_slider", "value")], 
+     Input("q_slider", "value")
+     ], 
      )
 def update_figure(selected_axial, selected_p, selected_pwp, selected_q):
     filtered_df = df_combined[
