@@ -6,6 +6,7 @@ import plotly.express as px
 import pandas as pd
 import sys
 import openpyxl
+import dash_bootstrap_components as dbc
 
 ### Read Data 
 
@@ -161,48 +162,73 @@ app.layout = html.Div(
                 "float": "left"
             },
             children = [
-                html.H2("Axial Strain Filter"),
-                html.P(id="axial_value"),
-                dcc.RangeSlider(
-                    0,
-                    0.5,
-                    step=None,
-                    value=[0,0.5], 
-                    id='axial_slider'
+                html.Div(
+                    dbc.Accordion(
+                        [
+                            dbc.AccordionItem(
+                                [
+                                    html.H2("Drainage"),
+                                    dcc.Dropdown(
+                                        options=["Drained", "Undrained"],
+                                        value="Drained",
+                                        id="drainage-dropdown"
+                                    )
+                                ],
+                                title="Test",
+                            ),
+                            dbc.AccordionItem(
+                                [
+                                    html.P("This is the content of the second section"),
+                                    dbc.Button("Don't click me!", color="danger"),
+                                ],
+                                title="Sample",
+                            ),
+                            dbc.AccordionItem(
+                                [
+                                    html.H2("Axial Strain Filter"),
+                                    html.P(id="axial_value"),
+                                    dcc.RangeSlider(
+                                        0,
+                                        0.5,
+                                        step=None,
+                                        value=[0,0.5], 
+                                        id='axial_slider'
+                                    ),
+                                    html.H2("p' Filter"),
+                                    html.P(id="p_value"),
+                                    dcc.RangeSlider(
+                                        0,
+                                        500,
+                                        step=None,
+                                        value=[0,500], 
+                                        id='p_slider'
+                                    ), 
+                                    html.H2("Induced PWP Filter"),
+                                    html.P(id="pwp_value"),
+                                    dcc.RangeSlider(
+                                        0,
+                                        500,
+                                        step=None,
+                                        value=[0,500], 
+                                        id='pwp_slider'
+                                    ),
+                                    html.H2("Deviator stress (q) Filter"),
+                                    html.P(id="q_value"),
+                                    dcc.RangeSlider(
+                                        0,
+                                        500,
+                                        step=None,
+                                        value=[0,500], 
+                                        id='q_slider'
+                                    )
+                                    ],
+                                title="Variables",
+                            ),
+                        ],
+                        always_open=True, flush=True,
+                    )
                 ),
-                html.H2("p' Filter"),
-                html.P(id="p_value"),
-                dcc.RangeSlider(
-                    0,
-                    500,
-                    step=None,
-                    value=[0,500], 
-                    id='p_slider'
-                ), 
-                html.H2("Induced PWP Filter"),
-                html.P(id="pwp_value"),
-                dcc.RangeSlider(
-                    0,
-                    500,
-                    step=None,
-                    value=[0,500], 
-                    id='pwp_slider'
-                ),
-                html.H2("Deviator stress (q) Filter"),
-                html.P(id="q_value"),
-                dcc.RangeSlider(
-                    0,
-                    500,
-                    step=None,
-                    value=[0,500], 
-                    id='q_slider'
-                ),
-                html.H2("Drainage"),
-                dcc.Dropdown(
-                    options=["Drained", "Undrained"],
-                    value="Drained",
-                    id="drainage-dropdown"
-                )
+                
             ]
         ), 
         html.Div(
