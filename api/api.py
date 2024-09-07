@@ -1,4 +1,5 @@
 import zerorpc
+import sys
 
 
 class TestApi():
@@ -7,10 +8,13 @@ class TestApi():
         return text
 
 
-
-
-port = "1234"
+port = "18018"
 addr = "tcp://127.0.0.1:" + port
+
+
+if len(sys.argv) > 1:
+    port = sys.argv[1]
+
 
 s = zerorpc.Server(TestApi())
 s.bind(addr)
