@@ -187,7 +187,7 @@ app.layout = html.Div(
                                         id="shearing-checklist",
                                         inline=True
                                     ),
-                                    html.H2("Anistropy"),
+                                    html.H2("Anisotropy"),
                                     dcc.Checklist(
                                         options={
                                             "Isotropic":"Isotropic", 
@@ -205,9 +205,10 @@ app.layout = html.Div(
                                         tooltip={"placement": "bottom", "always_visible": True}
                                     ),
                                     "Min Value:",
-                                    dcc.Input(id="anistropy_min_value", type="number", min=0, max=1.0, value=1.0, style={'width': '80px'}),
+                                    dcc.Input(id="anisotropy_min_value", type="number", min=0, max=1.0, value=1.0, style={'width': '80px'}),
                                     "Max Value:",
-                                    dcc.Input(id="anistropy_max_value", type="number", min=0, max=1.0, value=0, style={'width': '80px'}),
+                                    dcc.Input(id="anisotropy_max_value", type="number", min=0, max=1.0, value=0, style={'width': '80px'}),
+                                    
                                     html.H2("Consolidation"),
                                     html.P(id="consolidation_value"),
                                     dcc.RangeSlider(
@@ -215,10 +216,12 @@ app.layout = html.Div(
                                         1500,
                                         step=1,
                                         marks={
+                                            10: "10",
                                             300: "300",
                                             600: "600",
                                             900: "900",
-                                            1200: "1200"
+                                            1200: "1200",
+                                            1500: "1500"
                                         },
                                         value=[10,1500], 
                                         id="consolidation_slider",
@@ -228,12 +231,50 @@ app.layout = html.Div(
                                     dcc.Input(id="consolidation_min_value", type="number", min=0, max=1500, value=1500, style={'width': '80px'}),
                                     "Max Value:",
                                     dcc.Input(id="consolidation_max_value", type="number", min=0, max=1500, value=0, style={'width': '80px'}),
+
+                                    html.H2("Availability"),
+                                    dcc.Checklist(
+                                        options={
+                                            "Public":"Public", 
+                                            "Confidential":"Confidential"},
+                                        value=["Public", "Confidential"],
+                                        id="availability_checklist",
+                                        inline=True
+                                    )
                                 ],
                                 title="Test",
                             ),
                             dbc.AccordionItem(
                                 [
-                                    html.P("Sample Filters Here"),
+                                    html.H2("Density"),
+                                    dcc.Checklist(
+                                        options={
+                                            "Loose":"Loose",
+                                            "Dense":"Dense"},
+                                        value=["Loose", "Dense"],
+                                        id="density_checklist",
+                                        inline=True
+                                    ),
+                                    html.H2("Plasticity"),
+                                    dcc.Checklist(
+                                        options={
+                                            "Plastic":"Plastic",
+                                            "Non-plastic":"Nonplastic",
+                                            "Unknown":"Unknown"},
+                                        value=["Plastic", "Non-plastic","Unknown"],
+                                        id="plasticity_checklist",
+                                        inline=True
+                                    ),
+                                    html.H2("PSD"),
+                                    dcc.Checklist(
+                                        options={
+                                            "Clay":"Clay",
+                                            "Sand":"Sand",
+                                            "Silt":"Silt"},
+                                        value=["Clay", "Sand","Silt"],
+                                        id="psd_checklist",
+                                        inline=True
+                                    ),
                                 ],
                                 title="Sample",
                             ),
@@ -244,10 +285,23 @@ app.layout = html.Div(
                                     dcc.RangeSlider(
                                         0,
                                         0.5,
-                                        step=None,
+                                        step=0.05,
+                                        marks={
+                                            0.0: "0.0",
+                                            0.1: "0.1",
+                                            0.2: "0.2",
+                                            0.3: "0.3",
+                                            0.4: "0.4",
+                                            0.5: "0.5"
+                                        },
                                         value=[0,0.5], 
                                         id='axial_slider'
                                     ),
+                                    "Min Value:",
+                                    dcc.Input(id="axial_min_value", type="number", min=0, max=0.5, value=0.5, style={'width': '80px'}),
+                                    "Max Value:",
+                                    dcc.Input(id="axial_max_value", type="number", min=0, max=0.5, value=0, style={'width': '80px'}),
+                                    
                                     html.H2("p' Filter"),
                                     html.P(id="p_value"),
                                     dcc.RangeSlider(
@@ -274,7 +328,25 @@ app.layout = html.Div(
                                         step=None,
                                         value=[0,500], 
                                         id='q_slider'
-                                    )
+                                    ),
+
+                                    html.H2("e Filter"),
+                                    html.P(id="e_value"),
+                                    dcc.RangeSlider(
+                                        0,
+                                        1,
+                                        step=0.01,
+                                        marks={
+                                            0.0: "0.0",
+                                            0.2: "0.2",
+                                            0.4: "0.4",
+                                            0.6: "0.6",
+                                            0.8: "0.8",
+                                            1.0: "1.0"
+                                        },
+                                        value=[0,1], 
+                                        id='e_slider'
+                                    ),
                                     ],
                                 title="Variables",
                             ),
@@ -320,25 +392,45 @@ def sync_consol_slider(start, end, slider):
 
 @app.callback(
     [
-    Output("anistropy_min_value","value"),
-    Output("anistropy_max_value","value"),
+    Output("anisotropy_min_value","value"),
+    Output("anisotropy_max_value","value"),
     Output("anisotropy_slider","value")    
     ],    
     [
-     Input("anistropy_min_value","value"),
-     Input("anistropy_max_value","value"),
+     Input("anisotropy_min_value","value"),
+     Input("anisotropy_max_value","value"),
      Input("anisotropy_slider","value")
     ]   
 )
-def sync_consol_slider(start, end, slider):
+def sync_aniso_slider(start, end, slider):
     trigger_id = ctx.triggered_id
 
-    anistropy_min_value = start if trigger_id == "anistropy_min_value" else slider[0]
-    anistropy_max_value = end if trigger_id == "anistropy_max_value" else slider[1]
-    anisotropy_slider_value = slider if trigger_id == "anisotropy_slider" else [anistropy_min_value, anistropy_max_value]
+    anisotropy_min_value = start if trigger_id == "anisotropy_min_value" else slider[0]
+    anisotropy_max_value = end if trigger_id == "anisotropy_max_value" else slider[1]
+    anisotropy_slider_value = slider if trigger_id == "anisotropy_slider" else [anisotropy_min_value, anisotropy_max_value]
 
-    return anistropy_min_value, anistropy_max_value, anisotropy_slider_value
+    return anisotropy_min_value, anisotropy_max_value, anisotropy_slider_value
 
+@app.callback(
+    [
+    Output("axial_min_value","value"),
+    Output("axial_max_value","value"),
+    Output("axial_slider","value")    
+    ],    
+    [
+     Input("axial_min_value","value"),
+     Input("axial_max_value","value"),
+     Input("axial_slider","value")
+    ]   
+)
+def sync_axial_slider(start, end, slider):
+    trigger_id = ctx.triggered_id
+
+    axial_min_value = start if trigger_id == "axial_min_value" else slider[0]
+    axial_max_value = end if trigger_id == "axial_max_value" else slider[1]
+    axial_slider_value = slider if trigger_id == "axial_slider" else [axial_min_value, axial_max_value]
+
+    return axial_min_value, axial_max_value, axial_slider_value
 
 @app.callback(
     [
@@ -399,14 +491,16 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q):
     [Output("axial_value", "children"),
      Output("p_value", "children"),
      Output("pwp_value", "children"), 
-     Output("q_value", "children")],
+     Output("q_value", "children"),
+     Output("e_value", "children")],
     [Input("axial_slider", "value"), 
      Input("p_slider", "value"), 
      Input("pwp_slider", "value"), 
-     Input("q_slider", "value")]
+     Input("q_slider", "value"),
+     Input("e_slider", "value")]
      )
-def update_filters(selected_axial, selected_p, selected_pwp, selected_q): 
-    return f'Selected range: {selected_axial[0]} to {selected_axial[1]}', f'Selected range: {selected_p[0]} to {selected_p[1]}', f'Selected range: {selected_pwp[0]} to {selected_pwp[1]}', f'Selected range: {selected_q[0]} to {selected_q[1]}'
+def update_filters(selected_axial, selected_p, selected_pwp, selected_q, selected_e): 
+    return f'Selected range: {selected_axial[0]} to {selected_axial[1]}', f'Selected range: {selected_p[0]} to {selected_p[1]}', f'Selected range: {selected_pwp[0]} to {selected_pwp[1]}', f'Selected range: {selected_q[0]} to {selected_q[1]}', f'Selected range: {selected_e[0]} to {selected_e[1]}'
 
 port = "18019"
 
