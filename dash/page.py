@@ -175,7 +175,7 @@ app.layout = html.Div(
                                             "Drained":"Drained", 
                                             "Undrained":"Undrained"},
                                         value=["Drained", "Undrained"],
-                                        id="drainage-checklist",
+                                        id="drainage_checklist",
                                         inline=True
                                     ),
                                     html.H2("Shearing"),
@@ -184,7 +184,7 @@ app.layout = html.Div(
                                             "Compression":"Compression", 
                                             "Extension":"Extension"},
                                         value=["Compression", "Extension"],
-                                        id="shearing-checklist",
+                                        id="shearing_checklist",
                                         inline=True
                                     ),
                                     html.H2("Anisotropy"),
@@ -193,7 +193,7 @@ app.layout = html.Div(
                                             "Isotropic":"Isotropic", 
                                             "Anisotropic":"Anisotropic"},
                                         value=["Isotropic", "Anisotropic"],
-                                        id="anisotropy-checklist",
+                                        id="anisotropy_checklist",
                                         inline=True
                                     ),
                                     dcc.RangeSlider(
