@@ -5,6 +5,19 @@ import pandas as pd
 
 from models import Entry, Test, TestValues, SampleValues, Base
 
+# In array to allow changing of value in function
+PATH = [""]
+
+def get_path():
+    return PATH[0]
+
+def change_path(new_path: str):
+    
+    PATH[0] = new_path
+    print(f"Path to database is now {get_path()}")
+
+
+
 
 # Takes the specs dict defined within parsing
 # Returns an object which is ready to be .add() into database
@@ -73,7 +86,7 @@ def entry_objects(df: pd.DataFrame, test: Test):
 # Function that takes the data of a new entry and commits to database
 # The ordering matters of the commit due to foreign key dependencies
 # Takes absolute path to database
-def commit_new_entry(specs: dict, df: pd.DataFrame, path: str):
+def commit_new_entry(specs: dict, df: pd.DataFrame):
 
     sample_values = sample_values_object(specs)
     test_values = test_values_object(specs)
@@ -85,7 +98,7 @@ def commit_new_entry(specs: dict, df: pd.DataFrame, path: str):
     sample_values.test = test
     test_values.test = test
 
-    engine = create_engine("sqlite:////" + path, echo=True)
+    engine = create_engine("sqlite:////" + get_path(), echo=True)
     Base.metadata.create_all(engine)
 
     with Session(engine) as session:
@@ -97,3 +110,17 @@ def commit_new_entry(specs: dict, df: pd.DataFrame, path: str):
         session.commit()
 
 
+# Shouldn't really be used
+# Retrieves all entry data and returns them as list of dataframes
+def retrieve_entry_data():
+    
+    engine = create_engine("sqlite:///f1.db", echo=True)
+
+    with Session(engine) as session:
+        df = pd.read_sql(session.query(Entry).statement, session.bind)
+
+    # split dataframe into list of dataframes by test id
+    split_df = [group for _, group in df.groupby("test_id")]
+
+    return split_df
+    
