@@ -335,7 +335,7 @@ app.layout = html.Div(
                                         id='q_slider'
                                     ),
 
-                                    html.H2("e Filter"),
+                                    html.H2("Void Ratio (e) Filter"),
                                     html.P(id="e_value"),
                                     dcc.RangeSlider(
                                         0,
@@ -470,7 +470,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         y=["Deviator stress", "p'"], 
         labels={'x': 'Axial strain', 'value':"Deviator Stress & Mean Effective Stress, p'"}, 
         color="Test", 
-        title="Deviator, q and Mean Effective Stress (kPa), p' vs. Axial Strain (%)")
+        title="Deviator Stress, q and Mean Effective Stress (kPa), p' vs. Axial Strain (%)")
 
     # Shear induced PWP VS Axial Strain
     axial_pwp_fig = px.line(
@@ -502,7 +502,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         x="log(p')", 
         y="Void ratio",
         color="Test", 
-        title="Void ratio (e) vs. log(p')")
+        title="Void ratio, e vs. log(p')")
     
     ### Stress ratio (p'/q) vs. Axial Strain
     stress_ratio_axial_fig = px.line(
@@ -510,7 +510,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         x="Axial strain", 
         y=filtered_df["p'"]/filtered_df["Deviator stress"],
         color="Test", 
-        title="Stress ratio (p'/q) vs. Axial strain").update_layout(
+        title="Stress ratio, p'/q vs. Axial strain").update_layout(
             yaxis_title="Stress ratio"
         )
     
