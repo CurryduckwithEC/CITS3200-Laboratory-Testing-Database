@@ -369,7 +369,8 @@ app.layout = html.Div(
                 dcc.Graph(id="axial_pwp_fig"), 
                 dcc.Graph(id="q_p_fig"),
                 dcc.Graph(id="axial_vol_fig"), 
-                dcc.Graph(id="e_logp_fig")
+                dcc.Graph(id="e_logp_fig"),
+                dcc.Graph(id="stress_ratio_axial_fig")
             ]
         )
     ]
@@ -444,7 +445,8 @@ def sync_axial_slider(start, end, slider):
     Output("axial_pwp_fig", "figure"), 
     Output("q_p_fig", "figure"),
     Output("axial_vol_fig", "figure"), 
-    Output("e_logp_fig", "figure")
+    Output("e_logp_fig", "figure"), 
+    Output("stress_ratio_axial_fig", "figure")
     ],
     [Input("axial_slider", "value"), 
      Input("p_slider", "value"), 
@@ -500,9 +502,19 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         x="log(p')", 
         y="Void ratio",
         color="Test", 
-        title="e vs. log(p')")
+        title="Void ratio (e) vs. log(p')")
     
-    return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig, e_logp_fig
+    ### Stress ratio (p'/q) vs. Axial Strain
+    stress_ratio_axial_fig = px.line(
+        filtered_df, 
+        x="Axial strain", 
+        y=filtered_df["p'"]/filtered_df["Deviator stress"],
+        color="Test", 
+        title="Stress ratio (p'/q) vs. Axial strain").update_layout(
+            yaxis_title="Stress ratio"
+        )
+    
+    return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig, e_logp_fig, stress_ratio_axial_fig
 
 @app.callback(
     [Output("axial_value", "children"),
