@@ -7,6 +7,7 @@ import pandas as pd
 import sys
 import openpyxl
 import dash_bootstrap_components as dbc
+import numpy as np 
 
 ### Read Data 
 
@@ -142,7 +143,11 @@ df3['Test'] = 'Test3'
 
 df_combined = pd.concat([df, df2, df3])
 
+# Stress ratio column 
 df_combined["Stress ratio"] = df_combined["Deviator stress"]/df_combined["p'"]
+
+# log(p') column, forcing a NaN if p' is invalid 
+df_combined["log(p')"] = np.log(pd.to_numeric(df_combined["p'"], errors="coerce"))
 
 ### Create Visualisations
 
@@ -363,7 +368,8 @@ app.layout = html.Div(
                 dcc.Graph(id="axial_deviator_fig"),
                 dcc.Graph(id="axial_pwp_fig"), 
                 dcc.Graph(id="q_p_fig"),
-                dcc.Graph(id="axial_vol_fig")
+                dcc.Graph(id="axial_vol_fig"), 
+                dcc.Graph(id="e_logp_fig")
             ]
         )
     ]
@@ -437,20 +443,23 @@ def sync_axial_slider(start, end, slider):
     Output("axial_deviator_fig", "figure"),
     Output("axial_pwp_fig", "figure"), 
     Output("q_p_fig", "figure"),
-    Output("axial_vol_fig", "figure")
+    Output("axial_vol_fig", "figure"), 
+    Output("e_logp_fig", "figure")
     ],
     [Input("axial_slider", "value"), 
      Input("p_slider", "value"), 
      Input("pwp_slider", "value"), 
-     Input("q_slider", "value")
+     Input("q_slider", "value"),
+     Input("e_slider", "value")
      ], 
      )
-def update_figure(selected_axial, selected_p, selected_pwp, selected_q):
+def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected_e):
     filtered_df = df_combined[
         (df_combined["Axial strain"]>=selected_axial[0]) & (df_combined["Axial strain"]<=selected_axial[1])
         & (df_combined["p'"]>=selected_p[0]) & (df_combined["p'"]<=selected_p[1])
         & (df_combined["Shear induced PWP"]>=selected_pwp[0]) & (df_combined["Shear induced PWP"]<=selected_pwp[1])
-        & (df_combined["Deviator stress"]>=selected_q[0]) & (df_combined["Deviator stress"]<=selected_q[1])]
+        & (df_combined["Deviator stress"]>=selected_q[0]) & (df_combined["Deviator stress"]<=selected_q[1])
+        & (df_combined["Void ratio"]>=selected_e[0]) & (df_combined["Void ratio"]<=selected_e[1])]
 
     # Deviator Stress (q) & Mean effective stress (p') VS Axial Strain 
     axial_deviator_fig = px.line(
@@ -485,7 +494,15 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q):
         color="Test", 
         title="Volumetric Stress (%) vs. Axial Strain (%)")
     
-    return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig
+    ### e VS log(p')
+    e_logp_fig = px.line(
+        filtered_df, 
+        x="log(p')", 
+        y="Void ratio",
+        color="Test", 
+        title="e vs. log(p')")
+    
+    return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig, e_logp_fig
 
 @app.callback(
     [Output("axial_value", "children"),
