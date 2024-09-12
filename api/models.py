@@ -49,6 +49,8 @@ class Test(Base):
     consolidation: Mapped[int] = mapped_column(nullable=False)
     anisotropy: Mapped[float] = mapped_column(nullable=False)
 
+    test_file_name: Mapped[str] = mapped_column(String(50), nullable=False)
+
     entries: Mapped[List["Entry"]] = relationship()
 
     def __repr__(self) -> str:
