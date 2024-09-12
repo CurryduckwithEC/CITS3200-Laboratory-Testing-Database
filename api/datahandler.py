@@ -50,7 +50,7 @@ def test_values_object(specs: dict) -> TestValues:
 
     return test_values
 
-def test_object(specs: dict, sample_values: SampleValues, test_values: TestValues) -> Test:
+def test_object(specs: dict, sample_values: SampleValues, test_values: TestValues, file_path: str) -> Test:
 
     # Make sure to commit any foreign key dependencies first
     test = Test(
@@ -58,7 +58,9 @@ def test_object(specs: dict, sample_values: SampleValues, test_values: TestValue
         sample_value_id = sample_values.sample_value_id,
 
         consolidation = specs["consolidation"],
-        anisotropy = specs["anisotropy"]
+        anisotropy = specs["anisotropy"],
+
+        test_file_name = file_path
     )
 
     return test
