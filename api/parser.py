@@ -1,5 +1,6 @@
 import pandas as pd
 import openpyxl
+import os
 
 
 """
@@ -120,12 +121,14 @@ def ingest_table(sheet) -> pd.DataFrame:
 
 def parse_workbook(path):
     
+    _, file_name = os.path.split(path)
+    
     sheet = load_sheet(path)
 
     specs = ingest_specs(sheet)
     df = ingest_table(sheet)
 
-    return specs, df
+    return specs, df, file_name
 
 
 
