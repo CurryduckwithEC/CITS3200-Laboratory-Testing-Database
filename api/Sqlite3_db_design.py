@@ -47,6 +47,7 @@ cur.execute("""
 CREATE TABLE IF NOT EXISTS test (
     test_id INTEGER PRIMARY KEY AUTOINCREMENT,
     test_value_id INTEGER NOT NULL,
+    test_name TEXT NOT NULL,
     sample_value_id INTEGER NOT NULL,
     consolidation INTEGER NOT NULL,
     anisotropicy REAL NOT NULL,
