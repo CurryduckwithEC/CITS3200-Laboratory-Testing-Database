@@ -24,9 +24,9 @@ let dashProc = null
  */
 const buildPackage = () => {
 
-    api_path = path.join(__dirname, API)
-    
-    return require('fs').existsSync(api_path)
+    dependency_path = path.join(__dirname, API)
+
+    return require('fs').existsSync(dependency_path)
 }
 
 /**
@@ -66,13 +66,13 @@ const getDashPath = () => {
 const createPyProc = () => {
     
     api_path = getApiPath()
-    
+
     // if we are building the package, use the bin
     if(buildPackage()){
         pyProc = require("child_process").execFile(api_path, [API_PORT])
     }
     else{
-        pyProc = require("child_process").spawn("python", [api_path, API_PORT])
+        pyProc = require("child_process").spawn("python", [api_path, API_PORT], {stdio: "inherit"})
     }
 
     if(pyProc != null) {
@@ -81,7 +81,7 @@ const createPyProc = () => {
 }
 
 const exitPyProc = () => {
-    pyProc.kill()
+    pyProc.kill("SIGINT")
     pyProc = null
 }
 
@@ -94,7 +94,7 @@ const createDashProc = () => {
 
     dashPath = getDashPath()
 
-    dashProc = require("child_process").spawn("python", [dashPath, DASH_PORT])
+    dashProc = require("child_process").spawn("python", [dashPath, DASH_PORT], {stdio: "inherit"})
 
     if(dashProc != null) {
         console.log('dash process success')
@@ -103,17 +103,14 @@ const createDashProc = () => {
 }
 
 const exitDashProc = () => {
-    dashProc.kill()
+    dashProc.kill("SIGINT")
     dashProc = null
 }
 
-
-
-
 app.on('ready', createPyProc)
 app.on('ready', createDashProc)
-app.on('will-quit', exitPyProc)
-app.on('will-quit', exitDashProc)
+app.on('before-quit', exitPyProc)
+//app.on('before-quit', exitDashProc)
 
 
 
@@ -131,7 +128,7 @@ function createWindow () {
     //mainWindow.loadFile('index.html')
     mainWindow.loadURL('http://127.0.0.1:' + DASH_PORT)
 
-
+    
     // Open the DevTools.
     // mainWindow.webContents.openDevTools()
 }
