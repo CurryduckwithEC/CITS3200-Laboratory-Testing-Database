@@ -118,7 +118,7 @@ def commit_new_entry(specs: dict, df: pd.DataFrame, file_name: str):
 # Retrieves all entry data and returns them as list of dataframes
 def retrieve_entry_data():
     
-    engine = create_engine(get_path(), echo=True)
+    engine = create_engine("sqlite:///./api/test.db", echo=True) #replace sqlite:///.api/test with get_path()
 
     with Session(engine) as session:
         df = pd.read_sql(session.query(Entry).statement, session.bind)
@@ -126,7 +126,7 @@ def retrieve_entry_data():
     # split dataframe into list of dataframes by test id
     split_df = [group for _, group in df.groupby("test_id")]
 
-    return split_df
+    return df #split_df
     
 
 # Returns a dataframe of specs
@@ -144,3 +144,7 @@ def retrieve_test_specs():
         df = pd.read_sql(query.statement, session.bind)
 
     return df
+
+# Testing
+#df = retrieve_entry_data()
+#print(df)

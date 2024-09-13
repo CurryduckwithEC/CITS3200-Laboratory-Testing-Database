@@ -5,8 +5,14 @@ from dash import Dash, dcc, html, Input, Output, ctx, callback
 import plotly.express as px
 import pandas as pd
 import sys
+import dash_bootstrap_components as dbc
+
+from datahandler import retrieve_entry_data
 
 app = Dash(__name__)
+
+df_combined = retrieve_entry_data()
+#print(df_combined)
 
 app.layout = html.Div(
     id = "app-container",
@@ -312,59 +318,60 @@ def sync_axial_slider(start, end, slider):
      )
 def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected_e):
     filtered_df = df_combined[
-        (df_combined["Axial strain"]>=selected_axial[0]) & (df_combined["Axial strain"]<=selected_axial[1])
-        & (df_combined["p'"]>=selected_p[0]) & (df_combined["p'"]<=selected_p[1])
-        & (df_combined["Shear induced PWP"]>=selected_pwp[0]) & (df_combined["Shear induced PWP"]<=selected_pwp[1])
-        & (df_combined["Deviator stress"]>=selected_q[0]) & (df_combined["Deviator stress"]<=selected_q[1])
-        & (df_combined["Void ratio"]>=selected_e[0]) & (df_combined["Void ratio"]<=selected_e[1])]
+        (df_combined["axial_strain"]>=selected_axial[0]) & (df_combined["axial_strain"]<=selected_axial[1])
+        & (df_combined["p"]>=selected_p[0]) & (df_combined["p"]<=selected_p[1])
+        & (df_combined["shear_induced_pwp"]>=selected_pwp[0]) & (df_combined["shear_induced_pwp"]<=selected_pwp[1])
+        & (df_combined["deviator_stress"]>=selected_q[0]) & (df_combined["deviator_stress"]<=selected_q[1])
+        & (df_combined["void_ratio"]>=selected_e[0]) & (df_combined["void_ratio"]<=selected_e[1])]
 
     # Deviator Stress (q) & Mean effective stress (p') VS Axial Strain 
     axial_deviator_fig = px.line(
         filtered_df, 
-        x="Axial strain", 
-        y=["Deviator stress", "p'"], 
+        x="axial_strain", 
+        y=["deviator_stress", "p"], 
         labels={'x': 'Axial strain', 'value':"Deviator Stress & Mean Effective Stress, p'"}, 
-        color="Test", 
+        color="test_id", 
         title="Deviator Stress, q and Mean Effective Stress (kPa), p' vs. Axial Strain (%)")
 
     # Shear induced PWP VS Axial Strain
     axial_pwp_fig = px.line(
         filtered_df, 
-        x="Axial strain", 
-        y="Shear induced PWP",
-        color="Test", 
+        x="axial_strain", 
+        y="shear_induced_pwp",
+        color="test_id", 
         title="Shear Induced Pore Pressure (kPa) vs. Axial Strain (%)")
     
     # Deviator Stress (q) VS Mean effective stress (p')
     q_p_fig = px.line(
         filtered_df, 
-        x="p'", 
-        y="Deviator stress",
-        color="Test", 
+        x="p", 
+        y="deviator_stress",
+        color="test_id", 
         title="Deviator Stress, q (kPa) vs. Mean Effective Stress, p' (kPa)")
     
     ### Volumetric Strain VS Axial Strain
     axial_vol_fig = px.line(
         filtered_df, 
-        x="Axial strain", 
-        y="Volumetric strain",
-        color="Test", 
+        x="axial_strain", 
+        y="vol_strain",
+        color="test_id", 
         title="Volumetric Stress (%) vs. Axial Strain (%)")
     
     ### e VS log(p')
     e_logp_fig = px.line(
         filtered_df, 
-        x="log(p')", 
-        y="Void ratio",
-        color="Test", 
+        x="p", 
+        y="void_ratio",
+        labels={'x': "p", 'value':"log(p')"},
+        color="test_id", 
         title="Void ratio, e vs. log(p')")
     
     ### Stress ratio (p'/q) vs. Axial Strain
     stress_ratio_axial_fig = px.line(
         filtered_df, 
-        x="Axial strain", 
-        y=filtered_df["p'"]/filtered_df["Deviator stress"],
-        color="Test", 
+        x="axial_strain", 
+        y=filtered_df["p"]/filtered_df["deviator_stress"],
+        color="test_id", 
         title="Stress ratio, p'/q vs. Axial strain").update_layout(
             yaxis_title="Stress ratio"
         )
