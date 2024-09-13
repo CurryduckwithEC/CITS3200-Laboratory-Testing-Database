@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 import pandas as pd
+import os
 
 from models import Entry, Test, TestValues, SampleValues, Base
 
@@ -9,8 +10,9 @@ from models import Entry, Test, TestValues, SampleValues, Base
 PATH = [""]
 
 def get_path():
-    return PATH[0]
+    return "sqlite:///" + os.path.normpath(PATH[0])
 
+# Takes new path and name of database
 def change_path(new_path: str):
     
     PATH[0] = new_path
@@ -50,7 +52,7 @@ def test_values_object(specs: dict) -> TestValues:
 
     return test_values
 
-def test_object(specs: dict, sample_values: SampleValues, test_values: TestValues, file_path: str) -> Test:
+def test_object(specs: dict, sample_values: SampleValues, test_values: TestValues, file_name: str) -> Test:
 
     # Make sure to commit any foreign key dependencies first
     test = Test(
@@ -60,7 +62,7 @@ def test_object(specs: dict, sample_values: SampleValues, test_values: TestValue
         consolidation = specs["consolidation"],
         anisotropy = specs["anisotropy"],
 
-        test_file_name = file_path
+        test_file_name = file_name
     )
 
     return test
@@ -88,11 +90,11 @@ def entry_objects(df: pd.DataFrame, test: Test):
 # Function that takes the data of a new entry and commits to database
 # The ordering matters of the commit due to foreign key dependencies
 # Takes absolute path to database
-def commit_new_entry(specs: dict, df: pd.DataFrame):
+def commit_new_entry(specs: dict, df: pd.DataFrame, file_name: str):
 
     sample_values = sample_values_object(specs)
     test_values = test_values_object(specs)
-    test = test_object(specs, sample_values, test_values)
+    test = test_object(specs, sample_values, test_values, file_name)
 
     entries = entry_objects(df, test)
 
@@ -100,7 +102,7 @@ def commit_new_entry(specs: dict, df: pd.DataFrame):
     sample_values.test = test
     test_values.test = test
 
-    engine = create_engine("sqlite:////" + get_path(), echo=True)
+    engine = create_engine(get_path(), echo=True)
     Base.metadata.create_all(engine)
 
     with Session(engine) as session:
@@ -116,7 +118,7 @@ def commit_new_entry(specs: dict, df: pd.DataFrame):
 # Retrieves all entry data and returns them as list of dataframes
 def retrieve_entry_data():
     
-    engine = create_engine("sqlite:////" + get_path(), echo=True)
+    engine = create_engine(get_path(), echo=True)
 
     with Session(engine) as session:
         df = pd.read_sql(session.query(Entry).statement, session.bind)
@@ -130,7 +132,7 @@ def retrieve_entry_data():
 # Returns a dataframe of specs
 def retrieve_test_specs():
 
-    engine = create_engine("sqlite:////" + get_path(), echo=True)
+    engine = create_engine(get_path(), echo=True)
 
     with Session(engine) as session:
         query = (
