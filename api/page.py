@@ -329,9 +329,11 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         filtered_df, 
         x="axial_strain", 
         y=["deviator_stress", "p"], 
-        labels={'x': 'Axial strain', 'value':"Deviator Stress & Mean Effective Stress, p'"}, 
         color="test_id", 
-        title="Deviator Stress, q and Mean Effective Stress (kPa), p' vs. Axial Strain (%)")
+        title="Deviator Stress, q and Mean Effective Stress (kPa), p' vs. Axial Strain (%)").update_layout(
+            xaxis_title="Axial Strain",
+            yaxis_title="Deviator Stress, q & Mean Effective Stress, p'"
+        )
 
     # Shear induced PWP VS Axial Strain
     axial_pwp_fig = px.line(
@@ -339,15 +341,21 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         x="axial_strain", 
         y="shear_induced_pwp",
         color="test_id", 
-        title="Shear Induced Pore Pressure (kPa) vs. Axial Strain (%)")
+        title="Shear Induced Pore Pressure (kPa) vs. Axial Strain (%)").update_layout(
+            xaxis_title="Axial Strain",
+            yaxis_title="Shear Induced Pore Pressure"
+        )
     
     # Deviator Stress (q) VS Mean effective stress (p')
     q_p_fig = px.line(
         filtered_df, 
-        x="p", 
-        y="deviator_stress",
+        x="deviator_stress", 
+        y="p",
         color="test_id", 
-        title="Deviator Stress, q (kPa) vs. Mean Effective Stress, p' (kPa)")
+        title="Deviator Stress, q (kPa) vs. Mean Effective Stress, p' (kPa)").update_layout(
+            xaxis_title="Mean Effective Stress, p'",
+            yaxis_title="Deviator stress, q"
+        )
     
     ### Volumetric Strain VS Axial Strain
     axial_vol_fig = px.line(
@@ -355,16 +363,21 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         x="axial_strain", 
         y="vol_strain",
         color="test_id", 
-        title="Volumetric Stress (%) vs. Axial Strain (%)")
+        title="Volumetric Stress (%) vs. Axial Strain (%)").update_layout(
+            xaxis_title="Axial Strain",
+            yaxis_title="Volumetric Strain"
+        )
     
     ### e VS log(p')
     e_logp_fig = px.line(
         filtered_df, 
         x="p", 
         y="void_ratio",
-        labels={'x': "p", 'value':"log(p')"},
         color="test_id", 
-        title="Void ratio, e vs. log(p')")
+        title="Void ratio, e vs. log(p')").update_layout(
+            xaxis_title="log(p')",
+            yaxis_title="Void Ratio, e"
+        )
     
     ### Stress ratio (p'/q) vs. Axial Strain
     stress_ratio_axial_fig = px.line(
@@ -372,8 +385,9 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         x="axial_strain", 
         y=filtered_df["p"]/filtered_df["deviator_stress"],
         color="test_id", 
-        title="Stress ratio, p'/q vs. Axial strain").update_layout(
-            yaxis_title="Stress ratio"
+        title="Stress Ratio, p'/q vs. Axial Strain").update_layout(
+            xaxis_title="Axial Strain",
+            yaxis_title="Stress Ratio"
         )
     
     return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig, e_logp_fig, stress_ratio_axial_fig
