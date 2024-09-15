@@ -23,23 +23,26 @@ app.layout = dbc.Container(
                     [
                     dbc.Col(
                         html.Div(
-                            id = "filters-sidebare",
+                            id = "filters-sidebar",
                             style = {
                                 "backgroundColor": "lightGrey",
                                 "padding": "5px",
-                                "position": "fixed"
+                                "width": "inherit",
+                                "position": "fixed",
+                                "top": 0,
+                                "bottom": 0,
+                                "overflow-y": "scroll"
                             },
                             children = [
                                 html.H1("Filters"),
                                 html.Div(
-                                    
                                     dbc.Accordion(
                                         [
                                             dbc.AccordionItem(
                                                 [
                                                     # Have to go back and put in actual values used in DB
                                                     # Format Label:Value
-                                                    html.H2("Drainage"),
+                                                    html.H3("Drainage"),
                                                     dcc.Checklist(
                                                         options={
                                                             "Drained":"Drained", 
@@ -48,7 +51,7 @@ app.layout = dbc.Container(
                                                         id="drainage_checklist",
                                                         inline=True
                                                     ),
-                                                    html.H2("Shearing"),
+                                                    html.H3("Shearing"),
                                                     dcc.Checklist(
                                                         options={
                                                             "Compression":"Compression", 
@@ -57,7 +60,7 @@ app.layout = dbc.Container(
                                                         id="shearing_checklist",
                                                         inline=True
                                                     ),
-                                                    html.H2("Anisotropy"),
+                                                    html.H3("Anisotropy"),
                                                     dcc.Checklist(
                                                         options={
                                                             "Isotropic":"Isotropic", 
@@ -79,7 +82,7 @@ app.layout = dbc.Container(
                                                     "Max Value:",
                                                     dcc.Input(id="anisotropy_max_value", type="number", min=0, max=1.0, value=0, style={'width': '80px'}),
                                                     
-                                                    html.H2("Consolidation"),
+                                                    html.H3("Consolidation"),
                                                     html.P(id="consolidation_value"),
                                                     dcc.RangeSlider(
                                                         10,
@@ -102,7 +105,7 @@ app.layout = dbc.Container(
                                                     "Max Value:",
                                                     dcc.Input(id="consolidation_max_value", type="number", min=0, max=1500, value=0, style={'width': '80px'}),
 
-                                                    html.H2("Availability"),
+                                                    html.H3("Availability"),
                                                     dcc.Checklist(
                                                         options={
                                                             "Public":"Public", 
@@ -116,7 +119,7 @@ app.layout = dbc.Container(
                                             ),
                                             dbc.AccordionItem(
                                                 [
-                                                    html.H2("Density"),
+                                                    html.H3("Density"),
                                                     dcc.Checklist(
                                                         options={
                                                             "Loose":"Loose",
@@ -125,7 +128,7 @@ app.layout = dbc.Container(
                                                         id="density_checklist",
                                                         inline=True
                                                     ),
-                                                    html.H2("Plasticity"),
+                                                    html.H3("Plasticity"),
                                                     dcc.Checklist(
                                                         options={
                                                             "Plastic":"Plastic",
@@ -135,7 +138,7 @@ app.layout = dbc.Container(
                                                         id="plasticity_checklist",
                                                         inline=True
                                                     ),
-                                                    html.H2("PSD"),
+                                                    html.H3("PSD"),
                                                     dcc.Checklist(
                                                         options={
                                                             "Clay":"Clay",
@@ -150,7 +153,7 @@ app.layout = dbc.Container(
                                             ),
                                             dbc.AccordionItem(
                                                 [
-                                                    html.H2("Axial Strain Filter"),
+                                                    html.H3("Axial Strain Filter"),
                                                     html.P(id="axial_value"),
                                                     dcc.RangeSlider(
                                                         0,
@@ -172,7 +175,7 @@ app.layout = dbc.Container(
                                                     "Max Value:",
                                                     dcc.Input(id="axial_max_value", type="number", min=0, max=0.5, value=0, style={'width': '80px'}),
                                                     
-                                                    html.H2("p' Filter"),
+                                                    html.H3("p' Filter"),
                                                     html.P(id="p_value"),
                                                     dcc.RangeSlider(
                                                         0,
@@ -181,7 +184,7 @@ app.layout = dbc.Container(
                                                         value=[0,500], 
                                                         id='p_slider'
                                                     ), 
-                                                    html.H2("Induced PWP Filter"),
+                                                    html.H3("Induced PWP Filter"),
                                                     html.P(id="pwp_value"),
                                                     dcc.RangeSlider(
                                                         0,
@@ -190,7 +193,7 @@ app.layout = dbc.Container(
                                                         value=[0,500], 
                                                         id='pwp_slider'
                                                     ),
-                                                    html.H2("Deviator stress (q) Filter"),
+                                                    html.H3("Deviator stress (q) Filter"),
                                                     html.P(id="q_value"),
                                                     dcc.RangeSlider(
                                                         0,
@@ -200,7 +203,7 @@ app.layout = dbc.Container(
                                                         id='q_slider'
                                                     ),
 
-                                                    html.H2("Void Ratio (e) Filter"),
+                                                    html.H3("Void Ratio (e) Filter"),
                                                     html.P(id="e_value"),
                                                     dcc.RangeSlider(
                                                         0,
@@ -224,7 +227,6 @@ app.layout = dbc.Container(
                                         always_open=True, flush=True,
                                     )
                                 ),
-                                
                             ]
                         ), 
                         width=3
