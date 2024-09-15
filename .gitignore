@@ -2,3 +2,4 @@ node_modules*
 package-lock*
 
 **/__pycache__/
+.DS_Store

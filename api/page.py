@@ -14,227 +14,240 @@ app = Dash(__name__)
 df_combined = retrieve_entry_data()
 #print(df_combined)
 
-app.layout = html.Div(
-    id = "app-container",
-    style = {
-        "display": "flex",
-        "margin": "5px"},
-    children = [   
+app.layout = dbc.Container(
+    children = [
         html.Div(
-            id = "filters",
-            style = {
-                "backgroundColor": "lightGrey",
-                "padding": "5px",
-                "float": "left"
-            },
-            children = [
-                html.Div(
-                    dbc.Accordion(
-                        [
-                            dbc.AccordionItem(
-                                [
-                                    # Have to go back and put in actual values used in DB
-                                    # Format Label:Value
-                                    html.H2("Drainage"),
-                                    dcc.Checklist(
-                                        options={
-                                            "Drained":"Drained", 
-                                            "Undrained":"Undrained"},
-                                        value=["Drained", "Undrained"],
-                                        id="drainage_checklist",
-                                        inline=True
-                                    ),
-                                    html.H2("Shearing"),
-                                    dcc.Checklist(
-                                        options={
-                                            "Compression":"Compression", 
-                                            "Extension":"Extension"},
-                                        value=["Compression", "Extension"],
-                                        id="shearing_checklist",
-                                        inline=True
-                                    ),
-                                    html.H2("Anisotropy"),
-                                    dcc.Checklist(
-                                        options={
-                                            "Isotropic":"Isotropic", 
-                                            "Anisotropic":"Anisotropic"},
-                                        value=["Isotropic", "Anisotropic"],
-                                        id="anisotropy_checklist",
-                                        inline=True
-                                    ),
-                                    dcc.RangeSlider(
-                                        0.3,
-                                        1,
-                                        step=None,
-                                        value=[0.3,1.0], 
-                                        id="anisotropy_slider",
-                                        tooltip={"placement": "bottom", "always_visible": True}
-                                    ),
-                                    "Min Value:",
-                                    dcc.Input(id="anisotropy_min_value", type="number", min=0, max=1.0, value=1.0, style={'width': '80px'}),
-                                    "Max Value:",
-                                    dcc.Input(id="anisotropy_max_value", type="number", min=0, max=1.0, value=0, style={'width': '80px'}),
+            id = "app-container",
+            children = [  
+                dbc.Row( 
+                    [
+                    dbc.Col(
+                        html.Div(
+                            id = "filters-sidebare",
+                            style = {
+                                "backgroundColor": "lightGrey",
+                                "padding": "5px",
+                                "position": "fixed"
+                            },
+                            children = [
+                                html.H1("Filters"),
+                                html.Div(
                                     
-                                    html.H2("Consolidation"),
-                                    html.P(id="consolidation_value"),
-                                    dcc.RangeSlider(
-                                        10,
-                                        1500,
-                                        step=1,
-                                        marks={
-                                            10: "10",
-                                            300: "300",
-                                            600: "600",
-                                            900: "900",
-                                            1200: "1200",
-                                            1500: "1500"
-                                        },
-                                        value=[10,1500], 
-                                        id="consolidation_slider",
-                                        tooltip={"placement": "bottom", "always_visible": True}
-                                    ),
-                                    "Min Value:",
-                                    dcc.Input(id="consolidation_min_value", type="number", min=0, max=1500, value=1500, style={'width': '80px'}),
-                                    "Max Value:",
-                                    dcc.Input(id="consolidation_max_value", type="number", min=0, max=1500, value=0, style={'width': '80px'}),
+                                    dbc.Accordion(
+                                        [
+                                            dbc.AccordionItem(
+                                                [
+                                                    # Have to go back and put in actual values used in DB
+                                                    # Format Label:Value
+                                                    html.H2("Drainage"),
+                                                    dcc.Checklist(
+                                                        options={
+                                                            "Drained":"Drained", 
+                                                            "Undrained":"Undrained"},
+                                                        value=["Drained", "Undrained"],
+                                                        id="drainage_checklist",
+                                                        inline=True
+                                                    ),
+                                                    html.H2("Shearing"),
+                                                    dcc.Checklist(
+                                                        options={
+                                                            "Compression":"Compression", 
+                                                            "Extension":"Extension"},
+                                                        value=["Compression", "Extension"],
+                                                        id="shearing_checklist",
+                                                        inline=True
+                                                    ),
+                                                    html.H2("Anisotropy"),
+                                                    dcc.Checklist(
+                                                        options={
+                                                            "Isotropic":"Isotropic", 
+                                                            "Anisotropic":"Anisotropic"},
+                                                        value=["Isotropic", "Anisotropic"],
+                                                        id="anisotropy_checklist",
+                                                        inline=True
+                                                    ),
+                                                    dcc.RangeSlider(
+                                                        0.3,
+                                                        1,
+                                                        step=None,
+                                                        value=[0.3,1.0], 
+                                                        id="anisotropy_slider",
+                                                        tooltip={"placement": "bottom", "always_visible": True}
+                                                    ),
+                                                    "Min Value:",
+                                                    dcc.Input(id="anisotropy_min_value", type="number", min=0, max=1.0, value=1.0, style={'width': '80px'}),
+                                                    "Max Value:",
+                                                    dcc.Input(id="anisotropy_max_value", type="number", min=0, max=1.0, value=0, style={'width': '80px'}),
+                                                    
+                                                    html.H2("Consolidation"),
+                                                    html.P(id="consolidation_value"),
+                                                    dcc.RangeSlider(
+                                                        10,
+                                                        1500,
+                                                        step=1,
+                                                        marks={
+                                                            10: "10",
+                                                            300: "300",
+                                                            600: "600",
+                                                            900: "900",
+                                                            1200: "1200",
+                                                            1500: "1500"
+                                                        },
+                                                        value=[10,1500], 
+                                                        id="consolidation_slider",
+                                                        tooltip={"placement": "bottom", "always_visible": True}
+                                                    ),
+                                                    "Min Value:",
+                                                    dcc.Input(id="consolidation_min_value", type="number", min=0, max=1500, value=1500, style={'width': '80px'}),
+                                                    "Max Value:",
+                                                    dcc.Input(id="consolidation_max_value", type="number", min=0, max=1500, value=0, style={'width': '80px'}),
 
-                                    html.H2("Availability"),
-                                    dcc.Checklist(
-                                        options={
-                                            "Public":"Public", 
-                                            "Confidential":"Confidential"},
-                                        value=["Public", "Confidential"],
-                                        id="availability_checklist",
-                                        inline=True
+                                                    html.H2("Availability"),
+                                                    dcc.Checklist(
+                                                        options={
+                                                            "Public":"Public", 
+                                                            "Confidential":"Confidential"},
+                                                        value=["Public", "Confidential"],
+                                                        id="availability_checklist",
+                                                        inline=True
+                                                    )
+                                                ],
+                                                title="Test",
+                                            ),
+                                            dbc.AccordionItem(
+                                                [
+                                                    html.H2("Density"),
+                                                    dcc.Checklist(
+                                                        options={
+                                                            "Loose":"Loose",
+                                                            "Dense":"Dense"},
+                                                        value=["Loose", "Dense"],
+                                                        id="density_checklist",
+                                                        inline=True
+                                                    ),
+                                                    html.H2("Plasticity"),
+                                                    dcc.Checklist(
+                                                        options={
+                                                            "Plastic":"Plastic",
+                                                            "Non-plastic":"Nonplastic",
+                                                            "Unknown":"Unknown"},
+                                                        value=["Plastic", "Non-plastic","Unknown"],
+                                                        id="plasticity_checklist",
+                                                        inline=True
+                                                    ),
+                                                    html.H2("PSD"),
+                                                    dcc.Checklist(
+                                                        options={
+                                                            "Clay":"Clay",
+                                                            "Sand":"Sand",
+                                                            "Silt":"Silt"},
+                                                        value=["Clay", "Sand","Silt"],
+                                                        id="psd_checklist",
+                                                        inline=True
+                                                    ),
+                                                ],
+                                                title="Sample",
+                                            ),
+                                            dbc.AccordionItem(
+                                                [
+                                                    html.H2("Axial Strain Filter"),
+                                                    html.P(id="axial_value"),
+                                                    dcc.RangeSlider(
+                                                        0,
+                                                        0.5,
+                                                        step=0.05,
+                                                        marks={
+                                                            0.0: "0.0",
+                                                            0.1: "0.1",
+                                                            0.2: "0.2",
+                                                            0.3: "0.3",
+                                                            0.4: "0.4",
+                                                            0.5: "0.5"
+                                                        },
+                                                        value=[0,0.5], 
+                                                        id='axial_slider'
+                                                    ),
+                                                    "Min Value:",
+                                                    dcc.Input(id="axial_min_value", type="number", min=0, max=0.5, value=0.5, style={'width': '80px'}),
+                                                    "Max Value:",
+                                                    dcc.Input(id="axial_max_value", type="number", min=0, max=0.5, value=0, style={'width': '80px'}),
+                                                    
+                                                    html.H2("p' Filter"),
+                                                    html.P(id="p_value"),
+                                                    dcc.RangeSlider(
+                                                        0,
+                                                        500,
+                                                        step=None,
+                                                        value=[0,500], 
+                                                        id='p_slider'
+                                                    ), 
+                                                    html.H2("Induced PWP Filter"),
+                                                    html.P(id="pwp_value"),
+                                                    dcc.RangeSlider(
+                                                        0,
+                                                        500,
+                                                        step=None,
+                                                        value=[0,500], 
+                                                        id='pwp_slider'
+                                                    ),
+                                                    html.H2("Deviator stress (q) Filter"),
+                                                    html.P(id="q_value"),
+                                                    dcc.RangeSlider(
+                                                        0,
+                                                        500,
+                                                        step=None,
+                                                        value=[0,500], 
+                                                        id='q_slider'
+                                                    ),
+
+                                                    html.H2("Void Ratio (e) Filter"),
+                                                    html.P(id="e_value"),
+                                                    dcc.RangeSlider(
+                                                        0,
+                                                        1,
+                                                        step=0.01,
+                                                        marks={
+                                                            0.0: "0.0",
+                                                            0.2: "0.2",
+                                                            0.4: "0.4",
+                                                            0.6: "0.6",
+                                                            0.8: "0.8",
+                                                            1.0: "1.0"
+                                                        },
+                                                        value=[0,1], 
+                                                        id='e_slider'
+                                                    ),
+                                                    ],
+                                                title="Variables",
+                                            ),
+                                        ],
+                                        always_open=True, flush=True,
                                     )
-                                ],
-                                title="Test",
-                            ),
-                            dbc.AccordionItem(
-                                [
-                                    html.H2("Density"),
-                                    dcc.Checklist(
-                                        options={
-                                            "Loose":"Loose",
-                                            "Dense":"Dense"},
-                                        value=["Loose", "Dense"],
-                                        id="density_checklist",
-                                        inline=True
-                                    ),
-                                    html.H2("Plasticity"),
-                                    dcc.Checklist(
-                                        options={
-                                            "Plastic":"Plastic",
-                                            "Non-plastic":"Nonplastic",
-                                            "Unknown":"Unknown"},
-                                        value=["Plastic", "Non-plastic","Unknown"],
-                                        id="plasticity_checklist",
-                                        inline=True
-                                    ),
-                                    html.H2("PSD"),
-                                    dcc.Checklist(
-                                        options={
-                                            "Clay":"Clay",
-                                            "Sand":"Sand",
-                                            "Silt":"Silt"},
-                                        value=["Clay", "Sand","Silt"],
-                                        id="psd_checklist",
-                                        inline=True
-                                    ),
-                                ],
-                                title="Sample",
-                            ),
-                            dbc.AccordionItem(
-                                [
-                                    html.H2("Axial Strain Filter"),
-                                    html.P(id="axial_value"),
-                                    dcc.RangeSlider(
-                                        0,
-                                        0.5,
-                                        step=0.05,
-                                        marks={
-                                            0.0: "0.0",
-                                            0.1: "0.1",
-                                            0.2: "0.2",
-                                            0.3: "0.3",
-                                            0.4: "0.4",
-                                            0.5: "0.5"
-                                        },
-                                        value=[0,0.5], 
-                                        id='axial_slider'
-                                    ),
-                                    "Min Value:",
-                                    dcc.Input(id="axial_min_value", type="number", min=0, max=0.5, value=0.5, style={'width': '80px'}),
-                                    "Max Value:",
-                                    dcc.Input(id="axial_max_value", type="number", min=0, max=0.5, value=0, style={'width': '80px'}),
-                                    
-                                    html.H2("p' Filter"),
-                                    html.P(id="p_value"),
-                                    dcc.RangeSlider(
-                                        0,
-                                        500,
-                                        step=None,
-                                        value=[0,500], 
-                                        id='p_slider'
-                                    ), 
-                                    html.H2("Induced PWP Filter"),
-                                    html.P(id="pwp_value"),
-                                    dcc.RangeSlider(
-                                        0,
-                                        500,
-                                        step=None,
-                                        value=[0,500], 
-                                        id='pwp_slider'
-                                    ),
-                                    html.H2("Deviator stress (q) Filter"),
-                                    html.P(id="q_value"),
-                                    dcc.RangeSlider(
-                                        0,
-                                        500,
-                                        step=None,
-                                        value=[0,500], 
-                                        id='q_slider'
-                                    ),
-
-                                    html.H2("Void Ratio (e) Filter"),
-                                    html.P(id="e_value"),
-                                    dcc.RangeSlider(
-                                        0,
-                                        1,
-                                        step=0.01,
-                                        marks={
-                                            0.0: "0.0",
-                                            0.2: "0.2",
-                                            0.4: "0.4",
-                                            0.6: "0.6",
-                                            0.8: "0.8",
-                                            1.0: "1.0"
-                                        },
-                                        value=[0,1], 
-                                        id='e_slider'
-                                    ),
-                                    ],
-                                title="Variables",
-                            ),
-                        ],
-                        always_open=True, flush=True,
-                    )
-                ),
-                
-            ]
-        ), 
-        html.Div(
-            id = "dashboard",
-            children = [
-                dcc.Graph(id="axial_deviator_fig"),
-                dcc.Graph(id="axial_pwp_fig"), 
-                dcc.Graph(id="q_p_fig"),
-                dcc.Graph(id="axial_vol_fig"), 
-                dcc.Graph(id="e_logp_fig"),
-                dcc.Graph(id="stress_ratio_axial_fig")
+                                ),
+                                
+                            ]
+                        ), 
+                        width=3
+                    ),
+                    dbc.Col(
+                        html.Div(
+                            id = "dashboard",
+                            children = [
+                                dcc.Graph(id="axial_deviator_fig"),
+                                dcc.Graph(id="axial_pwp_fig"), 
+                                dcc.Graph(id="q_p_fig"),
+                                dcc.Graph(id="axial_vol_fig"), 
+                                dcc.Graph(id="e_logp_fig"),
+                                dcc.Graph(id="stress_ratio_axial_fig")
+                            ]
+                        ), width=9 
+                    ),
+                    ]
+                )
             ]
         )
-    ]
+    ],
+    fluid=True,
 )
 
 @app.callback(
