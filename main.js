@@ -13,8 +13,20 @@ const DASH = './api/dash_page'
 const API_PORT = 18018
 const DASH_PORT = 18019
 
+let db_path = "./test.db"
+
 let pyProc = null
 let dashProc = null
+
+
+/**
+ *  Fetches db path from UI and changes it
+ */
+function change_db_path(path){
+    db_path = path
+}
+
+
 
 /**
  *  Checks to see if the binary has been built for the API,
@@ -114,23 +126,41 @@ app.on('before-quit', exitDashProc)
 
 
 
+// For IPC with HTML files
+const { dialog, ipcMain } = require('electron')
+
 function createWindow () {
     // Create the browser window.
     const mainWindow = new BrowserWindow({
         width: 1600,
         height: 1000,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js')
+            preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: false,
+            enableRemoteModule: false,
+            contextIsolation: true,
+            sandbox: true
         }
     })
 
     // and load the index.html of the app.
     //mainWindow.loadFile('index.html')
-    mainWindow.loadURL('http://127.0.0.1:' + DASH_PORT)
+    mainWindow.loadFile("landing.html")
+
 
     
-    // Open the DevTools.
-    // mainWindow.webContents.openDevTools()
+    ipcMain.on('select-dirs', async (event, arg) => {
+        const result = await dialog.showOpenDialog(mainWindow, {
+            properties: ['openFile']
+        })
+        db_path = result.filePaths[0]
+        console.log('directories selected', result.filePaths)
+    })
+
+    ipcMain.handle("return-selected-path", async () => {
+        data = db_path
+        return data
+    })
 }
 
 // This method will be called when Electron has finished
@@ -138,6 +168,7 @@ function createWindow () {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
     createWindow()
+    console.log("Initial window created...")
 
     app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
