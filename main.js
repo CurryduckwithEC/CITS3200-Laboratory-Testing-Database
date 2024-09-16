@@ -9,7 +9,7 @@ const path = require('node:path')
 
 //  Defines the path to the Python api file
 const API = './api/api'
-const DASH = './api/dash'
+const DASH = './api/dash_page'
 const API_PORT = 18018
 const DASH_PORT = 18019
 
