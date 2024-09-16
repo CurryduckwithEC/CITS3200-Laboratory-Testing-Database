@@ -9,7 +9,7 @@ const path = require('node:path')
 
 //  Defines the path to the Python api file
 const API = './api/api'
-const DASH = './dash/page'
+const DASH = './api/dash'
 const API_PORT = 18018
 const DASH_PORT = 18019
 
@@ -110,7 +110,7 @@ const exitDashProc = () => {
 app.on('ready', createPyProc)
 app.on('ready', createDashProc)
 app.on('before-quit', exitPyProc)
-//app.on('before-quit', exitDashProc)
+app.on('before-quit', exitDashProc)
 
 
 
