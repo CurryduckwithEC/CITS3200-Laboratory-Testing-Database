@@ -7,9 +7,19 @@ import pandas as pd
 import sys
 import dash_bootstrap_components as dbc
 
-from datahandler import retrieve_entry_data
+from datahandler import retrieve_entry_data, change_path
 
 app = Dash(__name__)
+
+# Set default port
+port = "18019"
+
+if len(sys.argv) > 2:
+    port = sys.argv[2]
+
+# Read path off command line arguments
+change_path(sys.argv[1])
+
 
 df_combined = retrieve_entry_data()
 #print(df_combined)
@@ -414,7 +424,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
 def update_filters(selected_axial, selected_p, selected_pwp, selected_q, selected_e): 
     return f'Selected range: {selected_axial[0]} to {selected_axial[1]}', f'Selected range: {selected_p[0]} to {selected_p[1]}', f'Selected range: {selected_pwp[0]} to {selected_pwp[1]}', f'Selected range: {selected_q[0]} to {selected_q[1]}', f'Selected range: {selected_e[0]} to {selected_e[1]}'
 
-port = "18019"
+
 
 
 if len(sys.argv) > 1:
