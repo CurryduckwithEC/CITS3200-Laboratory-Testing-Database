@@ -136,7 +136,7 @@ if(pyProc != null){
 const { dialog, ipcMain } = require('electron')
 const { create } = require('node:domain')
 
-function createWindow () {
+function createInitialWindow () {
     // Create the browser window.
     const mainWindow = new BrowserWindow({
         width: 1600,
@@ -154,9 +154,37 @@ function createWindow () {
     //mainWindow.loadFile('index.html')
     mainWindow.loadFile("landing.html")
 
+    return mainWindow
+}
+
+// Create subsequent windows for app
+function createWindow(URL){
+    const mainWindow = new BrowserWindow({
+        width: 1600,
+        height: 1000,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: false,
+            enableRemoteModule: false,
+            contextIsolation: true,
+            sandbox: true
+        }
+    })
+
+    mainWindow.loadURL(URL)
+    return mainWindow
+}
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.whenReady().then(() => {
+    mainWindow = createInitialWindow()
+    console.log("Initial window created...")
+
 
     // ipc to invoke dialog to select db path
-    ipcMain.on('select-dirs', async (event) => {
+    ipcMain.on('select-dirs', async () => {
         const result = await dialog.showOpenDialog(mainWindow, {
             properties: ['openFile']
         })
@@ -167,35 +195,19 @@ function createWindow () {
         console.log("Sent selected directory back to user...")
     })
 
-    // returning selected path as string to user
-    ipcMain.handle("return-selected-path", async () => {
-        console.log("Sending selected directory back to user...")
-        data = db_path[0]
-        return data
-    })
-
     // after pressing submit, the dash process is created and connection
     // to database is established
-    ipcMain.on('submit_dir', async () => {
+    ipcMain.on('submit-dir', async () => {
+        console.log(".db path committed, starting Dash...")
         createDashProc(db_path)
 
-        //timeout to wait for dash to start
+        // timeout to allow dahs to load
         setTimeout(() => {
-            console.log("Waiting 2 seconds for dash process to start...")
-        }, 2000)
-
-        mainWindow.loadURL("http://127.0.0.1:" + DASH_PORT)
+            console.log("Redirecting to Dash at http://127.0.0.1:" + DASH_PORT);
+            mainWindow.loadURL("http://127.0.0.1:" + DASH_PORT);
+        }, 5000); // Delay of 5 seconds
     })
 
-
-}
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-    createWindow()
-    console.log("Initial window created...")
 
     app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

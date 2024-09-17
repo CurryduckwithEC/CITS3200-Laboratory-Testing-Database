@@ -11,22 +11,14 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 
-// Listening for directory selection on landing page
-process.once('loaded', () => {
-    window.addEventListener('message', evt => {
-      if (evt.data.type === 'select-dirs') {
-        ipcRenderer.send('select-dirs')
-      }
-      if (evt.data.type === "submit-dir") {
-        ipcRenderer.send("submit-dir")
-      }
-    })
-})
+
 
 
 // Listening for directory that is selected from main.js
 contextBridge.exposeInMainWorld("electronAPI", {
-    returnedPath: (callback) => ipcRenderer.on("return-selected-path", (_event, value) => callback(value))
+    returnedPath: (callback) => ipcRenderer.on("return-selected-path", (_event, value) => callback(value)),
+    selectDir: () => ipcRenderer.send("select-dirs"),
+    commitDir: () => ipcRenderer.send("submit-dir")
 })
 
 
