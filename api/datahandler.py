@@ -118,7 +118,7 @@ def commit_new_entry(specs: dict, df: pd.DataFrame, file_name: str):
 # Retrieves all entry data and returns them as list of dataframes
 def retrieve_entry_data():
     
-    engine = create_engine("sqlite:///./api/test.db", echo=True) #replace sqlite:///.api/test with get_path()
+    engine = create_engine(get_path(), echo=True) #replace sqlite:///.api/test with get_path()
 
     with Session(engine) as session:
         df = pd.read_sql(session.query(Entry).statement, session.bind)
