@@ -102,11 +102,11 @@ const exitPyProc = () => {
  *  Creates the Dash process
  */
 
-const createDashProc = () => {
+const createDashProc = (databasePath) => {
 
     dashPath = getDashPath()
 
-    dashProc = require("child_process").spawn("python", [dashPath, DASH_PORT], {stdio: "inherit"})
+    dashProc = require("child_process").spawn("python", [dashPath, databasePath, DASH_PORT], {stdio: "inherit"})
 
     if(dashProc != null) {
         console.log('dash process success')
@@ -120,14 +120,21 @@ const exitDashProc = () => {
 }
 
 app.on('ready', createPyProc)
-app.on('ready', createDashProc)
-app.on('before-quit', exitPyProc)
-app.on('before-quit', exitDashProc)
+//app.on('ready', createDashProc)
+
+if(dashProc != null){
+    app.on('before-quit', exitDashProc)
+}
+
+if(pyProc != null){
+    app.on('before-quit', exitPyProc)
+}
 
 
 
 // For IPC with HTML files
 const { dialog, ipcMain } = require('electron')
+const { create } = require('node:domain')
 
 function createWindow () {
     // Create the browser window.
@@ -148,19 +155,39 @@ function createWindow () {
     mainWindow.loadFile("landing.html")
 
 
-    
-    ipcMain.on('select-dirs', async (event, arg) => {
+    // ipc to invoke dialog to select db path
+    ipcMain.on('select-dirs', async (event) => {
         const result = await dialog.showOpenDialog(mainWindow, {
             properties: ['openFile']
         })
         db_path = result.filePaths[0]
-        console.log('directories selected', result.filePaths)
+        console.log(".db path:", db_path)
+    
+        mainWindow.webContents.send("return-selected-path", db_path)
+        console.log("Sent selected directory back to user...")
     })
 
+    // returning selected path as string to user
     ipcMain.handle("return-selected-path", async () => {
-        data = db_path
+        console.log("Sending selected directory back to user...")
+        data = db_path[0]
         return data
     })
+
+    // after pressing submit, the dash process is created and connection
+    // to database is established
+    ipcMain.on('submit_dir', async () => {
+        createDashProc(db_path)
+
+        //timeout to wait for dash to start
+        setTimeout(() => {
+            console.log("Waiting 2 seconds for dash process to start...")
+        }, 2000)
+
+        mainWindow.loadURL("http://127.0.0.1:" + DASH_PORT)
+    })
+
+
 }
 
 // This method will be called when Electron has finished

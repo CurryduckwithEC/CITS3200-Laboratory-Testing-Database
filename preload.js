@@ -17,13 +17,16 @@ process.once('loaded', () => {
       if (evt.data.type === 'select-dirs') {
         ipcRenderer.send('select-dirs')
       }
+      if (evt.data.type === "submit-dir") {
+        ipcRenderer.send("submit-dir")
+      }
     })
 })
 
 
 // Listening for directory that is selected from main.js
-contextBridge.exposeInMainWorld("electron", {
-    returnedPath: () => ipcRenderer.invoke("return-selected-path")
+contextBridge.exposeInMainWorld("electronAPI", {
+    returnedPath: (callback) => ipcRenderer.on("return-selected-path", (_event, value) => callback(value))
 })
 
 
