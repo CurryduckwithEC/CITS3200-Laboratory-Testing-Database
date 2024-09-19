@@ -548,15 +548,15 @@ def parse_contents(contents, filename):
 def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected_e, contents):  
     global df_combined
     
-    print("update_figure called with selected values:")
-    print(f"Axial: {selected_axial}, p: {selected_p}, pwp: {selected_pwp}, q: {selected_q}, e: {selected_e}")
+    #print("update_figure called with selected values:")
+    #print(f"Axial: {selected_axial}, p: {selected_p}, pwp: {selected_pwp}, q: {selected_q}, e: {selected_e}")
 
     if df_combined.empty:
         print("Global dataframe 'df_combined' is empty. Returning empty figures.")
         return {}, {}, {}, {}, {}, {}
 
-    print("df_combined before filtering:")
-    print(df_combined.head())
+    #print("df_combined before filtering:")
+    #print(df_combined.head())
 
     filtered_df = df_combined[
         (df_combined["axial_strain"] >= selected_axial[0]) &
@@ -574,7 +574,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         print("Filtered dataframe is empty after applying the filters.")
         return {}, {}, {}, {}, {}, {}
 
-    print(filtered_df.head())
+    #print(filtered_df.head())
     # Deviator Stress (q) & Mean effective stress (p') VS Axial Strain 
     axial_deviator_fig = px.line(
         filtered_df, 
