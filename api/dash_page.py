@@ -504,6 +504,7 @@ def handle_upload(content, filename):
 
         # commit the new entry to database
         commit_new_entry(specs, df, filename[0])
+        print("Comitting new file:", filename[0])
     except Exception as e:
         print(f"Error parsing file {filename}: {str(e)}")
         return None, f"Error parsing file {filename}: {str(e)}"
