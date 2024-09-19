@@ -5,9 +5,12 @@ from dash import Dash, dcc, html, Input, Output, ctx, callback, State
 import plotly.express as px
 import pandas as pd
 import sys
+import io
+import base64
 import dash_bootstrap_components as dbc
 
-from datahandler import retrieve_entry_data, change_path
+from datahandler import retrieve_entry_data, change_path, commit_new_entry
+from parser import parse_workbook
 
 app = Dash(__name__)
 
