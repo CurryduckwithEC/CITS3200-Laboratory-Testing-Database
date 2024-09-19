@@ -16,8 +16,8 @@ from datahandler import retrieve_entry_data
 from parser import parse_workbook
 
 app = Dash(__name__)
-
-df_combined = retrieve_entry_data()
+df_combined = pd.DataFrame()
+# df_combined = retrieve_entry_data()
 #print(df_combined)
 
 app.layout = dbc.Container(
@@ -444,6 +444,7 @@ app.layout = dbc.Container(
 )
 
 
+
 def sync_slider_callback(min_id, max_id, slider):
     @app.callback(
     [
@@ -475,24 +476,76 @@ sync_slider_callback("q_min_value", "q_max_value", "q_slider")
 sync_slider_callback("e_min_value", "e_max_value", "e_slider")
 
 
-@app.callback(
-    [
-    Output("axial_deviator_fig", "figure"),
-    Output("axial_pwp_fig", "figure"), 
-    Output("q_p_fig", "figure"),
-    Output("axial_vol_fig", "figure"), 
-    Output("e_logp_fig", "figure"), 
-    Output("stress_ratio_axial_fig", "figure")
-    ],
-    [Input("axial_slider", "value"), 
-     Input("p_slider", "value"), 
-     Input("pwp_slider", "value"), 
-     Input("q_slider", "value"),
-     Input("e_slider", "value")
-     ], 
+# @app.callback(
+#     [
+#     Output("axial_deviator_fig", "figure"),
+#     Output("axial_pwp_fig", "figure"), 
+#     Output("q_p_fig", "figure"),
+#     Output("axial_vol_fig", "figure"), 
+#     Output("e_logp_fig", "figure"), 
+#     Output("stress_ratio_axial_fig", "figure")
+#     ],
+#     [Input("axial_slider", "value"), 
+#      Input("p_slider", "value"), 
+#      Input("pwp_slider", "value"), 
+#      Input("q_slider", "value"),
+#      Input("e_slider", "value")
+#      ], 
     
-     )
+#      )
+
+@app.callback(
+    Output('upload-status', 'children'),
+    [Input('upload-data', 'contents')],
+    [Input('upload-data', 'filename')]
+)
+
+def handle_file_upload(contents, filename):
+    # Process the uploaded file
+    global df_combined
+    if contents is not None:
+        df_combined = pd.DataFrame()  # Reset global DataFrame
+        if isinstance(contents, list):
+            for content, name in zip(contents, filename):
+                # Parse the uploaded file
+                df_new = parse_contents(content, name)
+                if df_new is not None:
+                    df_combined = pd.concat([df_combined, df_new])
+                else:
+                    return f"Error processing file {name}."
+            return f"Files {', '.join(filename)} uploaded and parsed successfully!"
+        else:
+            df_new = parse_contents(contents, filename)
+            if df_new is not None:
+                df_combined = pd.concat([df_combined, df_new])
+                return f"File {filename} uploaded and parsed successfully!"
+            else:
+                return "Error processing file."
+    return "Please upload an Excel (.xlsx) file."
+
+    
+
+def parse_contents(contents, filename):
+    # This function parses and processes the uploaded file contents.
+    try:
+        content_type, content_string = contents.split(',')
+        decoded = base64.b64decode(content_string)
+        
+        
+        specs, df = parse_workbook(decoded)
+        return df
+    except Exception as e:
+        print(f"Error parsing file {filename}: {str(e)}")
+        return None
+
+    
+
+
 def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected_e):
+    if df_combined.empty:
+        # Return empty figures if no data is available
+        return {}, {}, {}, {}, {}, {}
+
     filtered_df = df_combined[
         (df_combined["axial_strain"]>=selected_axial[0]) & (df_combined["axial_strain"]<=selected_axial[1])
         & (df_combined["p"]>=selected_p[0]) & (df_combined["p"]<=selected_p[1])
@@ -583,34 +636,6 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
 def update_filters(selected_axial, selected_p, selected_pwp, selected_q, selected_e): 
     return f'Selected range: {selected_axial[0]} to {selected_axial[1]}', f'Selected range: {selected_p[0]} to {selected_p[1]}', f'Selected range: {selected_pwp[0]} to {selected_pwp[1]}', f'Selected range: {selected_q[0]} to {selected_q[1]}', f'Selected range: {selected_e[0]} to {selected_e[1]}'
 
-
-
-@app.callback(
-    Output('upload-status', 'children'),
-    [Input('upload-data', 'contents')],
-    [Input('upload-data', 'filename')]
-)
-def update_output(contents, filename):
-    global df_combined  
-
-    if contents is not None:
-        if isinstance(contents, list):  
-            for content, name in zip(contents, filename):
-                df_new = parse_contents(content, name)
-                if df_new is not None:
-                    df_combined = pd.concat([df_combined, df_new]) 
-                else:
-                    return f"There was an error processing the file {name}."
-            return f"Files {', '.join(filename)} uploaded and data appended successfully!"
-        else: 
-            df_new = parse_contents(contents, filename)
-            if df_new is not None:
-                df_combined = pd.concat([df_combined, df_new])  
-                return f"File {filename} uploaded and data appended successfully!"
-            else:
-                return "There was an error processing the file."
-
-    return "Please upload an Excel (.xlsx) file."
 
 
 
