@@ -496,7 +496,7 @@ def handle_upload(content, filename):
         return
   
     try:
-        excel_base64 = content.split(',')[1]
+        excel_base64 = content[0].split(',')[1]
         decoded = base64.b64decode(excel_base64)
       
         file = io.BytesIO(decoded)
