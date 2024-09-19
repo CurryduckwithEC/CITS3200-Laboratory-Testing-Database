@@ -23,6 +23,33 @@ change_path(sys.argv[1])
 df_combined = retrieve_entry_data()
 #print(df_combined)
 
+navbar = dbc.NavbarSimple(
+    children=[
+        dbc.NavItem(dbc.NavLink("Top", href="#")),
+        dbc.NavItem(dbc.NavLink("Admin", href="#")),
+        dbc.NavItem(dbc.NavLink("axial_deviator", href="#axial_deviator_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("axial_pwp", href="#axial_pwp_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("q_p", href="#q_p_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("axial_vol", href="#axial_vol_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("e_logp", href="#e_logp_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("stress_ratio_axial", href="#stress_ratio_axial_fig", external_link=True)),
+        dbc.DropdownMenu(
+            children=[
+                dbc.DropdownMenuItem("More pages", header=True),
+            ],
+            nav=True,
+            in_navbar=True,
+            label="More",
+            direction="start",
+        ),
+    ],
+    brand="DatabaseApp",
+    brand_href="#",
+    color="primary",
+    sticky="top",
+    dark=True,
+)
+
 app.layout = dbc.Container(
     children = [
         html.Div(
@@ -86,9 +113,9 @@ app.layout = dbc.Container(
                                                         id="anisotropy_slider",
                                                         tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
-                                                    "Min Value:",
+                                                    "Min:",
                                                     dcc.Input(id="anisotropy_min_value", type="number", min=0, max=1.0, value=1.0,  step=0.05, style={'width': '70px'}),
-                                                    "Max Value:",
+                                                    "Max:",
                                                     dcc.Input(id="anisotropy_max_value", type="number", min=0, max=1.0, value=0,  step=0.05, style={'width': '70px'}),
                                                     
                                                     html.H3("Consolidation"),
@@ -109,9 +136,9 @@ app.layout = dbc.Container(
                                                         id="consolidation_slider",
                                                         tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
-                                                    "Min Value:",
+                                                    "Min:",
                                                     dcc.Input(id="consolidation_min_value", type="number", min=0, max=1500, value=1500, style={'width': '70px'}),
-                                                    "Max Value:",
+                                                    "Max:",
                                                     dcc.Input(id="consolidation_max_value", type="number", min=0, max=1500, value=0, style={'width': '70px'}),
 
                                                     html.H3("Availability"),
@@ -180,9 +207,9 @@ app.layout = dbc.Container(
                                                         id='axial_slider',
                                                         tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
-                                                    "Min Value:",
+                                                    "Min:",
                                                     dcc.Input(id="axial_min_value", type="number", min=0, max=0.5, value=0, step=0.05, style={'width': '70px'}),
-                                                    "Max Value:",
+                                                    "Max:",
                                                     dcc.Input(id="axial_max_value", type="number", min=0, max=0.5, value=0.5, step=0.05, style={'width': '70px'}),
                                                     
                                                     html.H3("p' Filter"),
@@ -195,9 +222,9 @@ app.layout = dbc.Container(
                                                         id='p_slider',
                                                         tooltip={"placement": "bottom", "always_visible": True}
                                                     ), 
-                                                    "Min Value:",
+                                                    "Min:",
                                                     dcc.Input(id="p_min_value", type="number", min=0, max=500, value=0, style={'width': '70px'}),
-                                                    "Max Value:",
+                                                    "Max:",
                                                     dcc.Input(id="p_max_value", type="number", min=0, max=500, value=500, style={'width': '70px'}),
 
                                                     html.H3("Induced PWP Filter"),
@@ -210,9 +237,9 @@ app.layout = dbc.Container(
                                                         id='pwp_slider',
                                                         tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
-                                                    "Min Value:",
+                                                    "Min:",
                                                     dcc.Input(id="pwp_min_value", type="number", min=0, max=500, value=0, style={'width': '70px'}),
-                                                    "Max Value:",
+                                                    "Max:",
                                                     dcc.Input(id="pwp_max_value", type="number", min=0, max=500, value=500, style={'width': '70px'}),
                                                     
                                                     html.H3("Deviator stress (q) Filter"),
@@ -225,9 +252,9 @@ app.layout = dbc.Container(
                                                         id='q_slider',
                                                         tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
-                                                    "Min Value:",
+                                                    "Min:",
                                                     dcc.Input(id="q_min_value", type="number", min=0, max=500, value=0, style={'width': '70px'}),
-                                                    "Max Value:",
+                                                    "Max:",
                                                     dcc.Input(id="q_max_value", type="number", min=0, max=500, value=500, style={'width': '70px'}),
                                                     
                                                     html.H3("Void Ratio (e) Filter"),
@@ -248,9 +275,9 @@ app.layout = dbc.Container(
                                                         id='e_slider',
                                                         tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
-                                                    "Min Value:",
+                                                    "Min:",
                                                     dcc.Input(id="e_min_value", type="number", min=0, max=1, value=0, step=0.1, style={'width': '70px'}),
-                                                    "Max Value:",
+                                                    "Max:",
                                                     dcc.Input(id="e_max_value", type="number", min=0, max=1, value=1, step=0.1, style={'width': '70px'}),
                                                                                                         
                                                     ],
@@ -264,10 +291,11 @@ app.layout = dbc.Container(
                         ), 
                         width=3
                     ),
-                    dbc.Col(
+                    dbc.Col([
                         html.Div(
                             id = "dashboard",
                             children = [
+                                navbar,
                                 dcc.Graph(id="axial_deviator_fig"),
                                 dcc.Graph(id="axial_pwp_fig"), 
                                 dcc.Graph(id="q_p_fig"),
@@ -275,9 +303,10 @@ app.layout = dbc.Container(
                                 dcc.Graph(id="e_logp_fig"),
                                 dcc.Graph(id="stress_ratio_axial_fig")
                             ]
-                        ), width=9 
+                        )
+                    ], width=9, 
                     ),
-                    ]
+                    ],
                 )
             ]
         )
