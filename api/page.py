@@ -498,6 +498,7 @@ def handle_file_upload(contents, filename):
                     df_combined = pd.concat([df_combined, df_new], ignore_index=True)
                 print(f"File {name} parsed successfully with {len(df_new)} rows")
             else:
+<<<<<<< HEAD
                 print(f"Error processing file {name}")
                 return message
         print(f"Combined dataframe now has {len(df_combined)} rows")
@@ -527,6 +528,10 @@ def save_and_parse_file(contents, filename):
         print(f"Error parsing file {filename}: {str(e)}")
         return None, f"Error parsing file {filename}: {str(e)}"
 
+=======
+                return "Error processing file."
+    return "Please upload an Excel (.xlsx) file."""
+>>>>>>> 192148080b4c7d135f8f387fa8876d6557f1b627
 
     
 
