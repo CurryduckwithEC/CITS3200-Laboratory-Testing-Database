@@ -17,7 +17,7 @@ from parser import parse_workbook
 
 app = Dash(__name__)
 df_combined = pd.DataFrame()
-# df_combined = retrieve_entry_data()
+#df_combined = retrieve_entry_data()
 #print(df_combined)
 
 app.layout = dbc.Container(
@@ -499,8 +499,26 @@ sync_slider_callback("e_min_value", "e_max_value", "e_slider")
     [Input('upload-data', 'contents')],
     [Input('upload-data', 'filename')]
 )
-
 def handle_file_upload(contents, filename):
+
+    # Handling initialisation
+    if contents == None:
+        return
+
+    # Process the uploaded file
+    excel_base64 = contents[0].split(',')[1]
+
+    decoded = base64.b64decode(excel_base64)
+
+    file = io.BytesIO(decoded)
+    
+    specs, df = parse_workbook(file)
+
+    print(specs)
+
+
+
+"""def handle_file_upload(contents, filename):
     # Process the uploaded file
     global df_combined
     if contents is not None:
@@ -521,7 +539,7 @@ def handle_file_upload(contents, filename):
                 return f"File {filename} uploaded and parsed successfully!"
             else:
                 return "Error processing file."
-    return "Please upload an Excel (.xlsx) file."
+    return "Please upload an Excel (.xlsx) file.""""
 
     
 
