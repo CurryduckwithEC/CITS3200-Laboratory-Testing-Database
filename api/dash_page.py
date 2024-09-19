@@ -454,14 +454,14 @@ app.layout = dbc.Container(
 def sync_slider_callback(min_id, max_id, slider):
     @app.callback(
     [
-    Output(min_id,"value"),
-    Output(max_id,"value"),
-    Output(slider,"value")    
+        Output(min_id,"value"),
+        Output(max_id,"value"),
+        Output(slider,"value")    
     ],    
     [
-     Input(min_id,"value"),
-     Input(max_id,"value"),
-     Input(slider,"value")
+        Input(min_id,"value"),
+        Input(max_id,"value"),
+        Input(slider,"value")
     ]   
 )
     def sync_slider(start, end, slider):
@@ -504,11 +504,11 @@ def handle_upload(content, filename):
 
         # commit the new entry to database
         commit_new_entry(specs, df, filename[0])
-        print("Comitting new file:", filename[0])
     except Exception as e:
         print(f"Error parsing file {filename}: {str(e)}")
         return None, f"Error parsing file {filename}: {str(e)}"
-
+    
+    return f"{filename[0]} committed succesfully."
 
     
 
@@ -525,27 +525,26 @@ def parse_contents(contents, filename):
         print(f"Error parsing file {filename}: {str(e)}")
         return None
 
+
     
 @app.callback(
     [
-    Output("axial_deviator_fig", "figure"),
-    Output("axial_pwp_fig", "figure"), 
-    Output("q_p_fig", "figure"),
-    Output("axial_vol_fig", "figure"), 
-    Output("e_logp_fig", "figure"), 
-    Output("stress_ratio_axial_fig", "figure")
+        Output("axial_deviator_fig", "figure"),
+        Output("axial_pwp_fig", "figure"), 
+        Output("q_p_fig", "figure"),
+        Output("axial_vol_fig", "figure"), 
+        Output("e_logp_fig", "figure"), 
+        Output("stress_ratio_axial_fig", "figure")
     ],
-    [Input("axial_slider", "value"), 
-     Input("p_slider", "value"), 
-     Input("pwp_slider", "value"), 
-     Input("q_slider", "value"),
-     Input("e_slider", "value"),
-    Input('upload-data', 'contents')
-     ], 
-    
-    
-     )
-
+    [
+        Input("axial_slider", "value"), 
+        Input("p_slider", "value"), 
+        Input("pwp_slider", "value"), 
+        Input("q_slider", "value"),
+        Input("e_slider", "value"),
+        Input("upload-status", "children")
+    ]
+)
 def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected_e, contents):  
     global df_combined
     
@@ -647,16 +646,20 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
 
 
 @app.callback(
-    [Output("axial_value", "children"),
-     Output("p_value", "children"),
-     Output("pwp_value", "children"), 
-     Output("q_value", "children"),
-     Output("e_value", "children")],
-    [Input("axial_slider", "value"), 
-     Input("p_slider", "value"), 
-     Input("pwp_slider", "value"), 
-     Input("q_slider", "value"),
-     Input("e_slider", "value")],
+    [
+        Output("axial_value", "children"),
+        Output("p_value", "children"),
+        Output("pwp_value", "children"), 
+        Output("q_value", "children"),
+        Output("e_value", "children")
+     ],
+    [
+        Input("axial_slider", "value"), 
+        Input("p_slider", "value"), 
+        Input("pwp_slider", "value"), 
+        Input("q_slider", "value"),
+        Input("e_slider", "value")]
+     ,
      
 )
 def update_filters(selected_axial, selected_p, selected_pwp, selected_q, selected_e): 
