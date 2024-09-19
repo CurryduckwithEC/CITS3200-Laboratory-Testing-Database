@@ -539,7 +539,7 @@ def handle_file_upload(contents, filename):
                 return f"File {filename} uploaded and parsed successfully!"
             else:
                 return "Error processing file."
-    return "Please upload an Excel (.xlsx) file.""""
+    return "Please upload an Excel (.xlsx) file."""
 
     
 
