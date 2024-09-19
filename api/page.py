@@ -12,7 +12,7 @@ import os
 import tempfile
 
 
-from datahandler import retrieve_entry_data
+from datahandler import retrieve_entry_data, commit_new_entry
 from parser import parse_workbook
 
 app = Dash(__name__)
@@ -483,55 +483,25 @@ sync_slider_callback("e_min_value", "e_max_value", "e_slider")
     [Input('upload-data', 'contents'),
      Input('upload-data', 'filename')]
 )
-def handle_file_upload(contents, filename):
-    global df_combined  
-    if contents is not None:
-        
-        if df_combined.empty:
-            df_combined = pd.DataFrame()
-        for content, name in zip(contents, filename):
-            df_new, message = save_and_parse_file(content, name)
-            if df_new is not None:
-                if df_combined.empty:
-                    df_combined = df_new
-                else:
-                    df_combined = pd.concat([df_combined, df_new], ignore_index=True)
-                print(f"File {name} parsed successfully with {len(df_new)} rows")
-            else:
-<<<<<<< HEAD
-                print(f"Error processing file {name}")
-                return message
-        print(f"Combined dataframe now has {len(df_combined)} rows")
-        print(df_combined.head())
-        return f"Files {', '.join(filename)} uploaded and read successfully!"
-    else:
-        print("No file uploaded yet")
-        return "Please upload an Excel (.xlsx) file."
+def handle_upload(content, filename):
 
-def save_and_parse_file(contents, filename):
+    # Handling Electron initialisation
+    if content == None:
+        return
   
     try:
+        excel_base64 = content.split(',')[1]
+        decoded = base64.b64decode(excel_base64)
       
-        content_type, content_string = contents.split(',')
-        
-      
-        decoded = base64.b64decode(content_string)
+        file = io.BytesIO(decoded)
+        specs, df = parse_workbook(file)
 
-      
-        file_like_object = io.BytesIO(decoded)
-
-      
-        specs, df = parse_workbook(file_like_object)
-        return df, f"File {filename} parsed successfully!"
-
+        # commit the new entry to database
+        commit_new_entry(specs, df, filename[0])
     except Exception as e:
         print(f"Error parsing file {filename}: {str(e)}")
         return None, f"Error parsing file {filename}: {str(e)}"
 
-=======
-                return "Error processing file."
-    return "Please upload an Excel (.xlsx) file."""
->>>>>>> 192148080b4c7d135f8f387fa8876d6557f1b627
 
     
 
