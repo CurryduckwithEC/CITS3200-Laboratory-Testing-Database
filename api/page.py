@@ -1,7 +1,7 @@
 # See official docs at https://dash.plotly.com
 # pip install dash pandas
 
-from dash import Dash, dcc, html, Input, Output, ctx, callback
+from dash import Dash, dcc, html, Input, Output, ctx, callback, State
 import plotly.express as px
 import pandas as pd
 import sys
@@ -476,70 +476,57 @@ sync_slider_callback("q_min_value", "q_max_value", "q_slider")
 sync_slider_callback("e_min_value", "e_max_value", "e_slider")
 
 
-# @app.callback(
-#     [
-#     Output("axial_deviator_fig", "figure"),
-#     Output("axial_pwp_fig", "figure"), 
-#     Output("q_p_fig", "figure"),
-#     Output("axial_vol_fig", "figure"), 
-#     Output("e_logp_fig", "figure"), 
-#     Output("stress_ratio_axial_fig", "figure")
-#     ],
-#     [Input("axial_slider", "value"), 
-#      Input("p_slider", "value"), 
-#      Input("pwp_slider", "value"), 
-#      Input("q_slider", "value"),
-#      Input("e_slider", "value")
-#      ], 
-    
-#      )
+
 
 @app.callback(
     Output('upload-status', 'children'),
-    [Input('upload-data', 'contents')],
-    [Input('upload-data', 'filename')]
+    [Input('upload-data', 'contents'),
+     Input('upload-data', 'filename')]
 )
 def handle_file_upload(contents, filename):
-
-    # Handling initialisation
-    if contents == None:
-        return
-
-    # Process the uploaded file
-    excel_base64 = contents[0].split(',')[1]
-
-    decoded = base64.b64decode(excel_base64)
-
-    file = io.BytesIO(decoded)
-    
-    specs, df = parse_workbook(file)
-
-    print(specs)
-
-
-
-"""def handle_file_upload(contents, filename):
-    # Process the uploaded file
-    global df_combined
+    global df_combined  
     if contents is not None:
-        df_combined = pd.DataFrame()  # Reset global DataFrame
-        if isinstance(contents, list):
-            for content, name in zip(contents, filename):
-                # Parse the uploaded file
-                df_new = parse_contents(content, name)
-                if df_new is not None:
-                    df_combined = pd.concat([df_combined, df_new])
-                else:
-                    return f"Error processing file {name}."
-            return f"Files {', '.join(filename)} uploaded and parsed successfully!"
-        else:
-            df_new = parse_contents(contents, filename)
+        
+        if df_combined.empty:
+            df_combined = pd.DataFrame()
+        for content, name in zip(contents, filename):
+            df_new, message = save_and_parse_file(content, name)
             if df_new is not None:
-                df_combined = pd.concat([df_combined, df_new])
-                return f"File {filename} uploaded and parsed successfully!"
+                if df_combined.empty:
+                    df_combined = df_new
+                else:
+                    df_combined = pd.concat([df_combined, df_new], ignore_index=True)
+                print(f"File {name} parsed successfully with {len(df_new)} rows")
             else:
-                return "Error processing file."
-    return "Please upload an Excel (.xlsx) file.""""
+                print(f"Error processing file {name}")
+                return message
+        print(f"Combined dataframe now has {len(df_combined)} rows")
+        print(df_combined.head())
+        return f"Files {', '.join(filename)} uploaded and read successfully!"
+    else:
+        print("No file uploaded yet")
+        return "Please upload an Excel (.xlsx) file."
+
+def save_and_parse_file(contents, filename):
+  
+    try:
+      
+        content_type, content_string = contents.split(',')
+        
+      
+        decoded = base64.b64decode(content_string)
+
+      
+        file_like_object = io.BytesIO(decoded)
+
+      
+        specs, df = parse_workbook(file_like_object)
+        return df, f"File {filename} parsed successfully!"
+
+    except Exception as e:
+        print(f"Error parsing file {filename}: {str(e)}")
+        return None, f"Error parsing file {filename}: {str(e)}"
+
 
     
 
@@ -557,20 +544,56 @@ def parse_contents(contents, filename):
         return None
 
     
+@app.callback(
+    [
+    Output("axial_deviator_fig", "figure"),
+    Output("axial_pwp_fig", "figure"), 
+    Output("q_p_fig", "figure"),
+    Output("axial_vol_fig", "figure"), 
+    Output("e_logp_fig", "figure"), 
+    Output("stress_ratio_axial_fig", "figure")
+    ],
+    [Input("axial_slider", "value"), 
+     Input("p_slider", "value"), 
+     Input("pwp_slider", "value"), 
+     Input("q_slider", "value"),
+     Input("e_slider", "value"),
+    Input('upload-data', 'contents')
+     ], 
+    
+    
+     )
 
+def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected_e, contents):  
+    global df_combined
+    
+    print("update_figure called with selected values:")
+    print(f"Axial: {selected_axial}, p: {selected_p}, pwp: {selected_pwp}, q: {selected_q}, e: {selected_e}")
 
-def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected_e):
     if df_combined.empty:
-        # Return empty figures if no data is available
+        print("Global dataframe 'df_combined' is empty. Returning empty figures.")
         return {}, {}, {}, {}, {}, {}
 
-    filtered_df = df_combined[
-        (df_combined["axial_strain"]>=selected_axial[0]) & (df_combined["axial_strain"]<=selected_axial[1])
-        & (df_combined["p"]>=selected_p[0]) & (df_combined["p"]<=selected_p[1])
-        & (df_combined["shear_induced_pwp"]>=selected_pwp[0]) & (df_combined["shear_induced_pwp"]<=selected_pwp[1])
-        & (df_combined["deviator_stress"]>=selected_q[0]) & (df_combined["deviator_stress"]<=selected_q[1])
-        & (df_combined["void_ratio"]>=selected_e[0]) & (df_combined["void_ratio"]<=selected_e[1])]
+    print("df_combined before filtering:")
+    print(df_combined.head())
 
+    filtered_df = df_combined[
+        (df_combined["axial_strain"] >= selected_axial[0]) &
+        (df_combined["axial_strain"] <= selected_axial[1]) &
+        (df_combined["p"] >= selected_p[0]) &
+        (df_combined["p"] <= selected_p[1]) &
+        (df_combined["shear_induced_pwp"] >= selected_pwp[0]) &
+        (df_combined["shear_induced_pwp"] <= selected_pwp[1]) &
+        (df_combined["deviator_stress"] >= selected_q[0]) &
+        (df_combined["deviator_stress"] <= selected_q[1]) &
+        (df_combined["void_ratio"] >= selected_e[0]) &
+        (df_combined["void_ratio"] <= selected_e[1])
+    ]
+    if filtered_df.empty:
+        print("Filtered dataframe is empty after applying the filters.")
+        return {}, {}, {}, {}, {}, {}
+
+    print(filtered_df.head())
     # Deviator Stress (q) & Mean effective stress (p') VS Axial Strain 
     axial_deviator_fig = px.line(
         filtered_df, 
@@ -639,6 +662,8 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
     
     return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig, e_logp_fig, stress_ratio_axial_fig
 
+
+
 @app.callback(
     [Output("axial_value", "children"),
      Output("p_value", "children"),
@@ -649,8 +674,9 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
      Input("p_slider", "value"), 
      Input("pwp_slider", "value"), 
      Input("q_slider", "value"),
-     Input("e_slider", "value")]
-     )
+     Input("e_slider", "value")],
+     
+)
 def update_filters(selected_axial, selected_p, selected_pwp, selected_q, selected_e): 
     return f'Selected range: {selected_axial[0]} to {selected_axial[1]}', f'Selected range: {selected_p[0]} to {selected_p[1]}', f'Selected range: {selected_pwp[0]} to {selected_pwp[1]}', f'Selected range: {selected_q[0]} to {selected_q[1]}', f'Selected range: {selected_e[0]} to {selected_e[1]}'
 
