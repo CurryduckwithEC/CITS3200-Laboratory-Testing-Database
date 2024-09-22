@@ -9,7 +9,7 @@ import io
 import base64
 import dash_bootstrap_components as dbc
 
-from datahandler import retrieve_entry_data, change_path, commit_new_entry
+from datahandler import retrieve_entry_data, change_path, commit_new_entry, retrieve_filtered_data
 from parser import parse_workbook
 
 app = Dash(__name__)
@@ -537,41 +537,67 @@ def parse_contents(contents, filename):
         Output("stress_ratio_axial_fig", "figure")
     ],
     [
-        Input("axial_slider", "value"), 
+        Input("drainage_checklist", "value"),
+        Input("shearing_checklist", "value"),
+        Input("anisotropy_slider", "value"),
+        Input("consolidation_slider", "value"),
+        Input("availability_checklist", "value"),
+        Input("density_checklist","value"),
+        Input("plasticity_checklist", "value"),
+        Input("psd_checklist","value"),
+        Input("axial_slider", "value"),
         Input("p_slider", "value"), 
         Input("pwp_slider", "value"), 
         Input("q_slider", "value"),
         Input("e_slider", "value"),
-        Input("upload-status", "children")
     ]
 )
-def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected_e, contents):  
-    global df_combined
+def update_figure(selected_drainage, selected_shearing, selected_anisotropy, selected_consolidation, selected_availability, selected_density, selected_plasticity, selected_psd,
+                  selected_axial, selected_p, selected_pwp, selected_q, selected_e):
     
-    #print("update_figure called with selected values:")
-    #print(f"Axial: {selected_axial}, p: {selected_p}, pwp: {selected_pwp}, q: {selected_q}, e: {selected_e}")
+    # Check if filters and data are properly initialized
+    print(f"Selected filters: {selected_drainage}, {selected_shearing}, {selected_anisotropy}, {selected_consolidation}, {selected_availability},{selected_density},{selected_plasticity},{selected_psd}")
 
-    if df_combined.empty:
-        print("Global dataframe 'df_combined' is empty. Returning empty figures.")
+    filtered_data = retrieve_filtered_data(
+        drainage_types=selected_drainage,
+        shearing_types=selected_shearing,
+        anisotropy_range=selected_anisotropy,
+        consolidation_range=selected_consolidation,
+        availability_types=selected_availability,
+        density_types=selected_density,
+        plasticity_types=selected_plasticity,
+        psd_types = selected_psd
+    )
+    
+    if not filtered_data:
+        print("No data after filtering")
         return {}, {}, {}, {}, {}, {}
 
-    #print("df_combined before filtering:")
-    #print(df_combined.head())
+    df_filtered = pd.DataFrame([entry.__dict__ for entry in filtered_data])
+    
+    print(f"Filtered DataFrame: {df_filtered.shape}")  # Debugging log to see if data is passed to the figure generation
+    
+    if df_filtered.empty:
+        print("Filtered dataframe is empty.")
+        return {}, {}, {}, {}, {}, {}
 
-    filtered_df = df_combined[
-        (df_combined["axial_strain"] >= selected_axial[0]) &
-        (df_combined["axial_strain"] <= selected_axial[1]) &
-        (df_combined["p"] >= selected_p[0]) &
-        (df_combined["p"] <= selected_p[1]) &
-        (df_combined["shear_induced_pwp"] >= selected_pwp[0]) &
-        (df_combined["shear_induced_pwp"] <= selected_pwp[1]) &
-        (df_combined["deviator_stress"] >= selected_q[0]) &
-        (df_combined["deviator_stress"] <= selected_q[1]) &
-        (df_combined["void_ratio"] >= selected_e[0]) &
-        (df_combined["void_ratio"] <= selected_e[1])
+
+    # Filter the data further by the sliders (axial strain, p, pwp, q, and e)
+    filtered_df = df_filtered[
+        (df_filtered["axial_strain"] >= selected_axial[0]) &
+        (df_filtered["axial_strain"] <= selected_axial[1]) &
+        (df_filtered["p"] >= selected_p[0]) &
+        (df_filtered["p"] <= selected_p[1]) &
+        (df_filtered["shear_induced_pwp"] >= selected_pwp[0]) &
+        (df_filtered["shear_induced_pwp"] <= selected_pwp[1]) &
+        (df_filtered["deviator_stress"] >= selected_q[0]) &
+        (df_filtered["deviator_stress"] <= selected_q[1]) &
+        (df_filtered["void_ratio"] >= selected_e[0]) &
+        (df_filtered["void_ratio"] <= selected_e[1])
     ]
-    if filtered_df.empty:
-        print("Filtered dataframe is empty after applying the filters.")
+
+    if df_filtered.empty:
+        print("Filtered dataframe is empty after applying the sliders.")
         return {}, {}, {}, {}, {}, {}
 
     #print(filtered_df.head())
@@ -668,4 +694,3 @@ def update_filters(selected_axial, selected_p, selected_pwp, selected_q, selecte
 
 
 app.run_server(port=port, debug=True)
-

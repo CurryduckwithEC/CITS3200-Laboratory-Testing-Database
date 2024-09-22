@@ -1,5 +1,5 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import Session, sessionmaker
 
 import pandas as pd
 import os
@@ -148,3 +148,103 @@ def retrieve_test_specs():
 # Testing
 #df = retrieve_entry_data()
 #print(df)
+# def retrieve_filtered_data(drainage_types=None, shearing_types=None, anisotropy_range=None, consolidation_range=None, availability_types=None):
+#     engine = create_engine(get_path(), echo=True)
+#     Session = sessionmaker(bind=engine)
+#     session = Session()
+
+#     try:
+#         # Remove all filters to check if data exists
+#         query = session.query(Entry).join(Test).join(TestValues).join(SampleValues)
+
+#         # Run the query without any filters
+#         result = query.all()
+#         print(f"Retrieved {len(result)} entries")
+#         return result
+
+#     finally:
+#         session.close()
+# def retrieve_filtered_data(drainage_types=None, shearing_types=None, anisotropy_range=None, consolidation_range=None, availability_types=None):
+#     engine = create_engine(get_path(), echo=True)
+#     Session = sessionmaker(bind=engine)
+#     session = Session()
+
+#     try:
+#         # Start building the query without filters initially
+#         query = session.query(Entry).join(Test).join(TestValues).join(SampleValues)
+
+#         # Apply filters only if they are provided
+#         if drainage_types and len(drainage_types) > 0:
+#             query = query.filter(TestValues.drainage_type.in_(drainage_types))
+#         if shearing_types and len(shearing_types) > 0:
+#             query = query.filter(TestValues.shearing_type.in_(shearing_types))
+#         if anisotropy_range and len(anisotropy_range) == 2:
+#             query = query.filter(Test.anisotropy.between(anisotropy_range[0], anisotropy_range[1]))
+#         if consolidation_range and len(consolidation_range) == 2:
+#             query = query.filter(Test.consolidation.between(consolidation_range[0], consolidation_range[1]))
+#         if availability_types and len(availability_types) > 0:
+#             query = query.filter(TestValues.availability_type.in_(availability_types))
+
+#         result = query.all()
+#         print(f"Retrieved {len(result)} entries")  # Debugging log
+#         return result
+#         # Execute and return the query results
+#         return query.all()
+
+#     finally:
+#         session.close()
+
+def retrieve_filtered_data(drainage_types=None, shearing_types=None, anisotropy_range=None, consolidation_range=None, availability_types=None, density_types=None, plasticity_types = None, psd_types = None):
+    engine = create_engine(get_path(), echo=True)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    try:
+        query = session.query(Entry).join(Test).join(TestValues).join(SampleValues)
+    
+
+        if drainage_types:
+            drainage_map = {'Drained': "drained", 'Undrained':"undrained"}
+            drainage_types = [drainage_map[atype] for atype in drainage_types]
+            query = query.filter(TestValues.drainage_type.in_(drainage_types))
+
+        if shearing_types:
+            shearing_map = {'Compression': 'compression', 'Extension': 'extension'}
+            shearing_types = [shearing_map[atype] for atype in shearing_types]
+            query = query.filter(TestValues.shearing_type.in_(shearing_types))
+
+        # Apply anisotropy filter
+        if anisotropy_range:
+            query = query.filter(Test.anisotropy.between(anisotropy_range[0], anisotropy_range[1])) #this works!!
+
+        # Apply consolidation filter
+        if consolidation_range:
+            query = query.filter(Test.consolidation.between(consolidation_range[0], consolidation_range[1]))
+
+        # Apply availability filter
+        if availability_types:
+            availability_map = {'Public': True, 'Confidential': False}
+            availability_types = [availability_map[atype] for atype in availability_types]
+            query = query.filter(TestValues.availability_type.in_(availability_types))
+
+        if density_types:
+            density_map = {'Loose':'loose', 'Dense':'dense'}
+            density_types = [density_map[atype] for atype in density_types]
+            query = query.filter(SampleValues.density_type.in_(density_types))
+
+        if plasticity_types:
+            plasticity_map = {"Plastic":"plastic", "Non-plastic" :"non-plastic", "Unknown" : "unknown"} #dash doesnt have dash in nonplastic
+            plasticity_types = [plasticity_map[atype] for atype in plasticity_types]
+            query = query.filter(SampleValues.plasticity_type.in_(plasticity_types))
+        
+        
+        if psd_types:
+            psd_map = {"Clay":"clay", "Silt":"silt", "Sand":"sand"}
+            psd_types = [psd_map[atype] for atype in psd_types]
+            query = query.filter(SampleValues.psd_type.in_(psd_types))
+        result = query.all()
+        print(f"Retrieved {len(result)} entries after filtering")
+        return result
+
+    finally:
+        session.close()
