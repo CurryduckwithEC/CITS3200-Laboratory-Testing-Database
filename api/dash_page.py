@@ -634,9 +634,9 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
     stress_ratio_axial_fig = px.line(
         filtered_df, 
         x="axial_strain", 
-        y=filtered_df["p"]/filtered_df["deviator_stress"],
+        y=filtered_df["deviator_stress"]/filtered_df["p"],
         color="test_id", 
-        title="Stress Ratio, p'/q vs. Axial Strain").update_layout(
+        title="Stress Ratio, q/p' vs. Axial Strain").update_layout(
             xaxis_title="Axial Strain",
             yaxis_title="Stress Ratio"
         )
