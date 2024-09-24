@@ -600,8 +600,8 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
     # Deviator Stress (q) VS Mean effective stress (p')
     q_p_fig = px.line(
         filtered_df, 
-        x="deviator_stress", 
-        y="p",
+        x="p", 
+        y="deviator_stress",
         color="test_id", 
         title="Deviator Stress, q (kPa) vs. Mean Effective Stress, p' (kPa)").update_layout(
             xaxis_title="Mean Effective Stress, p'",
