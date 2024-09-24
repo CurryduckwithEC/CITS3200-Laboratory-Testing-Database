@@ -625,8 +625,10 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         x="p", 
         y="void_ratio",
         color="test_id", 
-        title="Void ratio, e vs. log(p')").update_layout(
+        title="Void ratio, e vs. log(p')", 
+        log_x = True).update_layout(
             xaxis_title="log(p')",
+            xaxis = dict(range=[0,4]),
             yaxis_title="Void Ratio, e"
         )
     
