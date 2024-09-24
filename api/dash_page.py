@@ -60,15 +60,7 @@ app.layout = dbc.Container(
                     dbc.Col(
                         html.Div(
                             id = "filters-sidebar",
-                            style = {
-                                "backgroundColor": "lightGrey",
-                                "padding": "5px",
-                                "width": "inherit",
-                                "position": "fixed",
-                                "top": 0,
-                                "bottom": 0,
-                                "overflow-y": "scroll"
-                            },
+
                             children = [
                                 html.H1("Filters"),
                                 html.Div(
@@ -114,9 +106,9 @@ app.layout = dbc.Container(
                                                         tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="anisotropy_min_value", type="number", min=0, max=1.0, value=1.0,  step=0.05, style={'width': '70px'}),
+                                                    dcc.Input(id="anisotropy_min_value", className="filter_input_number", type="number", min=0, max=1.0, value=0,  step=0.05),
                                                     "Max:",
-                                                    dcc.Input(id="anisotropy_max_value", type="number", min=0, max=1.0, value=0,  step=0.05, style={'width': '70px'}),
+                                                    dcc.Input(id="anisotropy_max_value", className="filter_input_number", type="number", min=0, max=1.0, value=1.0,  step=0.05),
                                                     
                                                     html.H3("Consolidation"),
                                                     html.P(id="consolidation_value"),
@@ -137,9 +129,9 @@ app.layout = dbc.Container(
                                                         tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="consolidation_min_value", type="number", min=0, max=1500, value=1500, style={'width': '70px'}),
+                                                    dcc.Input(id="consolidation_min_value", className="filter_input_number", type="number", min=0, max=1500, value=0),
                                                     "Max:",
-                                                    dcc.Input(id="consolidation_max_value", type="number", min=0, max=1500, value=0, style={'width': '70px'}),
+                                                    dcc.Input(id="consolidation_max_value", className="filter_input_number", type="number", min=0, max=1500, value=1500),
 
                                                     html.H3("Availability"),
                                                     dcc.Checklist(
@@ -208,9 +200,9 @@ app.layout = dbc.Container(
                                                         tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="axial_min_value", type="number", min=0, max=0.5, value=0, step=0.05, style={'width': '70px'}),
+                                                    dcc.Input(id="axial_min_value", className="filter_input_number", type="number", min=0, max=0.5, value=0, step=0.05),
                                                     "Max:",
-                                                    dcc.Input(id="axial_max_value", type="number", min=0, max=0.5, value=0.5, step=0.05, style={'width': '70px'}),
+                                                    dcc.Input(id="axial_max_value", className="filter_input_number", type="number", min=0, max=0.5, value=0.5, step=0.05),
                                                     
                                                     html.H3("p' Filter"),
                                                     html.P(id="p_value"),
@@ -223,9 +215,9 @@ app.layout = dbc.Container(
                                                         tooltip={"placement": "bottom", "always_visible": True}
                                                     ), 
                                                     "Min:",
-                                                    dcc.Input(id="p_min_value", type="number", min=0, max=500, value=0, style={'width': '70px'}),
+                                                    dcc.Input(id="p_min_value", className="filter_input_number", type="number", min=0, max=500, value=0),
                                                     "Max:",
-                                                    dcc.Input(id="p_max_value", type="number", min=0, max=500, value=500, style={'width': '70px'}),
+                                                    dcc.Input(id="p_max_value", className="filter_input_number", type="number", min=0, max=500, value=500),
 
                                                     html.H3("Induced PWP Filter"),
                                                     html.P(id="pwp_value"),
@@ -238,9 +230,9 @@ app.layout = dbc.Container(
                                                         tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="pwp_min_value", type="number", min=0, max=500, value=0, style={'width': '70px'}),
+                                                    dcc.Input(id="pwp_min_value", className="filter_input_number", type="number", min=0, max=500, value=0),
                                                     "Max:",
-                                                    dcc.Input(id="pwp_max_value", type="number", min=0, max=500, value=500, style={'width': '70px'}),
+                                                    dcc.Input(id="pwp_max_value", className="filter_input_number", type="number", min=0, max=500, value=500),
                                                     
                                                     html.H3("Deviator stress (q) Filter"),
                                                     html.P(id="q_value"),
@@ -253,9 +245,9 @@ app.layout = dbc.Container(
                                                         tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="q_min_value", type="number", min=0, max=500, value=0, style={'width': '70px'}),
+                                                    dcc.Input(id="q_min_value", className="filter_input_number", type="number", min=0, max=500, value=0),
                                                     "Max:",
-                                                    dcc.Input(id="q_max_value", type="number", min=0, max=500, value=500, style={'width': '70px'}),
+                                                    dcc.Input(id="q_max_value", className="filter_input_number", type="number", min=0, max=500, value=500),
                                                     
                                                     html.H3("Void Ratio (e) Filter"),
                                                     html.P(id="e_value"),
@@ -276,9 +268,9 @@ app.layout = dbc.Container(
                                                         tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="e_min_value", type="number", min=0, max=1, value=0, step=0.1, style={'width': '70px'}),
+                                                    dcc.Input(id="e_min_value", className="filter_input_number", type="number", min=0, max=1, value=0, step=0.1),
                                                     "Max:",
-                                                    dcc.Input(id="e_max_value", type="number", min=0, max=1, value=1, step=0.1, style={'width': '70px'}),
+                                                    dcc.Input(id="e_max_value", className="filter_input_number", type="number", min=0, max=1, value=1, step=0.1),
                                                                                                         
                                                     ],
                                                 title="Variables",
