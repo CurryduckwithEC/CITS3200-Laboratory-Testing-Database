@@ -8,6 +8,7 @@ import sys
 import io
 import base64
 import dash_bootstrap_components as dbc
+import dash_table
 
 from datahandler import retrieve_entry_data, change_path, commit_new_entry
 from parser import parse_workbook
@@ -414,6 +415,20 @@ app.layout = dbc.Container(
                                                             multiple = True
                                                         ),
                                                         html.Div(id="upload-status"),
+                                                        dash_table.DataTable(
+                                                            id="data-table",
+                                                            columns=[{"name": "Test ID", "id":"test_id"},],  # Define columns
+                                                             data = df_combined.drop_duplicates(subset=['test_id'], keep='first').to_dict('records'),  # Convert dataframe to dictionary
+                                                                style_table={'overflowX': 'auto'},  # Allow horizontal scrolling
+                                                                style_cell={'textAlign': 'left'},  # Cell alignment
+                                                                style_header={
+                                                            'backgroundColor': 'lightgrey',
+                                                            'fontWeight': 'bold'
+                                                            }
+                                                            ),
+                                                        html.H3("Download CSV"),
+                                                        html.Button("Download CSV", id="btn-download-csv"),
+                                                        dcc.Download(id="download-csv")
                                                     ],
                                                     title="Upload",
                                                 ),
@@ -667,7 +682,15 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
 def update_filters(selected_axial, selected_p, selected_pwp, selected_q, selected_e): 
     return f'Selected range: {selected_axial[0]} to {selected_axial[1]}', f'Selected range: {selected_p[0]} to {selected_p[1]}', f'Selected range: {selected_pwp[0]} to {selected_pwp[1]}', f'Selected range: {selected_q[0]} to {selected_q[1]}', f'Selected range: {selected_e[0]} to {selected_e[1]}'
 
+@app.callback(
+    Output("download-csv", "data"),
+    Input("btn-download-csv", "n_clicks"),
+    prevent_initial_call=True,
+)
+def func(n_clicks):
+    return dcc.send_data_frame(df_combined.to_csv, "database.csv")
 
 
 app.run_server(port=port, debug=True)
+
 
