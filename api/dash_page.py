@@ -25,7 +25,7 @@ change_path(sys.argv[1])
 
 
 df_combined = retrieve_entry_data()
-#print(df_combined)
+df_test_ids = pd.DataFrame(df_combined["test_id"]).drop_duplicates()
 
 app.layout = dbc.Container(
     children=[
@@ -415,10 +415,15 @@ app.layout = dbc.Container(
                                                             multiple = True
                                                         ),
                                                         html.Div(id="upload-status"),
+                                                        html.H3("Download CSV"),
                                                         dash_table.DataTable(
                                                             id="data-table",
-                                                            columns=[{"name": "Test ID", "id":"test_id"},],  # Define columns
-                                                             data = df_combined.drop_duplicates(subset=['test_id'], keep='first').to_dict('records'),  # Convert dataframe to dictionary
+                                                            columns=[{"name": "Test ID", "id":"test_id"},
+                                                                     {"name": " ", "id": "download"}],  # Define columns
+                                                             data = [
+                                                                 {"test_id": row["test_id"],
+                                                                  "download": "Download"}
+                                                                  for _, row in df_test_ids.iterrows()],  # Convert dataframe to dictionary
                                                                 style_table={'overflowX': 'auto'},  # Allow horizontal scrolling
                                                                 style_cell={'textAlign': 'left'},  # Cell alignment
                                                                 style_header={
@@ -426,8 +431,6 @@ app.layout = dbc.Container(
                                                             'fontWeight': 'bold'
                                                             }
                                                             ),
-                                                        html.H3("Download CSV"),
-                                                        html.Button("Download CSV", id="btn-download-csv"),
                                                         dcc.Download(id="download-csv")
                                                     ],
                                                     title="Upload",
@@ -684,12 +687,14 @@ def update_filters(selected_axial, selected_p, selected_pwp, selected_q, selecte
 
 @app.callback(
     Output("download-csv", "data"),
-    Input("btn-download-csv", "n_clicks"),
-    prevent_initial_call=True,
+    Input("data-table", "active_cell")
 )
-def func(n_clicks):
-    return dcc.send_data_frame(df_combined.to_csv, "database.csv")
-
+def download_csv(active_cell):
+    if active_cell: 
+        row_idx = active_cell["row"]
+        selected_test = df_test_ids.iloc[row_idx]["test_id"]
+        test_df = df_combined[df_combined["test_id"]==selected_test]
+        return dcc.send_data_frame(test_df.to_csv, f"test_id_{selected_test}.csv")
 
 app.run_server(port=port, debug=True)
 
