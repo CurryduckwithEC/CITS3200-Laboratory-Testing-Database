@@ -103,7 +103,7 @@ app.layout = dbc.Container(
                                                         step=None,
                                                         value=[0.3,1.0], 
                                                         id="anisotropy_slider",
-                                                        tooltip={"placement": "bottom", "always_visible": True}
+                                                        tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
                                                     dcc.Input(id="anisotropy_min_value", className="filter_input_number", type="number", min=0, max=1.0, value=0,  step=0.05),
@@ -126,7 +126,7 @@ app.layout = dbc.Container(
                                                         },
                                                         value=[10,1500], 
                                                         id="consolidation_slider",
-                                                        tooltip={"placement": "bottom", "always_visible": True}
+                                                        tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
                                                     dcc.Input(id="consolidation_min_value", className="filter_input_number", type="number", min=0, max=1500, value=0),
@@ -197,7 +197,7 @@ app.layout = dbc.Container(
                                                         },
                                                         value=[0,0.5], 
                                                         id='axial_slider',
-                                                        tooltip={"placement": "bottom", "always_visible": True}
+                                                        tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
                                                     dcc.Input(id="axial_min_value", className="filter_input_number", type="number", min=0, max=0.5, value=0, step=0.05),
@@ -212,7 +212,7 @@ app.layout = dbc.Container(
                                                         step=None,
                                                         value=[0,500], 
                                                         id='p_slider',
-                                                        tooltip={"placement": "bottom", "always_visible": True}
+                                                        tooltip={"placement": "bottom"}
                                                     ), 
                                                     "Min:",
                                                     dcc.Input(id="p_min_value", className="filter_input_number", type="number", min=0, max=500, value=0),
@@ -227,7 +227,7 @@ app.layout = dbc.Container(
                                                         step=None,
                                                         value=[0,500], 
                                                         id='pwp_slider',
-                                                        tooltip={"placement": "bottom", "always_visible": True}
+                                                        tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
                                                     dcc.Input(id="pwp_min_value", className="filter_input_number", type="number", min=0, max=500, value=0),
@@ -242,7 +242,7 @@ app.layout = dbc.Container(
                                                         step=None,
                                                         value=[0,500], 
                                                         id='q_slider',
-                                                        tooltip={"placement": "bottom", "always_visible": True}
+                                                        tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
                                                     dcc.Input(id="q_min_value", className="filter_input_number", type="number", min=0, max=500, value=0),
@@ -265,7 +265,7 @@ app.layout = dbc.Container(
                                                         },
                                                         value=[0,1], 
                                                         id='e_slider',
-                                                        tooltip={"placement": "bottom", "always_visible": True}
+                                                        tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
                                                     dcc.Input(id="e_min_value", className="filter_input_number", type="number", min=0, max=1, value=0, step=0.1),
@@ -428,22 +428,6 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         )
     
     return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig, e_logp_fig, stress_ratio_axial_fig
-
-@app.callback(
-    [Output("axial_value", "children"),
-     Output("p_value", "children"),
-     Output("pwp_value", "children"), 
-     Output("q_value", "children"),
-     Output("e_value", "children")],
-    [Input("axial_slider", "value"), 
-     Input("p_slider", "value"), 
-     Input("pwp_slider", "value"), 
-     Input("q_slider", "value"),
-     Input("e_slider", "value")]
-     )
-def update_filters(selected_axial, selected_p, selected_pwp, selected_q, selected_e): 
-    return f'Selected range: {selected_axial[0]} to {selected_axial[1]}', f'Selected range: {selected_p[0]} to {selected_p[1]}', f'Selected range: {selected_pwp[0]} to {selected_pwp[1]}', f'Selected range: {selected_q[0]} to {selected_q[1]}', f'Selected range: {selected_e[0]} to {selected_e[1]}'
-
 
 
 app.run_server(port=port, debug=True)
