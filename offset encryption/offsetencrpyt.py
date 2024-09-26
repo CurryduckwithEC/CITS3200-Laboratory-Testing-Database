@@ -3,6 +3,7 @@ from Cryptodome.Cipher import AES
 from hashlib import sha256
 import struct
 import random
+import math
 from typing import Tuple
 
 # Constants
@@ -25,12 +26,14 @@ def word_to_aes_key(word: str, key_size: int = 256) -> bytes:
     elif key_size == 256:
         return hash_bytes
 
-# Generate random linear function coefficients based on AES key
-def generate_linear_function_coefficients(aes_key: bytes) -> tuple:
+# Generate random parameters based on AES key
+def generate_encryption_parameters(aes_key: bytes) -> tuple:
     random.seed(aes_key)
-    a = random.uniform(0.5, 2.0)  # Example range for coefficient a
-    b = random.uniform(-10, 10)   # Example range for coefficient b
-    return a, b
+    amplitude = random.uniform(0.5, 2.0)
+    frequency = random.uniform(0.1, 1.0)
+    phase = random.uniform(0, 2 * math.pi)
+    shift = random.uniform(-10, 10)
+    return amplitude, frequency, phase, shift
 
 # Apply linear function to data
 def offset_data(value: float, a: float, b: float) -> float:
