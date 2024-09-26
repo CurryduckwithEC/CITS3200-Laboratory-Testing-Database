@@ -39,6 +39,16 @@ def generate_encryption_parameters(aes_key: bytes) -> tuple:
 def encrypt_data(value: float, amplitude: float, frequency: float, phase: float, shift: float) -> float:
     return round(value + amplitude * math.sin(frequency * value + phase) + shift, 6)
 
+# Decrypt data
+def decrypt_data(value: float, amplitude: float, frequency: float, phase: float, shift: float) -> float:
+    # Use numerical method (Newton's method) to find the original value
+    x = value - shift
+    for _ in range(10):  # 10 iterations should be sufficient for convergence
+        fx = x + amplitude * math.sin(frequency * x + phase) + shift - value
+        dfx = 1 + amplitude * frequency * math.cos(frequency * x + phase)
+        x = x - fx / dfx
+    return round(x, 6)
+
 # Function to apply offset to float data in the entry table
 def apply_offset_to_entry_data(conn: sqlite3.Connection, aes_key: bytes):
     cursor = conn.cursor()
