@@ -1,5 +1,6 @@
 import sqlite3
 import random
+import math
 from hashlib import sha256
 
 # Constants
@@ -22,24 +23,33 @@ def word_to_aes_key(word: str, key_size: int = 256) -> bytes:
     elif key_size == 256:
         return hash_bytes
 
-# Generate random linear function coefficients based on AES key (same as in encryption)
-def generate_linear_function_coefficients(aes_key: bytes) -> tuple:
+# Generate random parameters based on AES key
+def generate_encryption_parameters(aes_key: bytes) -> tuple:
     random.seed(aes_key)
-    a = random.uniform(0.5, 2.0)  # Same range as encryption
-    b = random.uniform(-10, 10)   # Same range as encryption
-    return a, b
+    amplitude = random.uniform(0.5, 2.0)
+    frequency = random.uniform(0.1, 1.0)
+    phase = random.uniform(0, 2 * math.pi)
+    shift = random.uniform(-10, 10)
+    return amplitude, frequency, phase, shift
 
-# Reverse linear function to decrypt the data
-def reverse_offset_data(encrypted_value: float, a: float, b: float) -> float:
-    return (encrypted_value - b) / a
+
+# Decrypt data
+def decrypt_data(value: float, amplitude: float, frequency: float, phase: float, shift: float) -> float:
+    # Use numerical method (Newton's method) to find the original value
+    x = value - shift
+    for _ in range(10):  # 10 iterations should be sufficient for convergence
+        fx = x + amplitude * math.sin(frequency * x + phase) + shift - value
+        dfx = 1 + amplitude * frequency * math.cos(frequency * x + phase)
+        x = x - fx / dfx
+    return round(x, 6)
 
 # Function to apply decryption (reverse offset) to float data in the entry table
 def reverse_offset_for_entry_data(conn: sqlite3.Connection, aes_key: bytes):
     cursor = conn.cursor()
     
-    # Generate coefficients based on the AES key (same as encryption)
-    a, b = generate_linear_function_coefficients(aes_key)
-    
+    # Generate parameters based on the AES key
+    amplitude, frequency, phase, shift = generate_encryption_parameters(aes_key)
+
     try:
         cursor.execute("""
             SELECT entry_id, axial_strain, vol_strain, excess_pwp, p, deviator_stress, void_ratio, shear_induced_pwp 
@@ -52,7 +62,7 @@ def reverse_offset_for_entry_data(conn: sqlite3.Connection, aes_key: bytes):
             encrypted_values = row[1:8]  # Selecting the encrypted float columns from axial_strain to shear_induced_pwp
             
             # Decrypt the values by reversing the linear transformation
-            decrypted_values = [reverse_offset_data(value, a, b) for value in encrypted_values]
+            decrypted_values = [decrypt_data(value, amplitude, frequency, phase, shift) for value in encrypted_values]
             
             cursor.execute("""
                 UPDATE entry 
