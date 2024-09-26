@@ -504,13 +504,10 @@ sync_slider_callback("e_min_value", "e_max_value", "e_slider")
 @app.callback(
     Output('upload-status', 'children'),
     [Input('upload-data', 'contents'),
-     Input('upload-data', 'filename'),
-     Input('refresh-button', 'n_clicks')]
+     Input('upload-data', 'filename')
+    ]
 )
-def handle_upload(content, filename, n_clicks):
-
-    if n_clicks > 0:
-        return html.Script("window.location.reload();")
+def handle_upload(content, filename):
 
     # Handling Electron initialisation
     if content == None:
@@ -571,10 +568,11 @@ def parse_contents(contents, filename):
         Input("pwp_slider", "value"), 
         Input("q_slider", "value"),
         Input("e_slider", "value"),
+        Input('refresh-button', 'n_clicks')
     ]
 )
 def update_figure(selected_drainage, selected_shearing, selected_anisotropy, selected_consolidation, selected_availability, selected_density, selected_plasticity, selected_psd,
-                  selected_axial, selected_p, selected_pwp, selected_q, selected_e):
+                  selected_axial, selected_p, selected_pwp, selected_q, selected_e, click):
     
     # Check if filters and data are properly initialized
     print(f"Selected filters: {selected_drainage}, {selected_shearing}, {selected_anisotropy}, {selected_consolidation}, {selected_availability},{selected_density},{selected_plasticity},{selected_psd}")
