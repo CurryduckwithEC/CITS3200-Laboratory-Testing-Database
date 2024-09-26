@@ -7,13 +7,15 @@ const path = require('node:path')
 // https://github.com/fyears/electron-python-example/blob/master/main.js
 
 
+//  Are we building the exe?
+BUILD = false
+
+
 //  Defines the path to the Python api file
 const API = './api/api'
 const DASH = './api/dash_page'
 const API_PORT = 18018
 const DASH_PORT = 18019
-
-let db_path = "./test.db"
 
 let pyProc = null
 let dashProc = null
@@ -36,9 +38,7 @@ function change_db_path(path){
  */
 const buildPackage = () => {
 
-    dependency_path = path.join(__dirname, API)
-
-    return require('fs').existsSync(dependency_path)
+    return BUILD
 }
 
 /**
@@ -50,21 +50,25 @@ const buildPackage = () => {
  * 
  * @returns string containing path used to invoke API
  */
+
+
+/*  RPC is deprecated
 const getApiPath = () => {
     
     if(buildPackage()){
-        return path.join(__dirname, API)
+        return path.join(__dirname, "./dist/api/api.exe")
     }
     else{
         return path.join(__dirname, API + ".py")
     }
 }
+*/
 
 
 const getDashPath = () => {
 
     if(buildPackage()){
-        return path.join(__dirname, DASH)
+        return path.join(__dirname, "./dist/dash_page/dash_page.exe")
     }
     else{
         return path.join(__dirname, DASH + ".py")
@@ -73,8 +77,11 @@ const getDashPath = () => {
 
 
 /**
+ *  DEPRECATED!
  *  Creates the API process and assigns the process to pyProc
  */
+
+/*
 const createPyProc = () => {
     
     api_path = getApiPath()
@@ -91,6 +98,7 @@ const createPyProc = () => {
         console.log('child process success on port ' + API_PORT)
     }
 }
+*/
 
 const exitPyProc = () => {
     pyProc.kill("SIGINT")
@@ -106,7 +114,12 @@ const createDashProc = (databasePath) => {
 
     dashPath = getDashPath()
 
-    dashProc = require("child_process").spawn("python", [dashPath, databasePath, DASH_PORT], {stdio: "inherit"})
+    if(buildPackage()){
+        dashProc = require("child_process").execFile(dashPath, [databasePath, DASH_PORT], {stdio: "inherit"})
+    }
+    else{
+        dashProc = require("child_process").spawn("python", [dashPath, databasePath, DASH_PORT], {stdio: "inherit"})
+    }
 
     if(dashProc != null) {
         console.log('dash process success')
@@ -119,7 +132,7 @@ const exitDashProc = () => {
     dashProc = null
 }
 
-app.on('ready', createPyProc)
+//app.on('ready', createPyProc)
 //app.on('ready', createDashProc)
 
 if(dashProc != null){
