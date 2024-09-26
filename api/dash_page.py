@@ -1,6 +1,6 @@
 # See official docs at https://dash.plotly.com
 # pip install dash pandas
-
+import dash
 from dash import Dash, dcc, html, Input, Output, ctx, callback, State
 import plotly.express as px
 import pandas as pd
@@ -13,7 +13,7 @@ import dash_table
 from datahandler import retrieve_entry_data, change_path, commit_new_entry
 from parser import parse_workbook
 
-app = Dash(__name__)
+app = Dash(__name__, use_pages=True, pages_folder="")
 
 # Set default port
 port = 18019
@@ -27,7 +27,7 @@ change_path(sys.argv[1])
 df_combined = retrieve_entry_data()
 df_test_ids = pd.DataFrame(df_combined["test_id"]).drop_duplicates()
 
-app.layout = dbc.Container(
+graphs = dbc.Container(
     children=[
         html.Div(
             id="app-container",
@@ -391,47 +391,7 @@ app.layout = dbc.Container(
                                                
                                                 dbc.AccordionItem(
                                                     [
-                                                        html.H3("Upload Data (.xlsx)"),
-                                                        dcc.Upload(
-                                                            id="upload-data",
-                                                            children=html.Div(
-                                                                [
-                                                                    "Drag and Drop or ",
-                                                                    html.A("Select Files"),
-                                                                ]
-                                                            ),
-                                                            style={
-                                                                "width": "100%",
-                                                                "height": "60px",
-                                                                "lineHeight": "60px",
-                                                                "borderWidth": "1px",
-                                                                "borderStyle": "dashed",
-                                                                "borderRadius": "5px",
-                                                                "textAlign": "center",
-                                                                "margin": "10px",
-                                                            },
-                                                    
-                                                            accept=".xlsx",
-                                                            multiple = True
-                                                        ),
-                                                        html.Div(id="upload-status"),
-                                                        html.H3("Download CSV"),
-                                                        dash_table.DataTable(
-                                                            id="data-table",
-                                                            columns=[{"name": "Test ID", "id":"test_id"},
-                                                                     {"name": " ", "id": "download"}],  # Define columns
-                                                             data = [
-                                                                 {"test_id": row["test_id"],
-                                                                  "download": "Download"}
-                                                                  for _, row in df_test_ids.iterrows()],  # Convert dataframe to dictionary
-                                                                style_table={'overflowX': 'auto'},  # Allow horizontal scrolling
-                                                                style_cell={'textAlign': 'left'},  # Cell alignment
-                                                                style_header={
-                                                            'backgroundColor': 'lightgrey',
-                                                            'fontWeight': 'bold'
-                                                            }
-                                                            ),
-                                                        dcc.Download(id="download-csv")
+                                                        
                                                     ],
                                                     title="Upload",
                                                 ),
@@ -444,25 +404,85 @@ app.layout = dbc.Container(
                             ),
                             width=3,
                         ),
-                    
                         dbc.Col(
-                            html.Div(
-                                id="dashboard",
-                                children=[
-                                    dcc.Graph(id="axial_deviator_fig"),
-                                    dcc.Graph(id="axial_pwp_fig"),
-                                    dcc.Graph(id="q_p_fig"),
-                                    dcc.Graph(id="axial_vol_fig"),
-                                    dcc.Graph(id="e_logp_fig"),
-                                    dcc.Graph(id="stress_ratio_axial_fig"),
-                                ],
-                            ),
-                            width=9,
+                            children=[
+                                html.Div(
+                                    id="dashboard",
+                                    children=[
+                                        dcc.Graph(id="axial_deviator_fig"),
+                                        dcc.Graph(id="axial_pwp_fig"),
+                                        dcc.Graph(id="q_p_fig"),
+                                        dcc.Graph(id="axial_vol_fig"),
+                                        dcc.Graph(id="e_logp_fig"),
+                                        dcc.Graph(id="stress_ratio_axial_fig"),
+                                    ],
+                                ),
+                            ], width=9,
                         ),
                     ]
                 ),
             ]
         ),
+    ],
+    fluid=True,
+)
+
+admin = dbc.Container(children=[
+    html.H1('This is our Admin page'),
+    html.Div([
+        html.H3("Upload Data (.xlsx)"),
+        dcc.Upload(
+            id="upload-data",
+            children=html.Div(
+                [
+                    "Drag and Drop or ",
+                    html.A("Select Files"),
+                ]
+            ),
+            style={
+                "width": "100%",
+                "height": "60px",
+                "lineHeight": "60px",
+                "borderWidth": "1px",
+                "borderStyle": "dashed",
+                "borderRadius": "5px",
+                "textAlign": "center",
+                "margin": "10px",
+            },
+
+            accept=".xlsx",
+            multiple = True
+        ),
+        html.Div(id="upload-status"),
+        html.H3("Download CSV"),
+        dash_table.DataTable(
+            id="data-table",
+            columns=[{"name": "Test ID", "id":"test_id"},
+                      {"name": " ", "id": "download"}],  # Define columns
+              data = [
+                  {"test_id": row["test_id"],
+                  "download": "Download"}
+                  for _, row in df_test_ids.iterrows()],  # Convert dataframe to dictionary
+                style_table={'overflowX': 'auto'},  # Allow horizontal scrolling
+                style_cell={'textAlign': 'left'},  # Cell alignment
+                style_header={
+            'backgroundColor': 'lightgrey',
+            'fontWeight': 'bold'
+            }
+            ),
+        dcc.Download(id="download-csv"),
+    ]),
+])
+
+dash.register_page("graphs", path='/', layout=graphs)
+dash.register_page("admin", layout=admin)
+
+app.layout = dbc.Container(
+    children=[
+        dcc.Link('Admin', href=dash.page_registry['admin']['path']),
+        html.Br(),
+        dcc.Link('Graphs', href=dash.page_registry['graphs']['path']),
+        dash.page_container,
     ],
     fluid=True,
 )
@@ -544,7 +564,7 @@ def parse_contents(contents, filename):
         return None
 
 
-    
+
 @app.callback(
     [
         Output("axial_deviator_fig", "figure"),
@@ -560,10 +580,9 @@ def parse_contents(contents, filename):
         Input("pwp_slider", "value"), 
         Input("q_slider", "value"),
         Input("e_slider", "value"),
-        Input("upload-status", "children")
     ]
 )
-def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected_e, contents):  
+def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected_e):  
     global df_combined
     
     #print("update_figure called with selected values:")
