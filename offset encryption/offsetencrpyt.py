@@ -49,12 +49,12 @@ def decrypt_data(value: float, amplitude: float, frequency: float, phase: float,
         x = x - fx / dfx
     return round(x, 6)
 
-# Function to apply offset to float data in the entry table
-def apply_offset_to_entry_data(conn: sqlite3.Connection, aes_key: bytes):
+# Function to apply encryption to float data in the entry table
+def encrypt_entry_data(conn: sqlite3.Connection, aes_key: bytes):
     cursor = conn.cursor()
     
-    # Generate coefficients based on the AES key
-    a, b = generate_linear_function_coefficients(aes_key)
+    # Generate parameters based on the AES key
+    amplitude, frequency, phase, shift = generate_encryption_parameters(aes_key)
     
     try:
         cursor.execute("""
@@ -67,19 +67,50 @@ def apply_offset_to_entry_data(conn: sqlite3.Connection, aes_key: bytes):
             entry_id = row[0]
             values = row[1:8]  # Selecting float columns from axial_strain to shear_induced_pwp
             
-            offset_values = [offset_data(value, a, b) for value in values]
+            encrypted_values = [encrypt_data(value, amplitude, frequency, phase, shift) for value in values]
             
             cursor.execute("""
                 UPDATE entry 
                 SET axial_strain = ?, vol_strain = ?, excess_pwp = ?, p = ?, deviator_stress = ?, void_ratio = ?, shear_induced_pwp = ?
                 WHERE entry_id = ?
-            """, (*offset_values, entry_id))
+            """, (*encrypted_values, entry_id))
 
         conn.commit()
-        print("Offsets applied successfully.")
+        print("Encryption applied successfully.")
     except Exception as e:
         conn.rollback()
-        print(f"Error applying offsets: {e}")
+        print(f"Error applying encryption: {e}")
+    finally:
+        cursor.close()
+
+# Function to decrypt and print entry data
+def decrypt_and_print_entry_data(conn: sqlite3.Connection, aes_key: bytes):
+    cursor = conn.cursor()
+    
+    # Generate parameters based on the AES key
+    amplitude, frequency, phase, shift = generate_encryption_parameters(aes_key)
+    
+    try:
+        cursor.execute("""
+            SELECT entry_id, axial_strain, vol_strain, excess_pwp, p, deviator_stress, void_ratio, shear_induced_pwp 
+            FROM entry
+        """)
+        rows = cursor.fetchall()
+
+        print("Decrypted Entry Data:")
+        print("entry_id | axial_strain | vol_strain | excess_pwp | p | deviator_stress | void_ratio | shear_induced_pwp")
+        print("-" * 100)
+
+        for row in rows:
+            entry_id = row[0]
+            encrypted_values = row[1:8]
+            
+            decrypted_values = [decrypt_data(value, amplitude, frequency, phase, shift) for value in encrypted_values]
+            
+            print(f"{entry_id:8} | {' | '.join([f'{value:.6f}'.rjust(12) for value in decrypted_values])}")
+
+    except Exception as e:
+        print(f"Error decrypting and printing data: {e}")
     finally:
         cursor.close()
 
@@ -90,7 +121,8 @@ def main():
     conn = None
     try:
         conn = sqlite3.connect(DB_FILE)
-        apply_offset_to_entry_data(conn, aes_key)
+        encrypt_entry_data(conn, aes_key)
+        decrypt_and_print_entry_data(conn, aes_key)
     except Exception as e:
         print(f"Main function error: {e}")
     finally:
