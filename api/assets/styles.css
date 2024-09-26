@@ -1,0 +1,13 @@
+#filters-sidebar {
+  background-color: lightGrey;
+  padding: 5px;
+  width: inherit;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  overflow-y: scroll
+}
+
+.filter_input_number {
+  width: 30%;
+}

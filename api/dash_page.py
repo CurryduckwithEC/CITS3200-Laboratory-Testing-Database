@@ -12,7 +12,10 @@ import dash_bootstrap_components as dbc
 from datahandler import retrieve_entry_data, change_path, commit_new_entry, retrieve_filtered_data
 from parser import parse_workbook
 
-app = Dash(__name__)
+css_cdn = ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"]
+js_cdn = ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"]
+
+app = Dash(__name__, external_stylesheets=css_cdn, external_scripts=js_cdn)
 
 # Set default port
 port = 18019
@@ -25,6 +28,33 @@ change_path(sys.argv[1])
 
 df_combined = retrieve_entry_data()
 #print(df_combined)
+
+navbar = dbc.NavbarSimple(
+    children=[
+        dbc.NavItem(dbc.NavLink("Top", href="#")),
+        dbc.NavItem(dbc.NavLink("Admin", href="#")),
+        dbc.NavItem(dbc.NavLink("axial_deviator", href="#axial_deviator_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("axial_pwp", href="#axial_pwp_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("q_p", href="#q_p_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("axial_vol", href="#axial_vol_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("e_logp", href="#e_logp_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("stress_ratio_axial", href="#stress_ratio_axial_fig", external_link=True)),
+        dbc.DropdownMenu(
+            children=[
+                dbc.DropdownMenuItem("More pages", header=True),
+            ],
+            nav=True,
+            in_navbar=True,
+            label="More",
+            direction="start",
+        ),
+    ],
+    brand="DatabaseApp",
+    brand_href="#",
+    color="primary",
+    sticky="top",
+    dark=True,
+)
 
 app.layout = dbc.Container(
     children=[
@@ -444,22 +474,23 @@ app.layout = dbc.Container(
                             width=3,
                         ),
                     
-                        dbc.Col(
+                        dbc.Col([
                             html.Div(
                                 id="dashboard",
-                                children=[
-                                    dcc.Graph(id="axial_deviator_fig"),
-                                    dcc.Graph(id="axial_pwp_fig"),
-                                    dcc.Graph(id="q_p_fig"),
-                                    dcc.Graph(id="axial_vol_fig"),
-                                    dcc.Graph(id="e_logp_fig"),
-                                    dcc.Graph(id="stress_ratio_axial_fig"),
-                                ],
-                            ),
-                            width=9,
-                        ),
-                    ]
-                ),
+                                children = [
+                                navbar,
+                                dcc.Graph(id="axial_deviator_fig"),
+                                dcc.Graph(id="axial_pwp_fig"), 
+                                dcc.Graph(id="q_p_fig"),
+                                dcc.Graph(id="axial_vol_fig"), 
+                                dcc.Graph(id="e_logp_fig"),
+                                dcc.Graph(id="stress_ratio_axial_fig")
+                            ]
+                        )
+                    ], width=9, 
+                    ),
+                    ],
+                )
             ]
         ),
     ],
