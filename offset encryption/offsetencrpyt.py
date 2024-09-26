@@ -35,9 +35,9 @@ def generate_encryption_parameters(aes_key: bytes) -> tuple:
     shift = random.uniform(-10, 10)
     return amplitude, frequency, phase, shift
 
-# Apply linear function to data
-def offset_data(value: float, a: float, b: float) -> float:
-    return a * value + b
+# Encrypt data
+def encrypt_data(value: float, amplitude: float, frequency: float, phase: float, shift: float) -> float:
+    return round(value + amplitude * math.sin(frequency * value + phase) + shift, 6)
 
 # Function to apply offset to float data in the entry table
 def apply_offset_to_entry_data(conn: sqlite3.Connection, aes_key: bytes):
