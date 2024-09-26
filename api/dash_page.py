@@ -12,7 +12,10 @@ import dash_bootstrap_components as dbc
 from datahandler import retrieve_entry_data, change_path, commit_new_entry, retrieve_filtered_data
 from parser import parse_workbook
 
-app = Dash(__name__)
+css_cdn = ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"]
+js_cdn = ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"]
+
+app = Dash(__name__, external_stylesheets=css_cdn, external_scripts=js_cdn)
 
 # Set default port
 port = 18019
