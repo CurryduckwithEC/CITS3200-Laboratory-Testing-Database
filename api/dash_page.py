@@ -409,9 +409,26 @@ app.layout = dbc.Container(
                                                                 "textAlign": "center",
                                                                 "margin": "10px",
                                                             },
-                                                    
                                                             accept=".xlsx",
-                                                            multiple = True
+                                                            multiple=True
+                                                        ),
+                                                        # Refresh Button 
+                                                        html.Button(
+                                                            "Refresh Page", 
+                                                            id="refresh-button", 
+                                                            n_clicks=0, 
+                                                            style={
+                                                                'margin': '10px', 
+                                                                'background-color': '#4CAF50', 
+                                                                'color': 'white', 
+                                                                'border': 'none', 
+                                                                'padding': '10px 20px',
+                                                                'text-align': 'center',
+                                                                'text-decoration': 'none',
+                                                                'display': 'inline-block',
+                                                                'font-size': '16px',
+                                                                'cursor': 'pointer'
+                                                            }
                                                         ),
                                                         html.Div(id="upload-status"),
                                                     ],
@@ -487,9 +504,13 @@ sync_slider_callback("e_min_value", "e_max_value", "e_slider")
 @app.callback(
     Output('upload-status', 'children'),
     [Input('upload-data', 'contents'),
-     Input('upload-data', 'filename')]
+     Input('upload-data', 'filename'),
+     Input('refresh-button', 'n_clicks')]
 )
-def handle_upload(content, filename):
+def handle_upload(content, filename, n_clicks):
+
+    if n_clicks > 0:
+        return html.Script("window.location.reload();")
 
     # Handling Electron initialisation
     if content == None:
