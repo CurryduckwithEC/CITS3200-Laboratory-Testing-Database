@@ -1,4 +1,4 @@
-#filters-sidebar {
+#filters_sidebar {
   background-color: lightGrey;
   padding: 5px;
   width: inherit;
@@ -10,4 +10,8 @@
 
 .filter_input_number {
   width: 30%;
+}
+
+#filters_sidebar h2 {
+  font-size: 1.2em; 
 }
