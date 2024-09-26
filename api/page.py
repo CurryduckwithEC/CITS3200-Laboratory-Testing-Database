@@ -7,48 +7,12 @@ import pandas as pd
 import sys
 import dash_bootstrap_components as dbc
 
-from datahandler import retrieve_entry_data, change_path
+from datahandler import retrieve_entry_data
 
 app = Dash(__name__)
 
-# Set default port
-port = 18019
-if len(sys.argv) > 2:
-    port = int(sys.argv[2])
-
-# Read path off command line arguments
-change_path(sys.argv[1])
-
-
 df_combined = retrieve_entry_data()
 #print(df_combined)
-
-navbar = dbc.NavbarSimple(
-    children=[
-        dbc.NavItem(dbc.NavLink("Top", href="#")),
-        dbc.NavItem(dbc.NavLink("Admin", href="#")),
-        dbc.NavItem(dbc.NavLink("axial_deviator", href="#axial_deviator_fig", external_link=True)),
-        dbc.NavItem(dbc.NavLink("axial_pwp", href="#axial_pwp_fig", external_link=True)),
-        dbc.NavItem(dbc.NavLink("q_p", href="#q_p_fig", external_link=True)),
-        dbc.NavItem(dbc.NavLink("axial_vol", href="#axial_vol_fig", external_link=True)),
-        dbc.NavItem(dbc.NavLink("e_logp", href="#e_logp_fig", external_link=True)),
-        dbc.NavItem(dbc.NavLink("stress_ratio_axial", href="#stress_ratio_axial_fig", external_link=True)),
-        dbc.DropdownMenu(
-            children=[
-                dbc.DropdownMenuItem("More pages", header=True),
-            ],
-            nav=True,
-            in_navbar=True,
-            label="More",
-            direction="start",
-        ),
-    ],
-    brand="DatabaseApp",
-    brand_href="#",
-    color="primary",
-    sticky="top",
-    dark=True,
-)
 
 app.layout = dbc.Container(
     children = [
@@ -59,8 +23,16 @@ app.layout = dbc.Container(
                     [
                     dbc.Col(
                         html.Div(
-                            id = "filters_sidebar",
-
+                            id = "filters-sidebar",
+                            style = {
+                                "backgroundColor": "lightGrey",
+                                "padding": "5px",
+                                "width": "inherit",
+                                "position": "fixed",
+                                "top": 0,
+                                "bottom": 0,
+                                "overflow-y": "scroll"
+                            },
                             children = [
                                 html.H1("Filters"),
                                 html.Div(
@@ -69,35 +41,31 @@ app.layout = dbc.Container(
                                             dbc.AccordionItem(
                                                 [
                                                     # Have to go back and put in actual values used in DB
-                                                    # Format Value:Label
-                                                    html.H2("Drainage"),
+                                                    # Format Label:Value
+                                                    html.H3("Drainage"),
                                                     dcc.Checklist(
                                                         options={
-                                                            "drained":"Drained", 
-                                                            "undrained":"Undrained"},
-                                                        value=["drained", "undrained"],
+                                                            "Drained":"Drained", 
+                                                            "Undrained":"Undrained"},
+                                                        value=["Drained", "Undrained"],
                                                         id="drainage_checklist",
                                                         inline=True
                                                     ),
-                                                    html.Br(),
-                                                    
-                                                    html.H2("Shearing"),
+                                                    html.H3("Shearing"),
                                                     dcc.Checklist(
                                                         options={
-                                                            "compression":"Compression", 
-                                                            "extension":"Extension"},
-                                                        value=["compression", "extension"],
+                                                            "Compression":"Compression", 
+                                                            "Extension":"Extension"},
+                                                        value=["Compression", "Extension"],
                                                         id="shearing_checklist",
                                                         inline=True
                                                     ),
-                                                    html.Br(),
-                                                    
-                                                    html.H2("Anisotropy"),
+                                                    html.H3("Anisotropy"),
                                                     dcc.Checklist(
                                                         options={
-                                                            "isotropic":"Isotropic", 
-                                                            "anisotropic":"Anisotropic"},
-                                                        value=["isotropic", "anisotropic"],
+                                                            "Isotropic":"Isotropic", 
+                                                            "Anisotropic":"Anisotropic"},
+                                                        value=["Isotropic", "Anisotropic"],
                                                         id="anisotropy_checklist",
                                                         inline=True
                                                     ),
@@ -107,15 +75,14 @@ app.layout = dbc.Container(
                                                         step=None,
                                                         value=[0.3,1.0], 
                                                         id="anisotropy_slider",
-                                                        tooltip={"placement": "bottom"}
+                                                        tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
-                                                    "Min:",
-                                                    dcc.Input(id="anisotropy_min_value", className="filter_input_number", type="number", min=0.3, max=1.0, value=0,  step=0.005),
-                                                    "Max:",
-                                                    dcc.Input(id="anisotropy_max_value", className="filter_input_number", type="number", min=0.3, max=1.0, value=1.0,  step=0.005),
-                                                    html.Br(),
-
-                                                    html.H2("Consolidation"),
+                                                    "Min Value:",
+                                                    dcc.Input(id="anisotropy_min_value", type="number", min=0, max=1.0, value=1.0,  step=0.05, style={'width': '70px'}),
+                                                    "Max Value:",
+                                                    dcc.Input(id="anisotropy_max_value", type="number", min=0, max=1.0, value=0,  step=0.05, style={'width': '70px'}),
+                                                    
+                                                    html.H3("Consolidation"),
                                                     html.P(id="consolidation_value"),
                                                     dcc.RangeSlider(
                                                         10,
@@ -131,20 +98,19 @@ app.layout = dbc.Container(
                                                         },
                                                         value=[10,1500], 
                                                         id="consolidation_slider",
-                                                        tooltip={"placement": "bottom"}
+                                                        tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
-                                                    "Min:",
-                                                    dcc.Input(id="consolidation_min_value", className="filter_input_number", type="number", min=0, max=1500, value=0),
-                                                    "Max:",
-                                                    dcc.Input(id="consolidation_max_value", className="filter_input_number", type="number", min=0, max=1500, value=1500),
-                                                    html.Br(),
+                                                    "Min Value:",
+                                                    dcc.Input(id="consolidation_min_value", type="number", min=0, max=1500, value=1500, style={'width': '70px'}),
+                                                    "Max Value:",
+                                                    dcc.Input(id="consolidation_max_value", type="number", min=0, max=1500, value=0, style={'width': '70px'}),
 
-                                                    html.H2("Availability"),
+                                                    html.H3("Availability"),
                                                     dcc.Checklist(
                                                         options={
-                                                            "public":"Public", 
-                                                            "confidential":"Confidential"},
-                                                        value=["public", "confidential"],
+                                                            "Public":"Public", 
+                                                            "Confidential":"Confidential"},
+                                                        value=["Public", "Confidential"],
                                                         id="availability_checklist",
                                                         inline=True
                                                     )
@@ -153,36 +119,32 @@ app.layout = dbc.Container(
                                             ),
                                             dbc.AccordionItem(
                                                 [
-                                                    html.H2("Density"),
+                                                    html.H3("Density"),
                                                     dcc.Checklist(
                                                         options={
-                                                            "loose":"Loose",
-                                                            "dense":"Dense"},
-                                                        value=["loose", "dense"],
+                                                            "Loose":"Loose",
+                                                            "Dense":"Dense"},
+                                                        value=["Loose", "Dense"],
                                                         id="density_checklist",
                                                         inline=True
                                                     ),
-                                                    html.Br(),
-
-                                                    html.H2("Plasticity"),
+                                                    html.H3("Plasticity"),
                                                     dcc.Checklist(
                                                         options={
-                                                            "plastic":"Plastic",
-                                                            "non-plastic":"Non-plastic",
-                                                            "unknown":"Unknown"},
-                                                        value=["plastic", "non-plastic","unknown"],
+                                                            "Plastic":"Plastic",
+                                                            "Non-plastic":"Nonplastic",
+                                                            "Unknown":"Unknown"},
+                                                        value=["Plastic", "Non-plastic","Unknown"],
                                                         id="plasticity_checklist",
                                                         inline=True
                                                     ),
-                                                    html.Br(),
-
-                                                    html.H2("PSD"),
+                                                    html.H3("PSD"),
                                                     dcc.Checklist(
                                                         options={
-                                                            "clay":"Clay",
-                                                            "sand":"Sand",
-                                                            "silt":"Silt"},
-                                                        value=["clay","sand","silt"],
+                                                            "Clay":"Clay",
+                                                            "Sand":"Sand",
+                                                            "Silt":"Silt"},
+                                                        value=["Clay", "Sand","Silt"],
                                                         id="psd_checklist",
                                                         inline=True
                                                     ),
@@ -191,109 +153,96 @@ app.layout = dbc.Container(
                                             ),
                                             dbc.AccordionItem(
                                                 [
-                                                    html.H2("Axial Strain Filter"),
+                                                    html.H3("Axial Strain Filter"),
                                                     html.P(id="axial_value"),
                                                     dcc.RangeSlider(
                                                         0,
-                                                        40,
-                                                        step=None,
-                                                        value=[0,40], 
+                                                        0.5,
+                                                        step=0.05,
+                                                        marks={
+                                                            0.0: "0.0",
+                                                            0.1: "0.1",
+                                                            0.2: "0.2",
+                                                            0.3: "0.3",
+                                                            0.4: "0.4",
+                                                            0.5: "0.5"
+                                                        },
+                                                        value=[0,0.5], 
                                                         id='axial_slider',
-                                                        tooltip={"placement": "bottom"}
+                                                        tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
-                                                    "Min:",
-                                                    dcc.Input(id="axial_min_value", className="filter_input_number", type="number", min=0, max=40, value=0, step=0.05),
-                                                    "Max:",
-                                                    dcc.Input(id="axial_max_value", className="filter_input_number", type="number", min=0, max=40, value=40, step=0.05),
-                                                    html.Br(),
-
-                                                    html.H2("Volumetric Strain Filter"),
-                                                    html.P(id="volumetric_value"),
-                                                    dcc.RangeSlider(
-                                                        0,
-                                                        40,
-                                                        step=None,
-                                                        value=[0,40], 
-                                                        id='volumetric_slider',
-                                                        tooltip={"placement": "bottom"}
-                                                    ),
-                                                    "Min:",
-                                                    dcc.Input(id="vol_min_value", className="filter_input_number", type="number", min=0, max=40, value=0, step=0.05),
-                                                    "Max:",
-                                                    dcc.Input(id="vol_max_value", className="filter_input_number", type="number", min=0, max=40, value=40, step=0.05),
-                                                    html.Br(),
+                                                    "Min Value:",
+                                                    dcc.Input(id="axial_min_value", type="number", min=0, max=0.5, value=0, step=0.05, style={'width': '70px'}),
+                                                    "Max Value:",
+                                                    dcc.Input(id="axial_max_value", type="number", min=0, max=0.5, value=0.5, step=0.05, style={'width': '70px'}),
                                                     
-                                                    html.H2("p' Filter"),
+                                                    html.H3("p' Filter"),
                                                     html.P(id="p_value"),
                                                     dcc.RangeSlider(
                                                         0,
-                                                        7000,
+                                                        500,
                                                         step=None,
-                                                        value=[0,7000], 
+                                                        value=[0,500], 
                                                         id='p_slider',
-                                                        tooltip={"placement": "bottom"}
+                                                        tooltip={"placement": "bottom", "always_visible": True}
                                                     ), 
-                                                    "Min:",
-                                                    dcc.Input(id="p_min_value", className="filter_input_number", type="number", min=0, max=7000, value=0),
-                                                    "Max:",
-                                                    dcc.Input(id="p_max_value", className="filter_input_number", type="number", min=0, max=7000, value=7000),
-                                                    html.Br(),
+                                                    "Min Value:",
+                                                    dcc.Input(id="p_min_value", type="number", min=0, max=500, value=0, style={'width': '70px'}),
+                                                    "Max Value:",
+                                                    dcc.Input(id="p_max_value", type="number", min=0, max=500, value=500, style={'width': '70px'}),
 
-                                                    html.H2("Induced PWP Filter"),
+                                                    html.H3("Induced PWP Filter"),
                                                     html.P(id="pwp_value"),
                                                     dcc.RangeSlider(
                                                         0,
-                                                        7000,
+                                                        500,
                                                         step=None,
-                                                        value=[0,7000], 
+                                                        value=[0,500], 
                                                         id='pwp_slider',
-                                                        tooltip={"placement": "bottom"}
+                                                        tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
-                                                    "Min:",
-                                                    dcc.Input(id="pwp_min_value", className="filter_input_number", type="number", min=0, max=7000, value=0),
-                                                    "Max:",
-                                                    dcc.Input(id="pwp_max_value", className="filter_input_number", type="number", min=0, max=7000, value=7000),
-                                                    html.Br(),
+                                                    "Min Value:",
+                                                    dcc.Input(id="pwp_min_value", type="number", min=0, max=500, value=0, style={'width': '70px'}),
+                                                    "Max Value:",
+                                                    dcc.Input(id="pwp_max_value", type="number", min=0, max=500, value=500, style={'width': '70px'}),
                                                     
-                                                    html.H2("Deviator stress (q) Filter"),
+                                                    html.H3("Deviator stress (q) Filter"),
                                                     html.P(id="q_value"),
                                                     dcc.RangeSlider(
                                                         0,
-                                                        7000,
+                                                        500,
                                                         step=None,
-                                                        value=[0,7000], 
+                                                        value=[0,500], 
                                                         id='q_slider',
-                                                        tooltip={"placement": "bottom"}
+                                                        tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
-                                                    "Min:",
-                                                    dcc.Input(id="q_min_value", className="filter_input_number", type="number", min=0, max=7000, value=0),
-                                                    "Max:",
-                                                    dcc.Input(id="q_max_value", className="filter_input_number", type="number", min=0, max=7000, value=7000),
-                                                    html.Br(),
+                                                    "Min Value:",
+                                                    dcc.Input(id="q_min_value", type="number", min=0, max=500, value=0, style={'width': '70px'}),
+                                                    "Max Value:",
+                                                    dcc.Input(id="q_max_value", type="number", min=0, max=500, value=500, style={'width': '70px'}),
                                                     
-                                                    html.H2("Void Ratio (e) Filter"),
+                                                    html.H3("Void Ratio (e) Filter"),
                                                     html.P(id="e_value"),
                                                     dcc.RangeSlider(
-                                                        0.3,
-                                                        3,
+                                                        0,
+                                                        1,
                                                         step=0.01,
                                                         marks={
-                                                            0.3: "0.3",
-                                                            0.5: "0.5",
-                                                            1.0: "1.0",
-                                                            1.5: "1.5",
-                                                            2.0: "2.0",
-                                                            2.5: "2.5",
-                                                            3.0: "3.0"
+                                                            0.0: "0.0",
+                                                            0.2: "0.2",
+                                                            0.4: "0.4",
+                                                            0.6: "0.6",
+                                                            0.8: "0.8",
+                                                            1.0: "1.0"
                                                         },
-                                                        value=[0.3,3], 
+                                                        value=[0,1], 
                                                         id='e_slider',
-                                                        tooltip={"placement": "bottom"}
+                                                        tooltip={"placement": "bottom", "always_visible": True}
                                                     ),
-                                                    "Min:",
-                                                    dcc.Input(id="e_min_value", className="filter_input_number", type="number", min=0.3, max=3, value=0, step=0.01),
-                                                    "Max:",
-                                                    dcc.Input(id="e_max_value", className="filter_input_number", type="number", min=0.3, max=3, value=3, step=0.01),
+                                                    "Min Value:",
+                                                    dcc.Input(id="e_min_value", type="number", min=0, max=1, value=0, step=0.1, style={'width': '70px'}),
+                                                    "Max Value:",
+                                                    dcc.Input(id="e_max_value", type="number", min=0, max=1, value=1, step=0.1, style={'width': '70px'}),
                                                                                                         
                                                     ],
                                                 title="Variables",
@@ -306,11 +255,10 @@ app.layout = dbc.Container(
                         ), 
                         width=3
                     ),
-                    dbc.Col([
+                    dbc.Col(
                         html.Div(
                             id = "dashboard",
                             children = [
-                                navbar,
                                 dcc.Graph(id="axial_deviator_fig"),
                                 dcc.Graph(id="axial_pwp_fig"), 
                                 dcc.Graph(id="q_p_fig"),
@@ -318,10 +266,9 @@ app.layout = dbc.Container(
                                 dcc.Graph(id="e_logp_fig"),
                                 dcc.Graph(id="stress_ratio_axial_fig")
                             ]
-                        )
-                    ], width=9, 
+                        ), width=9 
                     ),
-                    ],
+                    ]
                 )
             ]
         )
@@ -353,8 +300,8 @@ def sync_slider_callback(min_id, max_id, slider):
 
 sync_slider_callback("consolidation_min_value", "consolidation_max_value", "consolidation_slider")
 sync_slider_callback("anisotropy_min_value", "anisotropy_max_value", "anisotropy_slider")
+sync_slider_callback("axial_min_value", "axial_max_value", "axial_slider")
 sync_slider_callback("axial_min_value", "axial_max_value", "axial_slider")    
-sync_slider_callback("vol_min_value", "vol_max_value", "volumetric_slider")    
 sync_slider_callback("p_min_value", "p_max_value", "p_slider")
 sync_slider_callback("pwp_min_value", "pwp_max_value", "pwp_slider")
 sync_slider_callback("q_min_value", "q_max_value", "q_slider")
@@ -453,5 +400,25 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
     
     return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig, e_logp_fig, stress_ratio_axial_fig
 
+@app.callback(
+    [Output("axial_value", "children"),
+     Output("p_value", "children"),
+     Output("pwp_value", "children"), 
+     Output("q_value", "children"),
+     Output("e_value", "children")],
+    [Input("axial_slider", "value"), 
+     Input("p_slider", "value"), 
+     Input("pwp_slider", "value"), 
+     Input("q_slider", "value"),
+     Input("e_slider", "value")]
+     )
+def update_filters(selected_axial, selected_p, selected_pwp, selected_q, selected_e): 
+    return f'Selected range: {selected_axial[0]} to {selected_axial[1]}', f'Selected range: {selected_p[0]} to {selected_p[1]}', f'Selected range: {selected_pwp[0]} to {selected_pwp[1]}', f'Selected range: {selected_q[0]} to {selected_q[1]}', f'Selected range: {selected_e[0]} to {selected_e[1]}'
+
+port = "18019"
+
+
+if len(sys.argv) > 1:
+    port = sys.argv[1]
 
 app.run_server(port=port, debug=True)
