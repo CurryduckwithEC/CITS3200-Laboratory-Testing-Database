@@ -27,6 +27,7 @@ change_path(sys.argv[1])
 df_combined = retrieve_entry_data()
 df_test_ids = pd.DataFrame(df_combined["test_id"]).drop_duplicates()
 
+
 graphs = dbc.Container(
     children=[
         html.Div(
@@ -476,12 +477,37 @@ admin = dbc.Container(children=[
 
 dash.register_page("graphs", path='/', layout=graphs)
 dash.register_page("admin", layout=admin)
+navbar = dbc.NavbarSimple(
+    children=[
+        dbc.NavItem(dbc.NavLink("Graphs", href=dash.page_registry['graphs']['path'])),
+        dbc.NavItem(dbc.NavLink("Admin", href=dash.page_registry['admin']['path'])),
+        dbc.NavItem(dbc.NavLink("axial_deviator", href="#axial_deviator_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("axial_pwp", href="#axial_pwp_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("q_p", href="#q_p_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("axial_vol", href="#axial_vol_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("e_logp", href="#e_logp_fig", external_link=True)),
+        dbc.NavItem(dbc.NavLink("stress_ratio_axial", href="#stress_ratio_axial_fig", external_link=True)),
+        dbc.DropdownMenu(
+            children=[
+                dbc.DropdownMenuItem("More pages", header=True),
+            ],
+            nav=True,
+            in_navbar=True,
+            label="More",
+            direction="start",
+        ),
+    ],
+    brand="DatabaseApp",
+    brand_href="#",
+    color="primary",
+    sticky="top",
+    dark=True,
+)
+
 
 app.layout = dbc.Container(
     children=[
-        dcc.Link('Admin', href=dash.page_registry['admin']['path']),
-        html.Br(),
-        dcc.Link('Graphs', href=dash.page_registry['graphs']['path']),
+        navbar,
         dash.page_container,
     ],
     fluid=True,
