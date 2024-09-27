@@ -68,7 +68,7 @@ const getApiPath = () => {
 const getDashPath = () => {
 
     if(buildPackage()){
-        return path.join(__dirname, "./dist/dash_page/dash_page.exe")
+        return path.join(process.resourcesPath, "dash_page.exe")
     }
     else{
         return path.join(__dirname, DASH + ".py")
