@@ -9,12 +9,24 @@ const path = require('node:path')
 
 //  Defines the path to the Python api file
 const API = './api/api'
-const DASH = './dash/page'
+const DASH = './api/dash_page'
 const API_PORT = 18018
 const DASH_PORT = 18019
 
+let db_path = "./test.db"
+
 let pyProc = null
 let dashProc = null
+
+
+/**
+ *  Fetches db path from UI and changes it
+ */
+function change_db_path(path){
+    db_path = path
+}
+
+
 
 /**
  *  Checks to see if the binary has been built for the API,
@@ -90,11 +102,11 @@ const exitPyProc = () => {
  *  Creates the Dash process
  */
 
-const createDashProc = () => {
+const createDashProc = (databasePath) => {
 
     dashPath = getDashPath()
 
-    dashProc = require("child_process").spawn("python", [dashPath, DASH_PORT], {stdio: "inherit"})
+    dashProc = require("child_process").spawn("python", [dashPath, databasePath, DASH_PORT], {stdio: "inherit"})
 
     if(dashProc != null) {
         console.log('dash process success')
@@ -108,36 +120,94 @@ const exitDashProc = () => {
 }
 
 app.on('ready', createPyProc)
-app.on('ready', createDashProc)
-app.on('before-quit', exitPyProc)
-//app.on('before-quit', exitDashProc)
+//app.on('ready', createDashProc)
+
+if(dashProc != null){
+    app.on('before-quit', exitDashProc)
+}
+
+if(pyProc != null){
+    app.on('before-quit', exitPyProc)
+}
 
 
 
-function createWindow () {
+// For IPC with HTML files
+const { dialog, ipcMain } = require('electron')
+const { create } = require('node:domain')
+
+function createInitialWindow () {
     // Create the browser window.
     const mainWindow = new BrowserWindow({
         width: 1600,
         height: 1000,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js')
+            preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: false,
+            enableRemoteModule: false,
+            contextIsolation: true,
+            sandbox: true
         }
     })
 
     // and load the index.html of the app.
     //mainWindow.loadFile('index.html')
-    mainWindow.loadURL('http://127.0.0.1:' + DASH_PORT)
+    mainWindow.loadFile("landing.html")
 
-    
-    // Open the DevTools.
-    // mainWindow.webContents.openDevTools()
+    return mainWindow
+}
+
+// Create subsequent windows for app
+function createWindow(URL){
+    const mainWindow = new BrowserWindow({
+        width: 1600,
+        height: 1000,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: false,
+            enableRemoteModule: false,
+            contextIsolation: true,
+            sandbox: true
+        }
+    })
+
+    mainWindow.loadURL(URL)
+    return mainWindow
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-    createWindow()
+    mainWindow = createInitialWindow()
+    console.log("Initial window created...")
+
+
+    // ipc to invoke dialog to select db path
+    ipcMain.on('select-dirs', async () => {
+        const result = await dialog.showOpenDialog(mainWindow, {
+            properties: ['openFile']
+        })
+        db_path = result.filePaths[0]
+        console.log(".db path:", db_path)
+    
+        mainWindow.webContents.send("return-selected-path", db_path)
+        console.log("Sent selected directory back to user...")
+    })
+
+    // after pressing submit, the dash process is created and connection
+    // to database is established
+    ipcMain.on('submit-dir', async () => {
+        console.log(".db path committed, starting Dash...")
+        createDashProc(db_path)
+
+        // timeout to allow dahs to load
+        setTimeout(() => {
+            console.log("Redirecting to Dash at http://127.0.0.1:" + DASH_PORT);
+            mainWindow.loadURL("http://127.0.0.1:" + DASH_PORT);
+        }, 5000); // Delay of 5 seconds
+    })
+
 
     app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
