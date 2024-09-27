@@ -128,20 +128,14 @@ const createDashProc = (databasePath) => {
 }
 
 const exitDashProc = () => {
-    dashProc.kill("SIGINT")
+    dashProc.kill()
     dashProc = null
 }
 
 //app.on('ready', createPyProc)
 //app.on('ready', createDashProc)
 
-if(dashProc != null){
-    app.on('before-quit', exitDashProc)
-}
 
-if(pyProc != null){
-    app.on('before-quit', exitPyProc)
-}
 
 
 
@@ -233,6 +227,10 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', function () {
+    if(dashProc){
+        exitDashProc();
+    }
+
     if (process.platform !== 'darwin') app.quit()
 })
 
