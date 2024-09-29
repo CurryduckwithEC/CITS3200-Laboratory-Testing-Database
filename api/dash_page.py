@@ -26,7 +26,8 @@ change_path(sys.argv[1])
 
 df_combined = retrieve_entry_data()
 df_test_specs = retrieve_test_specs()
-df_test_ids = pd.DataFrame(df_combined["test_id"]).drop_duplicates()
+df_test_specs["availability_type"] = df_test_specs["availability_type"].map({True: "public", False:"private"})
+#df_test_ids = pd.DataFrame(df_combined["test_id"]).drop_duplicates()
 
 
 graphs = dbc.Container(
@@ -740,7 +741,7 @@ import base64
 
 def create_excel_file(df, specs):
     output = io.BytesIO()
-    transposed_specs = pd.DataFrame(specs.T)
+    transposed_specs = pd.DataFrame(specs.T) # Transpose specifications to match format of required Excel sheet
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer: 
         transposed_specs.to_excel(writer, index=True, header=False, sheet_name="Shearing", startrow=0, startcol=0)
         df.to_excel(writer, index=False, sheet_name="Shearing", startrow=len(transposed_specs)+2)
@@ -756,12 +757,19 @@ def download_csv(active_cell):
         row_idx = active_cell["row"] # Index of clicked row
         selected_test = df_test_specs.iloc[row_idx]["test_id"] # Corresponding test ID 
 
-        test_df = df_combined[df_combined["test_id"]==selected_test]
-        test_specs = df_test_specs[df_test_specs["test_id"]==selected_test]
-        test_filename = test_specs["test_file_name"][row_idx]
+        test_df = df_combined[df_combined["test_id"]==selected_test] # Dataframe of selected test 
+        test_specs = df_test_specs[df_test_specs["test_id"]==selected_test] # Specifications of selected test 
+        test_filename = test_specs["test_file_name"][row_idx] # Original file name
 
-        test_df_d = test_df.drop(columns=["entry_id", "test_id"])
+        # Drop unnecessary columns 
+        test_df_d = test_df.drop(columns=["entry_id", "test_id"]) 
         test_specs_d = test_specs.drop(columns=["test_id", "test_value_id", "sample_value_id", "test_value_id_1", "test_file_name", "test_value_id", "sample_value_id_1"])
+
+        # Rename columns to match required format of Excel sheet 
+        test_df_d.columns = test_df_d.columns.str.replace('_', ' ')
+        test_specs_d.columns = test_specs_d.columns.str.replace('_', ' ')
+        test_specs_d.columns = test_specs_d.columns.str.replace('type', '')
+
 
         file = create_excel_file(test_df_d, test_specs_d)
 
