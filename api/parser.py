@@ -65,12 +65,10 @@ def ingest_specs(sheet) -> dict:
     keys_populated = set()
     spec_dict = dict()
 
-    for _, *values in sheet.iter_rows(max_row=CUTOFF):
+    for values in sheet.iter_rows(max_row=CUTOFF):
         for i, v in enumerate(values):
 
             cell_value = str(v.value).lower().strip()
-
-            print(cell_value)
 
             if cell_value in specs:
 
@@ -120,7 +118,8 @@ def ingest_table(sheet) -> pd.DataFrame:
             end_table_index = i
             break
 
-    df = df[:end_table_index]
+    if end_table_index != 0:
+        df = df[:end_table_index]
 
     return df
 
