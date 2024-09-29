@@ -459,12 +459,15 @@ admin = dbc.Container(children=[
         html.H3("Download CSV"),
         dash_table.DataTable(
             id="data-table",
-            columns=[{"name": "Test ID", "id":"test_id"},
-                      {"name": " ", "id": "download"}],  # Define columns
+            columns=[
+                {"name": "File Name", "id": "filename"},
+                {"name": "Test ID", "id":"test_id"},
+                {"name": " ", "id": "download"}],  # Define columns
               data = [
-                  {"test_id": row["test_id"],
-                  "download": "Download"}
-                  for _, row in df_test_ids.iterrows()],  # Convert dataframe to dictionary
+                  {"filename":row["test_file_name"],
+                   "test_id": row["test_id"],
+                   "download": "Download"}
+                  for _, row in df_test_specs.iterrows()],  # Convert dataframe to dictionary
                 style_table={'overflowX': 'auto'},  # Allow horizontal scrolling
                 style_cell={'textAlign': 'left'},  # Cell alignment
                 style_header={
@@ -740,7 +743,6 @@ def create_excel_file(df, specs):
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer: 
         specs.to_excel(writer, index=False, sheet_name="Shearing", startrow=0)
         df.to_excel(writer, index=False, sheet_name="Shearing", startrow=len(specs)+2)
-        #writer.save()
     output.seek(0)
     return output.getvalue()
 
