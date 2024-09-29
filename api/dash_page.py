@@ -10,7 +10,7 @@ import base64
 import dash_bootstrap_components as dbc
 import dash_table
 
-from datahandler import retrieve_entry_data, change_path, commit_new_entry
+from datahandler import retrieve_entry_data, change_path, commit_new_entry, retrieve_test_specs
 from parser import parse_workbook
 
 app = Dash(__name__, use_pages=True, pages_folder="")
@@ -25,6 +25,7 @@ change_path(sys.argv[1])
 
 
 df_combined = retrieve_entry_data()
+df_test_specs = retrieve_test_specs()
 df_test_ids = pd.DataFrame(df_combined["test_id"]).drop_duplicates()
 
 
@@ -730,6 +731,19 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
 def update_filters(selected_axial, selected_p, selected_pwp, selected_q, selected_e): 
     return f'Selected range: {selected_axial[0]} to {selected_axial[1]}', f'Selected range: {selected_p[0]} to {selected_p[1]}', f'Selected range: {selected_pwp[0]} to {selected_pwp[1]}', f'Selected range: {selected_q[0]} to {selected_q[1]}', f'Selected range: {selected_e[0]} to {selected_e[1]}'
 
+import io 
+from dash.dependencies import Input, Output
+import base64
+
+def create_excel_file(df, specs):
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writer: 
+        specs.to_excel(writer, index=False, sheet_name="Shearing", startrow=0)
+        df.to_excel(writer, index=False, sheet_name="Shearing", startrow=len(specs)+2)
+        #writer.save()
+    output.seek(0)
+    return output.getvalue()
+
 @app.callback(
     Output("download-csv", "data"),
     Input("data-table", "active_cell")
@@ -739,7 +753,10 @@ def download_csv(active_cell):
         row_idx = active_cell["row"]
         selected_test = df_test_ids.iloc[row_idx]["test_id"]
         test_df = df_combined[df_combined["test_id"]==selected_test]
-        return dcc.send_data_frame(test_df.to_csv, f"test_id_{selected_test}.csv")
+        test_specs = df_test_specs[df_test_specs["test_id"]==selected_test]
+        file = create_excel_file(test_df, test_specs)
+        return dcc.send_bytes(file, f"test_id_{selected_test}.xlsx")
+        #return dcc.send_data_frame(test_df.to_csv, f"test_id_{selected_test}.csv")
 
 app.run_server(port=port, debug=True)
 
