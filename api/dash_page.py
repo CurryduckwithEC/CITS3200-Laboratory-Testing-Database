@@ -754,8 +754,9 @@ def download_csv(active_cell):
         selected_test = df_test_ids.iloc[row_idx]["test_id"]
         test_df = df_combined[df_combined["test_id"]==selected_test]
         test_specs = df_test_specs[df_test_specs["test_id"]==selected_test]
+        test_filename = test_specs["test_file_name"][0]
         file = create_excel_file(test_df, test_specs)
-        return dcc.send_bytes(file, f"test_id_{selected_test}.xlsx")
+        return dcc.send_bytes(file, f"{test_filename}")
         #return dcc.send_data_frame(test_df.to_csv, f"test_id_{selected_test}.csv")
 
 app.run_server(port=port, debug=True)
