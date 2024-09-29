@@ -740,9 +740,10 @@ import base64
 
 def create_excel_file(df, specs):
     output = io.BytesIO()
+    transposed_specs = pd.DataFrame(specs.T)
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer: 
-        specs.to_excel(writer, index=False, sheet_name="Shearing", startrow=0)
-        df.to_excel(writer, index=False, sheet_name="Shearing", startrow=len(specs)+2)
+        transposed_specs.to_excel(writer, index=True, header=False, sheet_name="Shearing", startrow=0, startcol=0)
+        df.to_excel(writer, index=False, sheet_name="Shearing", startrow=len(transposed_specs)+2)
     output.seek(0)
     return output.getvalue()
 
