@@ -753,12 +753,18 @@ def create_excel_file(df, specs):
 )
 def download_csv(active_cell):
     if active_cell: 
-        row_idx = active_cell["row"]
-        selected_test = df_test_ids.iloc[row_idx]["test_id"]
+        row_idx = active_cell["row"] # Index of clicked row
+        selected_test = df_test_ids.iloc[row_idx]["test_id"] # Corresponding test ID 
+
         test_df = df_combined[df_combined["test_id"]==selected_test]
         test_specs = df_test_specs[df_test_specs["test_id"]==selected_test]
-        test_filename = test_specs["test_file_name"][0]
-        file = create_excel_file(test_df, test_specs)
+        test_filename = test_specs["test_file_name"][selected_test-1]
+
+        test_df_d = test_df.drop(columns=["entry_id", "test_id"])
+        test_specs_d = test_specs.drop(columns=["test_id", "test_value_id", "sample_value_id", "test_value_id_1", "test_file_name", "test_value_id", "sample_value_id_1"])
+
+        file = create_excel_file(test_df_d, test_specs_d)
+
         return dcc.send_bytes(file, f"{test_filename}")
         #return dcc.send_data_frame(test_df.to_csv, f"test_id_{selected_test}.csv")
 
