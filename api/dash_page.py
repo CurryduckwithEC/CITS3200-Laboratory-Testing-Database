@@ -767,7 +767,7 @@ def download_csv(active_cell):
 
         # Rename columns to match required format of Excel sheet 
         test_df_d.columns = test_df_d.columns.str.replace('_', ' ')
-        test_df_d.rename(columns={'p': "p'", 'void ratio': 'e', 'deviator stress':'q'}, inplace=True)
+        test_df_d.rename(columns={'p': "p'", 'vol strain': 'volumetric strain'}, inplace=True)
         test_specs_d.columns = test_specs_d.columns.str.replace('_', ' ')
         test_specs_d.columns = test_specs_d.columns.str.replace('type', '')
 
