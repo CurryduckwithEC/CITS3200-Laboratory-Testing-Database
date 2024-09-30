@@ -652,7 +652,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         title="Deviator Stress, q and Mean Effective Stress (kPa), p' vs. Axial Strain (%)").update_layout(
             xaxis_title="Axial Strain",
             yaxis_title="Deviator Stress, q & Mean Effective Stress, p'"
-        )
+        ).update_layout(showlegend=False)
 
     # Shear induced PWP VS Axial Strain
     axial_pwp_fig = px.line(
@@ -663,7 +663,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         title="Shear Induced Pore Pressure (kPa) vs. Axial Strain (%)").update_layout(
             xaxis_title="Axial Strain",
             yaxis_title="Shear Induced Pore Pressure"
-        )
+        ).update_layout(showlegend=False)
     
     # Deviator Stress (q) VS Mean effective stress (p')
     q_p_fig = px.line(
@@ -674,7 +674,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         title="Deviator Stress, q (kPa) vs. Mean Effective Stress, p' (kPa)").update_layout(
             xaxis_title="Mean Effective Stress, p'",
             yaxis_title="Deviator stress, q"
-        )
+        ).update_layout(showlegend=False)
     
     ### Volumetric Strain VS Axial Strain
     axial_vol_fig = px.line(
@@ -685,7 +685,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         title="Volumetric Stress (%) vs. Axial Strain (%)").update_layout(
             xaxis_title="Axial Strain",
             yaxis_title="Volumetric Strain"
-        )
+        ).update_layout(showlegend=False)
     
     ### e VS log(p')
     e_logp_fig = px.line(
@@ -698,7 +698,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
             xaxis_title="log(p')",
             xaxis = dict(range=[0,4]),
             yaxis_title="Void Ratio, e"
-        )
+        ).update_layout(showlegend=False)
     
     ### Stress ratio (p'/q) vs. Axial Strain
     stress_ratio_axial_fig = px.line(
@@ -709,7 +709,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         title="Stress Ratio, q/p' vs. Axial Strain").update_layout(
             xaxis_title="Axial Strain",
             yaxis_title="Stress Ratio"
-        )
+        ).update_layout(showlegend=False)
     
     return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig, e_logp_fig, stress_ratio_axial_fig
 
@@ -770,7 +770,6 @@ def download_csv(active_cell):
         test_df_d.rename(columns={'p': "p'", 'vol strain': 'volumetric strain'}, inplace=True)
         test_specs_d.columns = test_specs_d.columns.str.replace('_', ' ')
         test_specs_d.columns = test_specs_d.columns.str.replace('type', '')
-
 
         file = create_excel_file(test_df_d, test_specs_d)
 
