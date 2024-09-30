@@ -214,7 +214,7 @@ graphs = dbc.Container(
                                                 dbc.AccordionItem(
                                                     [
                                                         html.H3("Axial Strain"),
-                                                        html.P(id="axial_value"),
+                                                        #html.P(id="axial_value"),
                                                         dcc.RangeSlider(
                                                             0,
                                                             0.5,
@@ -255,7 +255,7 @@ graphs = dbc.Container(
                                                             style={'width': '70px'}
                                                         ),
                                                         html.H3("p'"),
-                                                        html.P(id="p_value"),
+                                                        #html.P(id="p_value"),
                                                         dcc.RangeSlider(
                                                             0,
                                                             500,
@@ -286,7 +286,7 @@ graphs = dbc.Container(
                                                             style={'width': '70px'}
                                                         ),
                                                         html.H3("Induced PWP"),
-                                                        html.P(id="pwp_value"),
+                                                        #html.P(id="pwp_value"),
                                                         dcc.RangeSlider(
                                                             0,
                                                             500,
@@ -317,7 +317,7 @@ graphs = dbc.Container(
                                                             style={'width': '70px'}
                                                         ),
                                                         html.H3("Deviator stress (q)"),
-                                                        html.P(id="q_value"),
+                                                        #html.P(id="q_value"),
                                                         dcc.RangeSlider(
                                                             0,
                                                             500,
@@ -348,7 +348,7 @@ graphs = dbc.Container(
                                                             style={'width': '70px'}
                                                         ),
                                                         html.H3("Void Ratio (e)"),
-                                                        html.P(id="e_value"),
+                                                        #html.P(id="e_value"),
                                                         dcc.RangeSlider(
                                                             0,
                                                             1,
@@ -458,7 +458,7 @@ admin = dbc.Container(children=[
         ),
         html.Div(id="upload-status"),
         html.Br(),
-        html.H3("Download Data (.xlsx)"),
+        html.H3("Current Database"),
         dash_table.DataTable(
             id="data-table",
             columns=[
@@ -755,26 +755,30 @@ def create_excel_file(df, specs):
 )
 def download_csv(active_cell):
     if active_cell: 
-        row_idx = active_cell["row"] # Index of clicked row
-        selected_test = df_test_specs.iloc[row_idx]["test_id"] # Corresponding test ID 
 
-        test_df = df_combined[df_combined["test_id"]==selected_test] # Dataframe of selected test 
-        test_specs = df_test_specs[df_test_specs["test_id"]==selected_test] # Specifications of selected test 
-        test_filename = test_specs["test_file_name"][row_idx] # Original file name
+        clicked_column = active_cell["column"] # Identify which column has been clicked 
 
-        # Drop unnecessary columns 
-        test_df_d = test_df.drop(columns=["entry_id", "test_id"]) 
-        test_specs_d = test_specs.drop(columns=["test_id", "test_value_id", "sample_value_id", "test_value_id_1", "test_file_name", "test_value_id", "sample_value_id_1"])
+        if clicked_column == 2: # Download column has been clicked 
+            row_idx = active_cell["row"] # Index of clicked row
+            selected_test = df_test_specs.iloc[row_idx]["test_id"] # Corresponding test ID 
 
-        # Rename columns to match required format of Excel sheet 
-        test_df_d.columns = test_df_d.columns.str.replace('_', ' ')
-        test_df_d.rename(columns={'p': "p'", 'vol strain': 'volumetric strain'}, inplace=True)
-        test_specs_d.columns = test_specs_d.columns.str.replace('_', ' ')
-        test_specs_d.columns = test_specs_d.columns.str.replace('type', '')
+            test_df = df_combined[df_combined["test_id"]==selected_test] # Dataframe of selected test 
+            test_specs = df_test_specs[df_test_specs["test_id"]==selected_test] # Specifications of selected test 
+            test_filename = test_specs["test_file_name"][row_idx] # Original file name
 
-        file = create_excel_file(test_df_d, test_specs_d)
+            # Drop unnecessary columns 
+            test_df_d = test_df.drop(columns=["entry_id", "test_id"]) 
+            test_specs_d = test_specs.drop(columns=["test_id", "test_value_id", "sample_value_id", "test_value_id_1", "test_file_name", "test_value_id", "sample_value_id_1"])
 
-        return dcc.send_bytes(file, f"{test_filename}")
+            # Rename columns to match required format of Excel sheet 
+            test_df_d.columns = test_df_d.columns.str.replace('_', ' ')
+            test_df_d.rename(columns={'p': "p'", 'vol strain': 'volumetric strain'}, inplace=True)
+            test_specs_d.columns = test_specs_d.columns.str.replace('_', ' ')
+            test_specs_d.columns = test_specs_d.columns.str.replace('type', '')
+
+            file = create_excel_file(test_df_d, test_specs_d)
+
+            return dcc.send_bytes(file, f"{test_filename}")
 
 app.run_server(port=port, debug=True)
 
