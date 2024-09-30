@@ -213,7 +213,7 @@ graphs = dbc.Container(
                                                 ),
                                                 dbc.AccordionItem(
                                                     [
-                                                        html.H3("Axial Strain Filter"),
+                                                        html.H3("Axial Strain"),
                                                         html.P(id="axial_value"),
                                                         dcc.RangeSlider(
                                                             0,
@@ -254,7 +254,7 @@ graphs = dbc.Container(
                                                             step=0.05,
                                                             style={'width': '70px'}
                                                         ),
-                                                        html.H3("p' Filter"),
+                                                        html.H3("p'"),
                                                         html.P(id="p_value"),
                                                         dcc.RangeSlider(
                                                             0,
@@ -285,7 +285,7 @@ graphs = dbc.Container(
                                                             value=500,
                                                             style={'width': '70px'}
                                                         ),
-                                                        html.H3("Induced PWP Filter"),
+                                                        html.H3("Induced PWP"),
                                                         html.P(id="pwp_value"),
                                                         dcc.RangeSlider(
                                                             0,
@@ -316,7 +316,7 @@ graphs = dbc.Container(
                                                             value=500,
                                                             style={'width': '70px'}
                                                         ),
-                                                        html.H3("Deviator stress (q) Filter"),
+                                                        html.H3("Deviator stress (q)"),
                                                         html.P(id="q_value"),
                                                         dcc.RangeSlider(
                                                             0,
@@ -347,7 +347,7 @@ graphs = dbc.Container(
                                                             value=500,
                                                             style={'width': '70px'}
                                                         ),
-                                                        html.H3("Void Ratio (e) Filter"),
+                                                        html.H3("Void Ratio (e)"),
                                                         html.P(id="e_value"),
                                                         dcc.RangeSlider(
                                                             0,
@@ -715,7 +715,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
     return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig, e_logp_fig, stress_ratio_axial_fig
 
 
-
+# REMOVE THIS 
 @app.callback(
     [
         Output("axial_value", "children"),
@@ -775,7 +775,6 @@ def download_csv(active_cell):
         file = create_excel_file(test_df_d, test_specs_d)
 
         return dcc.send_bytes(file, f"{test_filename}")
-        #return dcc.send_data_frame(test_df.to_csv, f"test_id_{selected_test}.csv")
 
 app.run_server(port=port, debug=True)
 
