@@ -431,7 +431,7 @@ graphs = dbc.Container(
 )
 
 admin = dbc.Container(children=[
-    html.H1('This is our Admin page'),
+    html.Br(),
     html.Div([
         html.H3("Upload Data (.xlsx)"),
         dcc.Upload(
@@ -457,16 +457,17 @@ admin = dbc.Container(children=[
             multiple = True
         ),
         html.Div(id="upload-status"),
-        html.H3("Download CSV"),
+        html.Br(),
+        html.H3("Download Data (.xlsx)"),
         dash_table.DataTable(
             id="data-table",
             columns=[
-                {"name": "File Name", "id": "filename"},
                 {"name": "Test ID", "id":"test_id"},
+                {"name": "File Name", "id": "filename"},
                 {"name": " ", "id": "download"}],  # Define columns
               data = [
-                  {"filename":row["test_file_name"],
-                   "test_id": row["test_id"],
+                  {"test_id": row["test_id"],
+                   "filename":row["test_file_name"],
                    "download": "Download"}
                   for _, row in df_test_specs.iterrows()],  # Convert dataframe to dictionary
                 style_table={'overflowX': 'auto'},  # Allow horizontal scrolling
