@@ -110,15 +110,15 @@ const exitPyProc = () => {
  *  Creates the Dash process
  */
 
-const createDashProc = (databasePath) => {
+const createDashProc = (databasePath, keyValue) => {
 
     dashPath = getDashPath()
 
     if(buildPackage()){
-        dashProc = require("child_process").execFile(dashPath, [databasePath, DASH_PORT], {stdio: "inherit"})
+        dashProc = require("child_process").execFile(dashPath, [databasePath, DASH_PORT, keyValue], {stdio: "inherit"})
     }
     else{
-        dashProc = require("child_process").spawn("python", [dashPath, databasePath, DASH_PORT], {stdio: "inherit"})
+        dashProc = require("child_process").spawn("python", [dashPath, databasePath, DASH_PORT, keyValue], {stdio: "inherit"})
     }
 
     if(dashProc != null) {
@@ -204,9 +204,9 @@ app.whenReady().then(() => {
 
     // after pressing submit, the dash process is created and connection
     // to database is established
-    ipcMain.on('submit-dir', async () => {
+    ipcMain.on('submit-dir', async (event, keyValue) => {
         console.log(".db path committed, starting Dash...")
-        createDashProc(db_path)
+        createDashProc(db_path, keyValue)
 
         // timeout to allow dahs to load
         setTimeout(() => {

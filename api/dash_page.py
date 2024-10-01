@@ -28,7 +28,12 @@ if len(sys.argv) > 2:
 
 # Read path off command line arguments
 change_path(sys.argv[1])
+# Read the key from arguments
+keyValue = None
+if len(sys.argv) > 3:
+    keyValue = sys.argv[3]
 
+#print("Key is:", keyValue)
 
 df_combined = retrieve_entry_data()
 #print(df_combined)
