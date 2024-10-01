@@ -51,7 +51,10 @@ def load_sheet(sheet_path):
     wb = openpyxl.load_workbook(filename=sheet_path, data_only=True, read_only=True)
     
     # Loads specific sheet object out of workbook
-    sheet = wb[wb.sheetnames[3]]
+    if len(wb.sheetnames) == 1:
+        sheet = wb[wb.sheetnames[0]]
+    else: 
+        sheet = wb[wb.sheetnames[3]]
     
     return sheet
 
@@ -62,7 +65,7 @@ def ingest_specs(sheet) -> dict:
     keys_populated = set()
     spec_dict = dict()
 
-    for _, *values in sheet.iter_rows(max_row=CUTOFF):
+    for values in sheet.iter_rows(max_row=CUTOFF):
         for i, v in enumerate(values):
 
             cell_value = str(v.value).lower().strip()
@@ -85,7 +88,7 @@ def ingest_table(sheet) -> pd.DataFrame:
 
     # We first need to detect the start of the table within the sheet using "Stage no."
     for i in range(CUTOFF):
-        if type(df.iloc[0][0]) is str and df.iloc[0][0].strip().lower() == "stage no.":
+        if type(df.iloc[0][0]) is str and (df.iloc[0][0].strip().lower() == "stage no." or df.iloc[0][0].strip().lower() == "time start of stage"):
             df = df.reset_index(drop=True)
             break
         else:
@@ -115,7 +118,8 @@ def ingest_table(sheet) -> pd.DataFrame:
             end_table_index = i
             break
 
-    df = df[:end_table_index]
+    if end_table_index != 0:
+        df = df[:end_table_index]
 
     return df
 
@@ -127,6 +131,7 @@ def parse_workbook(path):
     sheet = load_sheet(path)
 
     specs = ingest_specs(sheet)
+
     df = ingest_table(sheet)
 
     return specs, df

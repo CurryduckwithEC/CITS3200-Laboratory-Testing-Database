@@ -10,7 +10,7 @@ import base64
 import dash_bootstrap_components as dbc
 import dash_table
 
-from datahandler import retrieve_entry_data, change_path, commit_new_entry
+from datahandler import retrieve_entry_data, change_path, commit_new_entry, retrieve_test_specs
 from parser import parse_workbook
 
 app = Dash(__name__, use_pages=True, pages_folder="")
@@ -25,7 +25,9 @@ change_path(sys.argv[1])
 
 
 df_combined = retrieve_entry_data()
-df_test_ids = pd.DataFrame(df_combined["test_id"]).drop_duplicates()
+df_test_specs = retrieve_test_specs()
+df_test_specs["availability_type"] = df_test_specs["availability_type"].map({True: "public", False:"private"})
+#df_test_ids = pd.DataFrame(df_combined["test_id"]).drop_duplicates()
 
 
 graphs = dbc.Container(
@@ -38,7 +40,15 @@ graphs = dbc.Container(
                     dbc.Col(
                         html.Div(
                             id = "filters_sidebar",
-
+                            style={
+                                    "backgroundColor": "lightGrey",
+                                    "padding": "5px",
+                                    "width": "inherit",
+                                    "position": "fixed",
+                                    "top": 0,
+                                    "bottom": 0,
+                                    "overflow-y": "scroll",
+                                },
                             children = [
                                 html.H1("Filters"),
                                 html.Div(
@@ -120,9 +130,9 @@ graphs = dbc.Container(
                                                     html.H2("Availability"),
                                                     dcc.Checklist(
                                                         options={
-                                                            "public":"Public", 
-                                                            "confidential":"Confidential"},
-                                                        value=["public", "confidential"],
+                                                            True:"Public", 
+                                                            False:"Confidential"},
+                                                        value=[True, False],
                                                         id="availability_checklist",
                                                         inline=True
                                                     )
@@ -169,8 +179,8 @@ graphs = dbc.Container(
                                             ),
                                             dbc.AccordionItem(
                                                 [
-                                                    html.H2("Axial Strain Filter"),
-                                                    html.P(id="axial_value"),
+                                                    html.H2("Axial Strain"),
+                                                    #html.P(id="axial_value"),
                                                     dcc.RangeSlider(
                                                         0,
                                                         0.4,
@@ -215,8 +225,8 @@ graphs = dbc.Container(
                                                     dcc.Input(id="vol_max_value", className="filter_input_number", type="number", min=0, max=0.4, value=0.4, step=0.001),
                                                     html.Br(),
                                                     
-                                                    html.H2("p' Filter"),
-                                                    html.P(id="p_value"),
+                                                    html.H2("p'"),
+                                                    #html.P(id="p_value"),
                                                     dcc.RangeSlider(
                                                         0,
                                                         7000,
@@ -231,8 +241,8 @@ graphs = dbc.Container(
                                                     dcc.Input(id="p_max_value", className="filter_input_number", type="number", min=0, max=7000, value=7000),
                                                     html.Br(),
 
-                                                    html.H2("Induced PWP Filter"),
-                                                    html.P(id="pwp_value"),
+                                                    html.H2("Induced PWP"),
+                                                    #html.P(id="pwp_value"),
                                                     dcc.RangeSlider(
                                                         0,
                                                         7000,
@@ -247,8 +257,8 @@ graphs = dbc.Container(
                                                     dcc.Input(id="pwp_max_value", className="filter_input_number", type="number", min=0, max=7000, value=7000),
                                                     html.Br(),
                                                     
-                                                    html.H2("Deviator stress (q) Filter"),
-                                                    html.P(id="q_value"),
+                                                    html.H2("Deviator stress (q)"),
+                                                    #html.P(id="q_value"),
                                                     dcc.RangeSlider(
                                                         0,
                                                         7000,
@@ -263,8 +273,8 @@ graphs = dbc.Container(
                                                     dcc.Input(id="q_max_value", className="filter_input_number", type="number", min=0, max=7000, value=7000),
                                                     html.Br(),
                                                     
-                                                    html.H2("Void Ratio (e) Filter"),
-                                                    html.P(id="e_value"),
+                                                    html.H2("Void Ratio (e)"),
+                                                    #html.P(id="e_value"),
                                                     dcc.RangeSlider(
                                                         0.3,
                                                         3,
@@ -330,7 +340,7 @@ graphs = dbc.Container(
 )
 
 admin = dbc.Container(children=[
-    html.H1('This is our Admin page'),
+    html.Br(),
     html.Div([
         html.H3("Upload Data (.xlsx)"),
         dcc.Upload(
@@ -356,15 +366,19 @@ admin = dbc.Container(children=[
             multiple = True
         ),
         html.Div(id="upload-status"),
-        html.H3("Download CSV"),
+        html.Br(),
+        html.H3("Current Database"),
         dash_table.DataTable(
             id="data-table",
-            columns=[{"name": "Test ID", "id":"test_id"},
-                      {"name": " ", "id": "download"}],  # Define columns
+            columns=[
+                {"name": "Test ID", "id":"test_id"},
+                {"name": "File Name", "id": "filename"},
+                {"name": " ", "id": "download"}],  # Define columns
               data = [
                   {"test_id": row["test_id"],
-                  "download": "Download"}
-                  for _, row in df_test_ids.iterrows()],  # Convert dataframe to dictionary
+                   "filename":row["test_file_name"],
+                   "download": "Download"}
+                  for _, row in df_test_specs.iterrows()],  # Convert dataframe to dictionary
                 style_table={'overflowX': 'auto'},  # Allow horizontal scrolling
                 style_cell={'textAlign': 'left'},  # Cell alignment
                 style_header={
@@ -549,7 +563,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         title="Deviator Stress, q and Mean Effective Stress (kPa), p' vs. Axial Strain (%)").update_layout(
             xaxis_title="Axial Strain",
             yaxis_title="Deviator Stress, q & Mean Effective Stress, p'"
-        )
+        ).update_layout(showlegend=False)
 
     # Shear induced PWP VS Axial Strain
     axial_pwp_fig = px.line(
@@ -560,7 +574,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         title="Shear Induced Pore Pressure (kPa) vs. Axial Strain (%)").update_layout(
             xaxis_title="Axial Strain",
             yaxis_title="Shear Induced Pore Pressure"
-        )
+        ).update_layout(showlegend=False)
     
     # Deviator Stress (q) VS Mean effective stress (p')
     q_p_fig = px.line(
@@ -571,7 +585,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         title="Deviator Stress, q (kPa) vs. Mean Effective Stress, p' (kPa)").update_layout(
             xaxis_title="Mean Effective Stress, p'",
             yaxis_title="Deviator stress, q"
-        )
+        ).update_layout(showlegend=False)
     
     ### Volumetric Strain VS Axial Strain
     axial_vol_fig = px.line(
@@ -582,7 +596,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         title="Volumetric Stress (%) vs. Axial Strain (%)").update_layout(
             xaxis_title="Axial Strain",
             yaxis_title="Volumetric Strain"
-        )
+        ).update_layout(showlegend=False)
     
     ### e VS log(p')
     e_logp_fig = px.line(
@@ -595,7 +609,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
             xaxis_title="log(p')",
             xaxis = dict(range=[0,4]),
             yaxis_title="Void Ratio, e"
-        )
+        ).update_layout(showlegend=False)
     
     ### Stress ratio (p'/q) vs. Axial Strain
     stress_ratio_axial_fig = px.line(
@@ -606,10 +620,23 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
         title="Stress Ratio, q/p' vs. Axial Strain").update_layout(
             xaxis_title="Axial Strain",
             yaxis_title="Stress Ratio"
-        )
+        ).update_layout(showlegend=False)
     
     return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig, e_logp_fig, stress_ratio_axial_fig
 
+
+import io 
+from dash.dependencies import Input, Output
+import base64
+
+def create_excel_file(df, specs):
+    output = io.BytesIO()
+    transposed_specs = pd.DataFrame(specs.T) # Transpose specifications to match format of required Excel sheet
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writer: 
+        transposed_specs.to_excel(writer, index=True, header=False, sheet_name="Shearing", startrow=0, startcol=0)
+        df.to_excel(writer, index=False, sheet_name="Shearing", startrow=len(transposed_specs)+2)
+    output.seek(0)
+    return output.getvalue()
 
 @app.callback(
     Output("download-csv", "data"),
@@ -617,10 +644,30 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
 )
 def download_csv(active_cell):
     if active_cell: 
-        row_idx = active_cell["row"]
-        selected_test = df_test_ids.iloc[row_idx]["test_id"]
-        test_df = df_combined[df_combined["test_id"]==selected_test]
-        return dcc.send_data_frame(test_df.to_csv, f"test_id_{selected_test}.csv")
+
+        clicked_column = active_cell["column"] # Identify which column has been clicked 
+
+        if clicked_column == 2: # Download column has been clicked 
+            row_idx = active_cell["row"] # Index of clicked row
+            selected_test = df_test_specs.iloc[row_idx]["test_id"] # Corresponding test ID 
+
+            test_df = df_combined[df_combined["test_id"]==selected_test] # Dataframe of selected test 
+            test_specs = df_test_specs[df_test_specs["test_id"]==selected_test] # Specifications of selected test 
+            test_filename = test_specs["test_file_name"][row_idx] # Original file name
+
+            # Drop unnecessary columns 
+            test_df_d = test_df.drop(columns=["entry_id", "test_id"]) 
+            test_specs_d = test_specs.drop(columns=["test_id", "test_value_id", "sample_value_id", "test_value_id_1", "test_file_name", "test_value_id", "sample_value_id_1"])
+
+            # Rename columns to match required format of Excel sheet 
+            test_df_d.columns = test_df_d.columns.str.replace('_', ' ')
+            test_df_d.rename(columns={'p': "p'", 'vol strain': 'volumetric strain'}, inplace=True)
+            test_specs_d.columns = test_specs_d.columns.str.replace('_', ' ')
+            test_specs_d.columns = test_specs_d.columns.str.replace('type', '')
+
+            file = create_excel_file(test_df_d, test_specs_d)
+
+            return dcc.send_bytes(file, f"{test_filename}")
 
 app.run_server(port=port, debug=True)
 
