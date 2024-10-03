@@ -214,7 +214,7 @@ graphs = dbc.Container(
                                                 dbc.AccordionItem(
                                                     [
                                                         html.H3("Axial Strain"),
-                                                        #html.P(id="axial_value"),
+                                                        html.P(id="axial_value"),
                                                         dcc.RangeSlider(
                                                             0,
                                                             0.5,
@@ -255,7 +255,7 @@ graphs = dbc.Container(
                                                             style={'width': '70px'}
                                                         ),
                                                         html.H3("p'"),
-                                                        #html.P(id="p_value"),
+                                                        html.P(id="p_value"),
                                                         dcc.RangeSlider(
                                                             0,
                                                             500,
@@ -286,7 +286,7 @@ graphs = dbc.Container(
                                                             style={'width': '70px'}
                                                         ),
                                                         html.H3("Induced PWP"),
-                                                        #html.P(id="pwp_value"),
+                                                        html.P(id="pwp_value"),
                                                         dcc.RangeSlider(
                                                             0,
                                                             500,
@@ -317,7 +317,7 @@ graphs = dbc.Container(
                                                             style={'width': '70px'}
                                                         ),
                                                         html.H3("Deviator stress (q)"),
-                                                        #html.P(id="q_value"),
+                                                        html.P(id="q_value"),
                                                         dcc.RangeSlider(
                                                             0,
                                                             500,
@@ -348,7 +348,7 @@ graphs = dbc.Container(
                                                             style={'width': '70px'}
                                                         ),
                                                         html.H3("Void Ratio (e)"),
-                                                        #html.P(id="e_value"),
+                                                        html.P(id="e_value"),
                                                         dcc.RangeSlider(
                                                             0,
                                                             1,
