@@ -413,6 +413,23 @@ admin = dbc.Container(children=[
         ),
         html.Div(id="upload-status"),
         html.Br(),
+        html.Button(
+            "Refresh Page", 
+            id="refresh-table-button", 
+            n_clicks=0, 
+            style={
+                'margin': '10px', 
+                'background-color': '#4CAF50', 
+                'color': 'white', 
+                'border': 'none', 
+                'padding': '10px 20px',
+                'text-align': 'center',
+                'text-decoration': 'none',
+                'display': 'inline-block',
+                'font-size': '16px',
+                'cursor': 'pointer'
+            }
+        ),
         html.H3("Current Database"),
         dash_table.DataTable(
             id="data-table",
@@ -552,6 +569,18 @@ def parse_contents(contents, filename):
         print(f"Error parsing file {filename}: {str(e)}")
         return None
 
+@app.callback(
+    Output('data-table', 'data'),
+    Input('data-table', 'data')
+)
+def update_table(n_clicks):
+        df_test_specs = retrieve_test_specs()
+        data = [
+            {"test_id": row["test_id"],
+             "filename": row["test_file_name"],
+             "download": "Download"}
+            for _, row in df_test_specs.iterrows()]
+        return data
 
 
 @app.callback(
@@ -561,7 +590,7 @@ def parse_contents(contents, filename):
         Output("q_p_fig", "figure"),
         Output("axial_vol_fig", "figure"), 
         Output("e_logp_fig", "figure"), 
-        Output("stress_ratio_axial_fig", "figure")
+        Output("stress_ratio_axial_fig", "figure"),
     ],
     [
         Input("drainage_checklist", "value"),
@@ -697,6 +726,7 @@ def update_figure(selected_drainage, selected_shearing, selected_anisotropy, sel
             yaxis_title="Stress Ratio"
         ).update_layout(showlegend=False)
     
+
     return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig, e_logp_fig, stress_ratio_axial_fig
 
 
