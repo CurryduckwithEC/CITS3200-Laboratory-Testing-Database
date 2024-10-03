@@ -41,13 +41,14 @@ def generate_encryption_parameters(aes_key: bytes) -> tuple:
     return amplitude, frequency, phase, shift
 
 def encrypt_data(value: float, amplitude: float, frequency: float, phase: float, shift: float) -> float:
-    return round(value + amplitude * math.sin(frequency * value + phase) + shift, 6)
+    return round(value + amplitude * math.sin(frequency * value + phase) + shift * value, 6)
 
 def decrypt_data(value: float, amplitude: float, frequency: float, phase: float, shift: float) -> float:
-    x = value - shift
-    for _ in range(10):
-        fx = x + amplitude * math.sin(frequency * x + phase) + shift - value
-        dfx = 1 + amplitude * frequency * math.cos(frequency * x + phase)
+    x = value / (1 + shift)  # A rough estimate for initial guess
+    for _ in range(10):  # 10 iterations for convergence
+        dynamic_shift = shift * x
+        fx = x + amplitude * math.sin(frequency * x + phase) + dynamic_shift - value
+        dfx = 1 + amplitude * frequency * math.cos(frequency * x + phase) + shift
         x = x - fx / dfx
     return round(x, 6)
 
