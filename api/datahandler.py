@@ -9,7 +9,7 @@ import random
 import math
 
 # Constants
-WORD_FOR_KEY = ""  # Word for AES key generation
+WORD_FOR_KEY = [""]  # Word for AES key generation
 AES_KEY_SIZE = 256  # Key size (128, 192, or 256 bits)
 
 # In array to allow changing of value in function, this function is merged and may not be needed
@@ -27,12 +27,15 @@ def change_path(new_path: str):
 # Takes new key value from landing page
 def change_key(new_key: str):
     
-    WORD_FOR_KEY = new_key
+    WORD_FOR_KEY[0] = new_key
     print(f"New key: {new_key}")
     
 def get_key():
     
-    return WORD_FOR_KEY
+    key = WORD_FOR_KEY[0]
+    if key == "":
+        return None  
+    return WORD_FOR_KEY[0]
 
 # Encryption functions
 def word_to_aes_key(word: str, key_size: int = 256) -> bytes:
@@ -131,7 +134,7 @@ def entry_objects(df: pd.DataFrame, test: Test):
 
 # Create entry objects with added encryption
 def entry_objects_encrypt(df: pd.DataFrame, test: Test, encrypt_params: tuple):
-    amplitude, frequency, phase, shift = encrypt_params
+    
     def row_to_entry(row):
         return Entry(
             test_id = test.test_id,
@@ -153,15 +156,20 @@ def entry_objects_encrypt(df: pd.DataFrame, test: Test, encrypt_params: tuple):
 # The ordering matters of the commit due to foreign key dependencies
 # Takes absolute path to database
 def commit_new_entry(specs: dict, df: pd.DataFrame, file_name: str):
-    aes_key = word_to_aes_key(WORD_FOR_KEY, AES_KEY_SIZE)
-    encrypt_params = generate_encryption_parameters(aes_key)
-
+    
+    if get_key() is not None:
+        aes_key = word_to_aes_key(get_key(), AES_KEY_SIZE)
+        encrypt_params = generate_encryption_parameters(aes_key)
+        
+        print("Committing... key exists.")
+        
     sample_values = sample_values_object(specs)
     test_values = test_values_object(specs)
     test = test_object(specs, sample_values, test_values, file_name)
     
     if specs["availability"] == "private":
         entries = entry_objects_encrypt(df, test, encrypt_params)
+        print("Private test...")
     else:
         entries = entry_objects(df, test)
 
@@ -216,14 +224,24 @@ def retrieve_test_specs():
     return df
 
 
+def convert_query_to_dataframe(result) -> pd.DataFrame:
+    
+    print(f"Retrieved {len(result)} entries after filtering")
+    return pd.DataFrame([entry.__dict__ for entry in result])
+
+
 def retrieve_filtered_data(drainage_types=None, shearing_types=None, anisotropy_range=None, consolidation_range=None, availability_types=None, density_types=None, plasticity_types = None, psd_types = None):
     engine = create_engine(get_path(), echo=True)
     Session = sessionmaker(bind=engine)
     session = Session()
 
+    
+    if get_key() is None:
+        availability_types = ["Public"]
+   
+
     try:
         query = session.query(Entry).join(Test).join(TestValues).join(SampleValues)
-    
 
         if drainage_types:
             drainage_map = {'Drained': "drained", 'Undrained':"undrained"}
@@ -243,12 +261,6 @@ def retrieve_filtered_data(drainage_types=None, shearing_types=None, anisotropy_
         if consolidation_range:
             query = query.filter(Test.consolidation.between(consolidation_range[0], consolidation_range[1]))
 
-        # Apply availability filter
-        if availability_types:
-            availability_map = {'Public': True, 'Confidential': False}
-            availability_types = [availability_map[atype] for atype in availability_types]
-            query = query.filter(TestValues.availability_type.in_(availability_types))
-
         if density_types:
             density_map = {'Loose':'loose', 'Dense':'dense'}
             density_types = [density_map[atype] for atype in density_types]
@@ -264,9 +276,48 @@ def retrieve_filtered_data(drainage_types=None, shearing_types=None, anisotropy_
             psd_map = {"Clay":"clay", "Silt":"silt", "Sand":"sand"}
             psd_types = [psd_map[atype] for atype in psd_types]
             query = query.filter(SampleValues.psd_type.in_(psd_types))
-        result = query.all()
-        print(f"Retrieved {len(result)} entries after filtering")
-        return result
+        
+        
+        # Apply availability filter, if both types requested have to split into two queries for decryption
+        if availability_types:
+            availability_map = {'Public': True, 'Confidential': False}
+            availability_types = [availability_map[atype] for atype in availability_types]
+            
+            if len(availability_types) == 2:
+                query_public = query.filter(TestValues.availability_type.in_([True]))
+                query_private = query.filter(TestValues.availability_type.in_([False]))
+                
+                df_public = convert_query_to_dataframe(query_public.all())
+                df_private = convert_query_to_dataframe(query_private.all())
+                
+                # decrypt df entries with private tag if key is supplied
+                if get_key() is not None and df_private.empty != True:
+                    aes_key = word_to_aes_key(get_key(), AES_KEY_SIZE)
+                    decrypt_params = generate_encryption_parameters(aes_key)
+                    
+                    for column in ['axial_strain', 'vol_strain', 'excess_pwp', 'p', 'deviator_stress', 'void_ratio', 'shear_induced_pwp']:
+                            df_private[column] = df_private[column].apply(lambda x: decrypt_data(x, *decrypt_params))
+                            
+                df_filtered = pd.concat([df_public, df_private], ignore_index=True)
+                
+            elif True in availability_types:
+                query = query.filter(TestValues.availability_type.in_([availability_types]))
+                df_filtered = convert_query_to_dataframe(query.all())
+                
+            elif False in availability_types:
+                query = query.filter(TestValues.availability_type.in_([availability_types]))
+                df_filtered = convert_query_to_dataframe(query.all())
+                
+                # decrypt df entries with private tag if key is supplied
+                if get_key() is not None and df_filtered.empty != True:
+                    aes_key = word_to_aes_key(get_key(), AES_KEY_SIZE)
+                    decrypt_params = generate_encryption_parameters(aes_key)
+                    
+                    for column in ['axial_strain', 'vol_strain', 'excess_pwp', 'p', 'deviator_stress', 'void_ratio', 'shear_induced_pwp']:
+                        df_filtered[column] = df_filtered[column].apply(lambda x: decrypt_data(x, *decrypt_params))
+
+        return df_filtered
+
 
     finally:
         session.close()

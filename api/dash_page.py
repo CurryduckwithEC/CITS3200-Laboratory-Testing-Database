@@ -29,17 +29,17 @@ if len(sys.argv) > 2:
 # Read path off command line arguments
 change_path(sys.argv[1])
 # Read the key from arguments
-keyValue = None
+key_value = None
 if len(sys.argv) > 3:
-    keyValue = sys.argv[3]
+    key_value = sys.argv[3]
 
 # Change key value if not None
-if keyValue is not None:
-    change_key(keyValue)
+if key_value is not None and key_value != "":
+    change_key(key_value)
 
 #print("Key is:", keyValue)
 
-df_combined = retrieve_entry_data()
+#df_combined = retrieve_entry_data()
 #print(df_combined)
 
 navbar = dbc.NavbarSimple(
@@ -512,7 +512,7 @@ def update_figure(selected_drainage, selected_shearing, selected_anisotropy, sel
     # Check if filters and data are properly initialized
     print(f"Selected filters: {selected_drainage}, {selected_shearing}, {selected_anisotropy}, {selected_consolidation}, {selected_availability},{selected_density},{selected_plasticity},{selected_psd}")
 
-    filtered_data = retrieve_filtered_data(
+    df_filtered = retrieve_filtered_data(
         drainage_types=selected_drainage,
         shearing_types=selected_shearing,
         anisotropy_range=selected_anisotropy,
@@ -523,11 +523,9 @@ def update_figure(selected_drainage, selected_shearing, selected_anisotropy, sel
         psd_types = selected_psd
     )
     
-    if not filtered_data:
-        print("No data after filtering")
-        return {}, {}, {}, {}, {}, {}
-
-    df_filtered = pd.DataFrame([entry.__dict__ for entry in filtered_data])
+    #if not df_filtered:
+    #    print("No data after filtering")
+    #    return {}, {}, {}, {}, {}, {}
     
     print(f"Filtered DataFrame: {df_filtered.shape}")  # Debugging log to see if data is passed to the figure generation
     
@@ -537,7 +535,7 @@ def update_figure(selected_drainage, selected_shearing, selected_anisotropy, sel
 
 
     # Filter the data further by the sliders (axial strain, p, pwp, q, and e)
-    filtered_df = df_filtered[
+    filtered_df= df_filtered[
         (df_filtered["axial_strain"] >= selected_axial[0]) &
         (df_filtered["axial_strain"] <= selected_axial[1]) &
         (df_filtered["p"] >= selected_p[0]) &
@@ -550,7 +548,7 @@ def update_figure(selected_drainage, selected_shearing, selected_anisotropy, sel
         (df_filtered["void_ratio"] <= selected_e[1])
     ]
 
-    if df_filtered.empty:
+    if filtered_df.empty:
         print("Filtered dataframe is empty after applying the sliders.")
         return {}, {}, {}, {}, {}, {}
 
