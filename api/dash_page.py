@@ -9,7 +9,7 @@ import io
 import base64
 import dash_bootstrap_components as dbc
 
-from datahandler import retrieve_entry_data, change_path, commit_new_entry, retrieve_filtered_data
+from datahandler import retrieve_entry_data, change_path, commit_new_entry, retrieve_filtered_data, change_key
 from parser import parse_workbook
 
 css_cdn = ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"]
@@ -32,6 +32,10 @@ change_path(sys.argv[1])
 keyValue = None
 if len(sys.argv) > 3:
     keyValue = sys.argv[3]
+
+# Change key value if not None
+if keyValue is not None:
+    change_key(keyValue)
 
 #print("Key is:", keyValue)
 

@@ -9,7 +9,7 @@ import random
 import math
 
 # Constants
-WORD_FOR_KEY = "apple"  # Example word for AES key generation
+WORD_FOR_KEY = ""  # Word for AES key generation
 AES_KEY_SIZE = 256  # Key size (128, 192, or 256 bits)
 
 # In array to allow changing of value in function, this function is merged and may not be needed
@@ -23,6 +23,16 @@ def change_path(new_path: str):
     
     PATH[0] = new_path
     print(f"Path to database is now {get_path()}")
+    
+# Takes new key value from landing page
+def change_key(new_key: str):
+    
+    WORD_FOR_KEY = new_key
+    print(f"New key: {new_key}")
+    
+def get_key():
+    
+    return WORD_FOR_KEY
 
 # Encryption functions
 def word_to_aes_key(word: str, key_size: int = 256) -> bytes:
@@ -98,11 +108,34 @@ def test_object(specs: dict, sample_values: SampleValues, test_values: TestValue
 
     return test
 
-def entry_objects(df: pd.DataFrame, test: Test, encrypt_params: tuple):
+
+# Returns array of entry objects
+def entry_objects(df: pd.DataFrame, test: Test):
+
+    def row_to_entry(row):
+        return Entry(
+            test_id = test.test_id,
+
+            time_start_of_stage = row["time start of stage"],
+            axial_strain = row["axial strain"],
+            vol_strain = row["volumetric strain"],
+            excess_pwp = row["excess pwp"],
+            p = row["p'"],
+            deviator_stress = row["deviator stress"],
+            void_ratio = row["void ratio"],
+            shear_induced_pwp = row["shear induced pwp"] 
+        )
+    
+    return df.apply(row_to_entry, axis=1).tolist()
+
+
+# Create entry objects with added encryption
+def entry_objects_encrypt(df: pd.DataFrame, test: Test, encrypt_params: tuple):
     amplitude, frequency, phase, shift = encrypt_params
     def row_to_entry(row):
         return Entry(
             test_id = test.test_id,
+            
             time_start_of_stage = row["time start of stage"],
             axial_strain = encrypt_data(row["axial strain"], *encrypt_params),
             vol_strain = encrypt_data(row["volumetric strain"], *encrypt_params),
@@ -112,6 +145,7 @@ def entry_objects(df: pd.DataFrame, test: Test, encrypt_params: tuple):
             void_ratio = encrypt_data(row["void ratio"], *encrypt_params),
             shear_induced_pwp = encrypt_data(row["shear induced pwp"], *encrypt_params)
         )
+        
     return df.apply(row_to_entry, axis=1).tolist()
 
 
@@ -125,7 +159,11 @@ def commit_new_entry(specs: dict, df: pd.DataFrame, file_name: str):
     sample_values = sample_values_object(specs)
     test_values = test_values_object(specs)
     test = test_object(specs, sample_values, test_values, file_name)
-    entries = entry_objects(df, test, encrypt_params)
+    
+    if specs["availability"] == "private":
+        entries = entry_objects_encrypt(df, test, encrypt_params)
+    else:
+        entries = entry_objects(df, test)
 
     test.entries.extend(entries)
     sample_values.test = test
@@ -153,9 +191,10 @@ def retrieve_entry_data():
     with Session(engine) as session:
         df = pd.read_sql(session.query(Entry).statement, session.bind)
 
-    # Decrypt the data
-    for column in ['axial_strain', 'vol_strain', 'excess_pwp', 'p', 'deviator_stress', 'void_ratio', 'shear_induced_pwp']:
-        df[column] = df[column].apply(lambda x: decrypt_data(x, *decrypt_params))
+    # Decrypt the data if key is supplied
+    if WORD_FOR_KEY != "":        
+        for column in ['axial_strain', 'vol_strain', 'excess_pwp', 'p', 'deviator_stress', 'void_ratio', 'shear_induced_pwp']:
+            df[column] = df[column].apply(lambda x: decrypt_data(x, *decrypt_params))
 
     return df
     
