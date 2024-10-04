@@ -37,8 +37,14 @@ df_test_specs["availability_type"] = df_test_specs["availability_type"].map({Tru
 #df_test_ids = pd.DataFrame(df_combined["test_id"]).drop_duplicates()
 
 
+
+
 graphs = dbc.Container(
     children=[
+        html.Link(
+        rel='stylesheet',
+        href='api/styles.css'
+        ),
         html.Div(
             id="app-container",
             children=[
@@ -106,9 +112,9 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="anisotropy_min_value", className="filter_input_number", type="number", min=0.3, max=1.0, value=0,  step=0.005),
+                                                    dcc.Input(id="anisotropy_min_value", className="filter_input_number", style={"width":"30%"},  style={"width":"30%"},  type="number", min=0.3, max=1.0, value=0,  step=0.005),
                                                     "Max:",
-                                                    dcc.Input(id="anisotropy_max_value", className="filter_input_number", type="number", min=0.3, max=1.0, value=1.0,  step=0.005),
+                                                    dcc.Input(id="anisotropy_max_value", className="filter_input_number", style={"width":"30%"},  style={"width":"30%"},  type="number", min=0.3, max=1.0, value=1.0,  step=0.005),
                                                     html.Br(),
 
                                                     html.H2("Consolidation"),
@@ -130,9 +136,9 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="consolidation_min_value", className="filter_input_number", type="number", min=0, max=1500, value=0),
+                                                    dcc.Input(id="consolidation_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=1500, value=0),
                                                     "Max:",
-                                                    dcc.Input(id="consolidation_max_value", className="filter_input_number", type="number", min=0, max=1500, value=1500),
+                                                    dcc.Input(id="consolidation_max_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=1500, value=1500),
                                                     html.Br(),
 
                                                     html.H2("Availability"),
@@ -206,10 +212,10 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="axial_min_value", className="filter_input_number", type="number", min=0, max=0.4, value=0, step=0.001),
+                                                    dcc.Input(id="axial_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=0.4, value=0, step=0.001),
                                             
                                                     "Max:",
-                                                    dcc.Input(id="axial_max_value", className="filter_input_number", type="number",  min=0, max=0.4, value=0, step=0.001),
+                                                    dcc.Input(id="axial_max_value", className="filter_input_number", style={"width":"30%"},  type="number",  min=0, max=0.4, value=0, step=0.001),
                                                     
                                                     html.H2("Volumetric Strain"),
                                                     dcc.RangeSlider(
@@ -228,9 +234,9 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="vol_min_value", className="filter_input_number", type="number", min=0, max=0.4, value=0, step=0.001),
+                                                    dcc.Input(id="vol_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=0.4, value=0, step=0.001),
                                                     "Max:",
-                                                    dcc.Input(id="vol_max_value", className="filter_input_number", type="number", min=0, max=0.4, value=0.4, step=0.001),
+                                                    dcc.Input(id="vol_max_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=0.4, value=0.4, step=0.001),
                                                     html.Br(),
                                                     
                                                     html.H2("p'"),
@@ -244,9 +250,9 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ), 
                                                     "Min:",
-                                                    dcc.Input(id="p_min_value", className="filter_input_number", type="number", min=0, max=7000, value=0),
+                                                    dcc.Input(id="p_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=7000, value=0),
                                                     "Max:",
-                                                    dcc.Input(id="p_max_value", className="filter_input_number", type="number", min=0, max=7000, value=7000),
+                                                    dcc.Input(id="p_max_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=7000, value=7000),
                                                     html.Br(),
 
                                                     html.H2("Induced PWP"),
@@ -260,9 +266,9 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="pwp_min_value", className="filter_input_number", type="number", min=0, max=7000, value=0),
+                                                    dcc.Input(id="pwp_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=7000, value=0),
                                                     "Max:",
-                                                    dcc.Input(id="pwp_max_value", className="filter_input_number", type="number", min=0, max=7000, value=7000),
+                                                    dcc.Input(id="pwp_max_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=7000, value=7000),
                                                     html.Br(),
                                                     
                                                     html.H2("Deviator stress (q)"),
@@ -276,9 +282,9 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="q_min_value", className="filter_input_number", type="number", min=0, max=7000, value=0),
+                                                    dcc.Input(id="q_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=7000, value=0),
                                                     "Max:",
-                                                    dcc.Input(id="q_max_value", className="filter_input_number", type="number", min=0, max=7000, value=7000),
+                                                    dcc.Input(id="q_max_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=7000, value=7000),
                                                     html.Br(),
                                                     
                                                     html.H2("Void Ratio (e)"),
@@ -301,9 +307,9 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="e_min_value", className="filter_input_number", type="number", min=0.3, max=3, value=0, step=0.01),
+                                                    dcc.Input(id="e_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0.3, max=3, value=0, step=0.01),
                                                     "Max:",
-                                                    dcc.Input(id="e_max_value", className="filter_input_number", type="number", min=0.3, max=3, value=3, step=0.01),
+                                                    dcc.Input(id="e_max_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0.3, max=3, value=3, step=0.01),
                                                                                                         
                                                     ],
                                                     title="Variables",
@@ -483,7 +489,6 @@ navbar = dbc.NavbarSimple(
     sticky="top",
     dark=True,
 )
-
 
 app.layout = dbc.Container(
     children=[
