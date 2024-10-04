@@ -1,7 +1,7 @@
 # See official docs at https://dash.plotly.com
 # pip install dash pandas
 import dash
-from dash import Dash, dcc, html, Input, Output, ctx, callback, State
+from dash import Dash, dcc, html, Input, Output, ctx, callback, State, callback_context
 import plotly.express as px
 import pandas as pd
 import sys
@@ -65,6 +65,7 @@ graphs = dbc.Container(
                                                 [
                                                     # Have to go back and put in actual values used in DB
                                                     # Format Value:Label
+                                                    dcc.Checklist(["All"], [], id="checkall_test_checklist", inline=True),
                                                     html.H2("Drainage"),
                                                     dcc.Checklist(
                                                         options={
@@ -147,7 +148,8 @@ graphs = dbc.Container(
                                                 title="Test",
                                             ),
                                             dbc.AccordionItem(
-                                                [
+                                                [   
+                                                    dcc.Checklist(["All"], [], id="checkall_sample_checklist", inline=True),
                                                     html.H2("Density"),
                                                     dcc.Checklist(
                                                         options={
@@ -491,6 +493,64 @@ app.layout = dbc.Container(
     fluid=True,
 )
 
+@app.callback(
+    [
+        Output("density_checklist", "value"),
+        Output("plasticity_checklist", "value"),
+        Output("psd_checklist", "value")
+     ],
+    [
+        Input("checkall_sample_checklist", "value"),
+        Input("density_checklist", "value"),
+        Input("plasticity_checklist", "value"),
+        Input("psd_checklist", "value")
+    ]
+)
+def toggle_checklists(all_value, density_value, plasticity_value, psd_value):
+    density_options = ["Loose", "Dense"]
+    plasticity_options = ["Plastic", "Non-plastic", "Unknown"]
+    psd_options = ["Clay", "Sand", "Silt"]
+
+    ctx = callback_context
+    input_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    if input_id == "checkall_sample_checklist":
+        if "All" in all_value:
+            return density_options, plasticity_options, psd_options
+        else:
+            return [], [], []
+    return density_value, plasticity_value, psd_value
+
+@app.callback(
+    [
+        Output("drainage_checklist", "value"),
+        Output("shearing_checklist", "value"),
+        Output("anisotropy_checklist", "value"),
+        Output("availability_checklist", "value"),
+    ],
+    [
+        Input("checkall_test_checklist", "value"),
+        Input("drainage_checklist", "value"),
+        Input("shearing_checklist", "value"),
+        Input("anisotropy_checklist", "value"),
+        Input("availability_checklist", "value"),
+    ]
+)
+def toggle_test_checklists(all_value, drainage_value, shearing_value, anisotropy_value, availability_value):
+    drainage_options = ["Drained", "Undrained"]
+    shearing_options = ["Compression", "Extension"]
+    anisotropy_options = ["Isotropic", "Anisotropic"]
+    availability_options = ["Public", "Confidential"]
+
+    ctx = callback_context
+    input_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    if input_id == "checkall_test_checklist":
+        if "All" in all_value:
+            return drainage_options, shearing_options, anisotropy_options, availability_options
+        else:
+            return [], [], [], []
+    return drainage_value, shearing_value, anisotropy_value, availability_value
 
 
 def sync_slider_callback(min_id, max_id, slider):
@@ -570,17 +630,17 @@ def parse_contents(contents, filename):
         return None
 
 @app.callback(
-    Output('data-table', 'data'),
-    Input('data-table', 'data')
+    Output("data-table", "data"),
+    Input("refresh-table-button", "n_clicks")
 )
 def update_table(n_clicks):
-        df_test_specs = retrieve_test_specs()
-        data = [
-            {"test_id": row["test_id"],
-             "filename": row["test_file_name"],
-             "download": "Download"}
-            for _, row in df_test_specs.iterrows()]
-        return data
+    df_test_specs = retrieve_test_specs()
+    data = [
+        {"test_id": row["test_id"],
+            "filename": row["test_file_name"],
+            "download": "Download"}
+        for _, row in df_test_specs.iterrows()]
+    return data
 
 
 @app.callback(
@@ -606,11 +666,13 @@ def update_table(n_clicks):
         Input("pwp_slider", "value"), 
         Input("q_slider", "value"),
         Input("e_slider", "value"),
-        Input('refresh-button', 'n_clicks')
+        Input('refresh-button', 'n_clicks'),
+        Input("checkall_sample_checklist", "value"),
+        Input("checkall_test_checklist", "value")
     ]
 )
 def update_figure(selected_drainage, selected_shearing, selected_anisotropy, selected_consolidation, selected_availability, selected_density, selected_plasticity, selected_psd,
-                  selected_axial, selected_p, selected_pwp, selected_q, selected_e, click):
+                  selected_axial, selected_p, selected_pwp, selected_q, selected_e, click, selected_all_sample, selected_all_test):
     
     # Check if filters and data are properly initialized
     print(f"Selected filters: {selected_drainage}, {selected_shearing}, {selected_anisotropy}, {selected_consolidation}, {selected_availability},{selected_density},{selected_plasticity},{selected_psd}")
