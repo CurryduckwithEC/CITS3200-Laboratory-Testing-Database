@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 import pandas as pd
 import os
 
-from models import Entry, Test, TestValues, SampleValues, Base
+from .models import Entry, Test, TestValues, SampleValues, Base
 
 # In array to allow changing of value in function
 PATH = [""]
