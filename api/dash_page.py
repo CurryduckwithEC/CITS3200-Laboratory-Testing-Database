@@ -701,7 +701,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
             yaxis_title="Void Ratio, e"
         ).update_layout(showlegend=False)
     
-    ### Stress ratio (p'/q) vs. Axial Strain
+    ### Stress ratio (q/p') vs. Axial Strain
     stress_ratio_axial_fig = px.line(
         filtered_df, 
         x="axial_strain", 
