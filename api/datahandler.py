@@ -301,11 +301,11 @@ def retrieve_filtered_data(drainage_types=None, shearing_types=None, anisotropy_
                 df_filtered = pd.concat([df_public, df_private], ignore_index=True)
                 
             elif True in availability_types:
-                query = query.filter(TestValues.availability_type.in_([availability_types]))
+                query = query.filter(TestValues.availability_type.in_(availability_types))
                 df_filtered = convert_query_to_dataframe(query.all())
                 
             elif False in availability_types:
-                query = query.filter(TestValues.availability_type.in_([availability_types]))
+                query = query.filter(TestValues.availability_type.in_(availability_types))
                 df_filtered = convert_query_to_dataframe(query.all())
                 
                 # decrypt df entries with private tag if key is supplied
