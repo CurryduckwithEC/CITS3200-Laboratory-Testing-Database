@@ -420,7 +420,6 @@ admin = dbc.Container(children=[
             multiple = True
         ),
         html.Div(id="upload-status"),
-        html.Br(),
         html.Button(
             "Refresh Page", 
             id="refresh-table-button", 
@@ -438,6 +437,8 @@ admin = dbc.Container(children=[
                 'cursor': 'pointer', 
             }
         ),
+        html.Br(),
+        html.Br(),
         html.H3("Current Database"),
         dash_table.DataTable(
             id="data-table",
