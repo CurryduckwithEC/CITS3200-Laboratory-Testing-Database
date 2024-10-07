@@ -112,9 +112,9 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="anisotropy_min_value", className="filter_input_number", style={"width":"30%"},  style={"width":"30%"},  type="number", min=0.3, max=1.0, value=0,  step=0.005),
+                                                    dcc.Input(id="anisotropy_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0.3, max=1.0, value=0,  step=0.005),
                                                     "Max:",
-                                                    dcc.Input(id="anisotropy_max_value", className="filter_input_number", style={"width":"30%"},  style={"width":"30%"},  type="number", min=0.3, max=1.0, value=1.0,  step=0.005),
+                                                    dcc.Input(id="anisotropy_max_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0.3, max=1.0, value=1.0,  step=0.005),
                                                     html.Br(),
 
                                                     html.H2("Consolidation"),
@@ -435,7 +435,7 @@ admin = dbc.Container(children=[
                 'text-decoration': 'none',
                 'display': 'inline-block',
                 'font-size': '16px',
-                'cursor': 'pointer'
+                'cursor': 'pointer', 
             }
         ),
         html.H3("Current Database"),
@@ -451,14 +451,24 @@ admin = dbc.Container(children=[
                    "download": "Download"}
                   for _, row in df_test_specs.iterrows()],  # Convert dataframe to dictionary
                 style_table={'overflowX': 'auto'},  # Allow horizontal scrolling
-                style_cell={'textAlign': 'left'},  # Cell alignment
                 style_header={
-            'backgroundColor': 'lightgrey',
-            'fontWeight': 'bold'
-            }
+                    'backgroundColor': 'lightgrey',
+                    'font_size': '16px',
+                    'fontWeight': 'bold',
+                    'fontFamily': 'helveticaneue',
+                },
+                style_cell = {
+                    'textAlign': 'left',
+                    'padding': '10px',
+                    'font_family': 'helveticaneue',
+                    'font_size': '16px',
+                    #'border': '1px solid black',
+                    'margin': '20px'
+                }
             ),
         dcc.Download(id="download-csv"),
-    ]),
+    ], 
+    style={"margin-bottom": "50px"}),
 ])
 
 dash.register_page("graphs", path='/', layout=graphs)
