@@ -32,6 +32,15 @@ class TestDownloadxlsx(unittest.TestCase):
         
         # Compare values in p' column 
         self.assertAlmostEqual(expected_content["p'"].iloc[-1], test_content["p'"].iloc[-1], places=10)
+        print("p' column matches")
+
+        # Compare values in axial strain column 
+        self.assertAlmostEqual(expected_content["Axial strain"].iloc[-1], test_content["axial strain"].iloc[-1], places=10)
+        print("Axial strain column matches")
+
+        # Compare values in e column 
+        self.assertAlmostEqual(expected_content["Void ratio"].iloc[-1], test_content["void ratio"].iloc[-1], places=10)
+        print("Void ratio column matches")
 
 if __name__ == '__main__':
     unittest.main()
