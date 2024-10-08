@@ -37,16 +37,18 @@ if len(sys.argv) > 3:
 # Change key value if not None
 if key_value is not None and key_value != "":
     change_key(key_value)
+else:
+    key_value = None
 
 #print("Key is:", keyValue)
 
-#df_combined = retrieve_entry_data()
+# Used for data download
+df_combined = retrieve_entry_data()
+df_test_ids = pd.DataFrame(df_combined["test_id"]).drop_duplicates()
+
+# Used as list to display tests in admin page
 df_test_specs = retrieve_test_specs()
 df_test_specs["availability_type"] = df_test_specs["availability_type"].map({True: "public", False:"private"})
-#df_test_ids = pd.DataFrame(df_combined["test_id"]).drop_duplicates()
-
-
-
 
 graphs = dbc.Container(
     children=[

@@ -191,8 +191,6 @@ def commit_new_entry(specs: dict, df: pd.DataFrame, file_name: str):
 # Shouldn't really be used
 # Retrieves all entry data and returns them as list of dataframes
 def retrieve_entry_data():
-    aes_key = word_to_aes_key(WORD_FOR_KEY, AES_KEY_SIZE)
-    decrypt_params = generate_encryption_parameters(aes_key)
     
     engine = create_engine(get_path(), echo=True)
 
@@ -200,7 +198,10 @@ def retrieve_entry_data():
         df = pd.read_sql(session.query(Entry).statement, session.bind)
 
     # Decrypt the data if key is supplied
-    if WORD_FOR_KEY != "":        
+    if get_key() is not None:        
+        aes_key = word_to_aes_key(get_key(), AES_KEY_SIZE)
+        decrypt_params = generate_encryption_parameters(aes_key)
+        
         for column in ['axial_strain', 'vol_strain', 'excess_pwp', 'p', 'deviator_stress', 'void_ratio', 'shear_induced_pwp']:
             df[column] = df[column].apply(lambda x: decrypt_data(x, *decrypt_params))
 
@@ -220,6 +221,10 @@ def retrieve_test_specs():
         )
 
         df = pd.read_sql(query.statement, session.bind)
+        
+        if get_key() is None:
+            # Drop all private tests if key value is None
+            df = df.drop(df[df["availability_type"] == False].index)
 
     return df
 
