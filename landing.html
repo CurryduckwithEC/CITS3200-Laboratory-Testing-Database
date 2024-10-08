@@ -26,7 +26,7 @@
 
 <div class="container">
     <div class="form-container">
-        <h3 class="text-center">Enter Database Directory</h3>
+        <h3 class="text-center">Soil Sample Database Interface</h3>
         <form>
             <div class="form-group">
                 <label for="databaseDirectory">Database Directory</label>
@@ -35,6 +35,11 @@
                     <div class="input-group-append">
                         <button type="button" class="btn btn-secondary" id="databaseDirectory">Browse</button>
                     </div>
+                </div>
+                <br>
+                <label for="keyInput">Access Key (Optional)</label>
+                <div class="key-input">
+                    <input type="text" class="form-control" id="keyField" placeholder="Input key">
                 </div>
             </div>
             <div class="text-center">
@@ -57,7 +62,9 @@
 
     // event listener to submit path and invoke dash page to start
     document.getElementById("commit").addEventListener("click", () => {
-        window.electronAPI.commitDir()
+        const keyValue = document.getElementById("keyField").value;
+
+        window.electronAPI.commitDir(keyValue);
     })
 
     // event listener for returning db path as passed to backend to user
