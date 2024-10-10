@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, sessionmaker
 import pandas as pd
 import os
 from models import Entry, Test, TestValues, SampleValues, Base
-from Cryptodome.Cipher import AES
+from Crypto.Cipher import AES
 from hashlib import sha256
 import random
 import math
