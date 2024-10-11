@@ -18,7 +18,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld("electronAPI", {
     returnedPath: (callback) => ipcRenderer.on("return-selected-path", (_event, value) => callback(value)),
     selectDir: () => ipcRenderer.send("select-dirs"),
-    commitDir: () => ipcRenderer.send("submit-dir")
+    commitDir: (currentPath) => ipcRenderer.send("submit-dir", currentPath)
 })
 
 
