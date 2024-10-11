@@ -710,9 +710,10 @@ def update_figure(selected_drainage, selected_shearing, checked_anisotropy, sele
     # Check if filters and data are properly initialized
     print(f"Selected filters: {selected_drainage}, {selected_shearing}, {selected_anisotropy}, {selected_consolidation}, {selected_availability},{selected_density},{selected_plasticity},{selected_psd}")
     if(checked_anisotropy == ['Isotropic']):
-        selected_anisotropy = [0.5, 0.5]
+        selected_anisotropy = [1.0, 1.0]
     if(checked_anisotropy == ['Anisotropic']):
-        selected_anisotropy = [0.3, 0.495]
+        if(selected_anisotropy[0] >= 1.0 or selected_anisotropy[1] >= 1.0):
+            selected_anisotropy = [selected_anisotropy[0], 0.999]
     df_filtered = retrieve_filtered_data(
         drainage_types=selected_drainage,
         shearing_types=selected_shearing,
@@ -926,9 +927,10 @@ def update_graphs_based_on_filters(selected_drainage, selected_shearing, checked
                                    selected_q, selected_e, refresh_click):
     # Filter the data based on the inputs
     if(checked_anisotropy == ['Isotropic']):
-        selected_anisotropy = [0.5, 0.5]
+        selected_anisotropy = [1.0, 1.0]
     if(checked_anisotropy == ['Anisotropic']):
-        selected_anisotropy = [0.3, 0.495]
+        if(selected_anisotropy[0] >= 1.0 or selected_anisotropy[1] >= 1.0):
+            selected_anisotropy = [selected_anisotropy[0], 0.999]
     df_filtered = retrieve_filtered_data(
         drainage_types=selected_drainage,
         shearing_types=selected_shearing,
