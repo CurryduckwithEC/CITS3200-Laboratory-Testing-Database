@@ -10,7 +10,7 @@ import base64
 import dash_bootstrap_components as dbc
 import dash_table
 
-from datahandler import retrieve_entry_data, change_path, commit_new_entry, retrieve_test_specs, retrieve_filtered_data, change_key, delete_entry_by_test
+from datahandler import retrieve_entry_data, change_path, commit_new_entry, retrieve_test_specs, retrieve_filtered_data, change_key, delete_entry_by_test, delete_test_by_test
 from parser import parse_workbook
 
 css_cdn = ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"]
@@ -880,6 +880,7 @@ def update_data_table_on_delete(active_cell, current_data):
 
         # Delete entry from the database
         delete_entry_by_test(test_id=test_id_to_delete)
+        delete_test_by_test(test_id=test_id_to_delete)
 
         # Update DataTable by removing the deleted entry
         updated_data = [row for row in current_data if row["test_id"] != test_id_to_delete]
