@@ -1,7 +1,7 @@
 # See official docs at https://dash.plotly.com
 # pip install dash pandas
 import dash
-from dash import Dash, dcc, html, Input, Output, ctx, callback, State
+from dash import Dash, dcc, html, Input, Output, ctx, callback, State, callback_context
 import plotly.express as px
 import pandas as pd
 import sys
@@ -10,10 +10,17 @@ import base64
 import dash_bootstrap_components as dbc
 import dash_table
 
-from datahandler import retrieve_entry_data, change_path, commit_new_entry, retrieve_test_specs
+from datahandler import retrieve_entry_data, change_path, commit_new_entry, retrieve_test_specs, retrieve_filtered_data, change_key
 from parser import parse_workbook
 
-app = Dash(__name__, use_pages=True, pages_folder="")
+css_cdn = ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"]
+js_cdn = ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"]
+
+app = Dash(__name__, external_stylesheets=css_cdn, external_scripts=js_cdn)
+css_cdn = ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"]
+js_cdn = ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"]
+
+app = Dash(__name__, external_stylesheets=css_cdn, external_scripts=js_cdn, use_pages=True, pages_folder="")
 
 # Set default port
 port = 18019
@@ -22,16 +29,33 @@ if len(sys.argv) > 2:
 
 # Read path off command line arguments
 change_path(sys.argv[1])
+# Read the key from arguments
+key_value = None
+if len(sys.argv) > 3:
+    key_value = sys.argv[3]
 
+# Change key value if not None
+if key_value is not None and key_value != "":
+    change_key(key_value)
+else:
+    key_value = None
 
+#print("Key is:", keyValue)
+
+# Used for data download
 df_combined = retrieve_entry_data()
+df_test_ids = pd.DataFrame(df_combined["test_id"]).drop_duplicates()
+
+# Used as list to display tests in admin page
 df_test_specs = retrieve_test_specs()
 df_test_specs["availability_type"] = df_test_specs["availability_type"].map({True: "public", False:"private"})
-#df_test_ids = pd.DataFrame(df_combined["test_id"]).drop_duplicates()
-
 
 graphs = dbc.Container(
     children=[
+        html.Link(
+        rel='stylesheet',
+        href='api/styles.css'
+        ),
         html.Div(
             id="app-container",
             children=[
@@ -58,12 +82,13 @@ graphs = dbc.Container(
                                                 [
                                                     # Have to go back and put in actual values used in DB
                                                     # Format Value:Label
+                                                    dcc.Checklist(["All"], [], id="checkall_test_checklist", inline=True),
                                                     html.H2("Drainage"),
                                                     dcc.Checklist(
                                                         options={
-                                                            "drained":"Drained", 
-                                                            "undrained":"Undrained"},
-                                                        value=["drained", "undrained"],
+                                                            "Drained":"Drained", 
+                                                            "Undrained":"Undrained"},
+                                                        value=["Drained", "Undrained"],
                                                         id="drainage_checklist",
                                                         inline=True
                                                     ),
@@ -72,9 +97,9 @@ graphs = dbc.Container(
                                                     html.H2("Shearing"),
                                                     dcc.Checklist(
                                                         options={
-                                                            "compression":"Compression", 
-                                                            "extension":"Extension"},
-                                                        value=["compression", "extension"],
+                                                            "Compression":"Compression", 
+                                                            "Extension":"Extension"},
+                                                        value=["Compression", "Extension"],
                                                         id="shearing_checklist",
                                                         inline=True
                                                     ),
@@ -83,9 +108,9 @@ graphs = dbc.Container(
                                                     html.H2("Anisotropy"),
                                                     dcc.Checklist(
                                                         options={
-                                                            "isotropic":"Isotropic", 
-                                                            "anisotropic":"Anisotropic"},
-                                                        value=["isotropic", "anisotropic"],
+                                                            "Isotropic":"Isotropic", 
+                                                            "Anisotropic":"Anisotropic"},
+                                                        value=["Isotropic", "Anisotropic"],
                                                         id="anisotropy_checklist",
                                                         inline=True
                                                     ),
@@ -98,9 +123,9 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="anisotropy_min_value", className="filter_input_number", type="number", min=0.3, max=1.0, value=0,  step=0.005),
+                                                    dcc.Input(id="anisotropy_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0.3, max=1.0, value=0,  step=0.005),
                                                     "Max:",
-                                                    dcc.Input(id="anisotropy_max_value", className="filter_input_number", type="number", min=0.3, max=1.0, value=1.0,  step=0.005),
+                                                    dcc.Input(id="anisotropy_max_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0.3, max=1.0, value=1.0,  step=0.005),
                                                     html.Br(),
 
                                                     html.H2("Consolidation"),
@@ -122,17 +147,17 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="consolidation_min_value", className="filter_input_number", type="number", min=0, max=1500, value=0),
+                                                    dcc.Input(id="consolidation_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=1500, value=0),
                                                     "Max:",
-                                                    dcc.Input(id="consolidation_max_value", className="filter_input_number", type="number", min=0, max=1500, value=1500),
+                                                    dcc.Input(id="consolidation_max_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=1500, value=1500),
                                                     html.Br(),
 
                                                     html.H2("Availability"),
                                                     dcc.Checklist(
                                                         options={
-                                                            True:"Public", 
-                                                            False:"Confidential"},
-                                                        value=[True, False],
+                                                            "Public":"Public", 
+                                                            "Confidential":"Confidential"},
+                                                        value=["Public", "Confidential"],
                                                         id="availability_checklist",
                                                         inline=True
                                                     )
@@ -140,13 +165,14 @@ graphs = dbc.Container(
                                                 title="Test",
                                             ),
                                             dbc.AccordionItem(
-                                                [
+                                                [   
+                                                    dcc.Checklist(["All"], [], id="checkall_sample_checklist", inline=True),
                                                     html.H2("Density"),
                                                     dcc.Checklist(
                                                         options={
-                                                            "loose":"Loose",
-                                                            "dense":"Dense"},
-                                                        value=["loose", "dense"],
+                                                            "Loose":"Loose",
+                                                            "Dense":"Dense"},
+                                                        value=["Loose", "Dense"],
                                                         id="density_checklist",
                                                         inline=True
                                                     ),
@@ -155,10 +181,10 @@ graphs = dbc.Container(
                                                     html.H2("Plasticity"),
                                                     dcc.Checklist(
                                                         options={
-                                                            "plastic":"Plastic",
-                                                            "non-plastic":"Non-plastic",
-                                                            "unknown":"Unknown"},
-                                                        value=["plastic", "non-plastic","unknown"],
+                                                            "Plastic":"Plastic",
+                                                            "Non-plastic":"Non-plastic",
+                                                            "Unknown":"Unknown"},
+                                                        value=["Plastic", "Non-plastic","Unknown"],
                                                         id="plasticity_checklist",
                                                         inline=True
                                                     ),
@@ -167,10 +193,10 @@ graphs = dbc.Container(
                                                     html.H2("PSD"),
                                                     dcc.Checklist(
                                                         options={
-                                                            "clay":"Clay",
-                                                            "sand":"Sand",
-                                                            "silt":"Silt"},
-                                                        value=["clay","sand","silt"],
+                                                            "Clay":"Clay",
+                                                            "Sand":"Sand",
+                                                            "Silt":"Silt"},
+                                                        value=["Clay","Sand","Silt"],
                                                         id="psd_checklist",
                                                         inline=True
                                                     ),
@@ -197,13 +223,12 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="axial_min_value", className="filter_input_number", type="number", min=0, max=0.4, value=0, step=0.001),
+                                                    dcc.Input(id="axial_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=0.4, value=0, step=0.001),
+                                            
                                                     "Max:",
-                                                    dcc.Input(id="axial_max_value", className="filter_input_number", type="number", min=0, max=0.4, value=0.4, step=0.001),
-                                                    html.Br(),
-
-                                                    html.H2("Volumetric Strain Filter"),
-                                                    html.P(id="volumetric_value"),
+                                                    dcc.Input(id="axial_max_value", className="filter_input_number", style={"width":"30%"},  type="number",  min=0, max=0.4, value=0, step=0.001),
+                                                    
+                                                    html.H2("Volumetric Strain"),
                                                     dcc.RangeSlider(
                                                         0,
                                                         0.4,
@@ -220,9 +245,9 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="vol_min_value", className="filter_input_number", type="number", min=0, max=0.4, value=0, step=0.001),
+                                                    dcc.Input(id="vol_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=0.4, value=0, step=0.001),
                                                     "Max:",
-                                                    dcc.Input(id="vol_max_value", className="filter_input_number", type="number", min=0, max=0.4, value=0.4, step=0.001),
+                                                    dcc.Input(id="vol_max_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=0.4, value=0.4, step=0.001),
                                                     html.Br(),
                                                     
                                                     html.H2("p'"),
@@ -236,9 +261,9 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ), 
                                                     "Min:",
-                                                    dcc.Input(id="p_min_value", className="filter_input_number", type="number", min=0, max=7000, value=0),
+                                                    dcc.Input(id="p_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=7000, value=0),
                                                     "Max:",
-                                                    dcc.Input(id="p_max_value", className="filter_input_number", type="number", min=0, max=7000, value=7000),
+                                                    dcc.Input(id="p_max_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=7000, value=7000),
                                                     html.Br(),
 
                                                     html.H2("Induced PWP"),
@@ -252,9 +277,9 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="pwp_min_value", className="filter_input_number", type="number", min=0, max=7000, value=0),
+                                                    dcc.Input(id="pwp_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=7000, value=0),
                                                     "Max:",
-                                                    dcc.Input(id="pwp_max_value", className="filter_input_number", type="number", min=0, max=7000, value=7000),
+                                                    dcc.Input(id="pwp_max_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=7000, value=7000),
                                                     html.Br(),
                                                     
                                                     html.H2("Deviator stress (q)"),
@@ -268,9 +293,9 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="q_min_value", className="filter_input_number", type="number", min=0, max=7000, value=0),
+                                                    dcc.Input(id="q_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=7000, value=0),
                                                     "Max:",
-                                                    dcc.Input(id="q_max_value", className="filter_input_number", type="number", min=0, max=7000, value=7000),
+                                                    dcc.Input(id="q_max_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0, max=7000, value=7000),
                                                     html.Br(),
                                                     
                                                     html.H2("Void Ratio (e)"),
@@ -293,9 +318,9 @@ graphs = dbc.Container(
                                                         tooltip={"placement": "bottom"}
                                                     ),
                                                     "Min:",
-                                                    dcc.Input(id="e_min_value", className="filter_input_number", type="number", min=0.3, max=3, value=0, step=0.01),
+                                                    dcc.Input(id="e_min_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0.3, max=3, value=0, step=0.01),
                                                     "Max:",
-                                                    dcc.Input(id="e_max_value", className="filter_input_number", type="number", min=0.3, max=3, value=3, step=0.01),
+                                                    dcc.Input(id="e_max_value", className="filter_input_number", style={"width":"30%"},  type="number", min=0.3, max=3, value=3, step=0.01),
                                                                                                         
                                                     ],
                                                     title="Variables",
@@ -303,7 +328,47 @@ graphs = dbc.Container(
                                                
                                                 dbc.AccordionItem(
                                                     [
-                                                        
+                                                        html.H3("Upload Data (.xlsx)"),
+                                                        dcc.Upload(
+                                                            id="upload-data",
+                                                            children=html.Div(
+                                                                [
+                                                                    "Drag and Drop or ",
+                                                                    html.A("Select Files"),
+                                                                ]
+                                                            ),
+                                                            style={
+                                                                "width": "100%",
+                                                                "height": "60px",
+                                                                "lineHeight": "60px",
+                                                                "borderWidth": "1px",
+                                                                "borderStyle": "dashed",
+                                                                "borderRadius": "5px",
+                                                                "textAlign": "center",
+                                                                "margin": "10px",
+                                                            },
+                                                            accept=".xlsx",
+                                                            multiple=True
+                                                        ),
+                                                        # Refresh Button 
+                                                        html.Button(
+                                                            "Refresh Page", 
+                                                            id="refresh-button", 
+                                                            n_clicks=0, 
+                                                            style={
+                                                                'margin': '10px', 
+                                                                'background-color': '#4CAF50', 
+                                                                'color': 'white', 
+                                                                'border': 'none', 
+                                                                'padding': '10px 20px',
+                                                                'text-align': 'center',
+                                                                'text-decoration': 'none',
+                                                                'display': 'inline-block',
+                                                                'font-size': '16px',
+                                                                'cursor': 'pointer'
+                                                            }
+                                                        ),
+                                                        html.Div(id="upload-status"),
                                                     ],
                                                     title="Upload",
                                                 ),
@@ -316,23 +381,23 @@ graphs = dbc.Container(
                             ),
                             width=3,
                         ),
-                        dbc.Col(
-                            children=[
-                                html.Div(
-                                    id="dashboard",
-                                    children=[
-                                        dcc.Graph(id="axial_deviator_fig"),
-                                        dcc.Graph(id="axial_pwp_fig"),
-                                        dcc.Graph(id="q_p_fig"),
-                                        dcc.Graph(id="axial_vol_fig"),
-                                        dcc.Graph(id="e_logp_fig"),
-                                        dcc.Graph(id="stress_ratio_axial_fig"),
-                                    ],
-                                ),
-                            ], width=9,
-                        ),
-                    ]
-                ),
+                    
+                        dbc.Col([
+                            html.Div(
+                                id="dashboard",
+                                children = [
+                                dcc.Graph(id="axial_deviator_fig"),
+                                dcc.Graph(id="axial_pwp_fig"), 
+                                dcc.Graph(id="q_p_fig"),
+                                dcc.Graph(id="axial_vol_fig"), 
+                                dcc.Graph(id="e_logp_fig"),
+                                dcc.Graph(id="stress_ratio_axial_fig")
+                            ]
+                        )
+                    ], width=9, 
+                    ),
+                    ],
+                )
             ]
         ),
     ],
@@ -366,6 +431,24 @@ admin = dbc.Container(children=[
             multiple = True
         ),
         html.Div(id="upload-status"),
+        html.Button(
+            "Refresh Page", 
+            id="refresh-table-button", 
+            n_clicks=0, 
+            style={
+                'margin': '10px', 
+                'background-color': '#4CAF50', 
+                'color': 'white', 
+                'border': 'none', 
+                'padding': '10px 20px',
+                'text-align': 'center',
+                'text-decoration': 'none',
+                'display': 'inline-block',
+                'font-size': '16px',
+                'cursor': 'pointer', 
+            }
+        ),
+        html.Br(),
         html.Br(),
         html.H3("Current Database"),
         dash_table.DataTable(
@@ -380,14 +463,24 @@ admin = dbc.Container(children=[
                    "download": "Download"}
                   for _, row in df_test_specs.iterrows()],  # Convert dataframe to dictionary
                 style_table={'overflowX': 'auto'},  # Allow horizontal scrolling
-                style_cell={'textAlign': 'left'},  # Cell alignment
                 style_header={
-            'backgroundColor': 'lightgrey',
-            'fontWeight': 'bold'
-            }
+                    'backgroundColor': 'lightgrey',
+                    'font_size': '16px',
+                    'fontWeight': 'bold',
+                    'fontFamily': 'helveticaneue',
+                },
+                style_cell = {
+                    'textAlign': 'left',
+                    'padding': '10px',
+                    'font_family': 'helveticaneue',
+                    'font_size': '16px',
+                    #'border': '1px solid black',
+                    'margin': '20px'
+                }
             ),
         dcc.Download(id="download-csv"),
-    ]),
+    ], 
+    style={"margin-bottom": "50px"}),
 ])
 
 dash.register_page("graphs", path='/', layout=graphs)
@@ -419,7 +512,6 @@ navbar = dbc.NavbarSimple(
     dark=True,
 )
 
-
 app.layout = dbc.Container(
     children=[
         navbar,
@@ -428,6 +520,64 @@ app.layout = dbc.Container(
     fluid=True,
 )
 
+@app.callback(
+    [
+        Output("density_checklist", "value"),
+        Output("plasticity_checklist", "value"),
+        Output("psd_checklist", "value")
+     ],
+    [
+        Input("checkall_sample_checklist", "value"),
+        Input("density_checklist", "value"),
+        Input("plasticity_checklist", "value"),
+        Input("psd_checklist", "value")
+    ]
+)
+def toggle_checklists(all_value, density_value, plasticity_value, psd_value):
+    density_options = ["Loose", "Dense"]
+    plasticity_options = ["Plastic", "Non-plastic", "Unknown"]
+    psd_options = ["Clay", "Sand", "Silt"]
+
+    ctx = callback_context
+    input_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    if input_id == "checkall_sample_checklist":
+        if "All" in all_value:
+            return density_options, plasticity_options, psd_options
+        else:
+            return [], [], []
+    return density_value, plasticity_value, psd_value
+
+@app.callback(
+    [
+        Output("drainage_checklist", "value"),
+        Output("shearing_checklist", "value"),
+        Output("anisotropy_checklist", "value"),
+        Output("availability_checklist", "value"),
+    ],
+    [
+        Input("checkall_test_checklist", "value"),
+        Input("drainage_checklist", "value"),
+        Input("shearing_checklist", "value"),
+        Input("anisotropy_checklist", "value"),
+        Input("availability_checklist", "value"),
+    ]
+)
+def toggle_test_checklists(all_value, drainage_value, shearing_value, anisotropy_value, availability_value):
+    drainage_options = ["Drained", "Undrained"]
+    shearing_options = ["Compression", "Extension"]
+    anisotropy_options = ["Isotropic", "Anisotropic"]
+    availability_options = ["Public", "Confidential"]
+
+    ctx = callback_context
+    input_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    if input_id == "checkall_test_checklist":
+        if "All" in all_value:
+            return drainage_options, shearing_options, anisotropy_options, availability_options
+        else:
+            return [], [], [], []
+    return drainage_value, shearing_value, anisotropy_value, availability_value
 
 
 def sync_slider_callback(min_id, max_id, slider):
@@ -467,7 +617,8 @@ sync_slider_callback("e_min_value", "e_max_value", "e_slider")
 @app.callback(
     Output('upload-status', 'children'),
     [Input('upload-data', 'contents'),
-     Input('upload-data', 'filename')]
+     Input('upload-data', 'filename')
+    ]
 )
 def handle_upload(content, filename):
 
@@ -505,6 +656,18 @@ def parse_contents(contents, filename):
         print(f"Error parsing file {filename}: {str(e)}")
         return None
 
+@app.callback(
+    Output("data-table", "data"),
+    Input("refresh-table-button", "n_clicks")
+)
+def update_table(n_clicks):
+    df_test_specs = retrieve_test_specs()
+    data = [
+        {"test_id": row["test_id"],
+            "filename": row["test_file_name"],
+            "download": "Download"}
+        for _, row in df_test_specs.iterrows()]
+    return data
 
 
 @app.callback(
@@ -514,43 +677,71 @@ def parse_contents(contents, filename):
         Output("q_p_fig", "figure"),
         Output("axial_vol_fig", "figure"), 
         Output("e_logp_fig", "figure"), 
-        Output("stress_ratio_axial_fig", "figure")
+        Output("stress_ratio_axial_fig", "figure"),
     ],
     [
-        Input("axial_slider", "value"), 
+        Input("drainage_checklist", "value"),
+        Input("shearing_checklist", "value"),
+        Input("anisotropy_slider", "value"),
+        Input("consolidation_slider", "value"),
+        Input("availability_checklist", "value"),
+        Input("density_checklist","value"),
+        Input("plasticity_checklist", "value"),
+        Input("psd_checklist","value"),
+        Input("axial_slider", "value"),
         Input("p_slider", "value"), 
         Input("pwp_slider", "value"), 
         Input("q_slider", "value"),
         Input("e_slider", "value"),
+        Input('refresh-button', 'n_clicks'),
+        Input("checkall_sample_checklist", "value"),
+        Input("checkall_test_checklist", "value")
     ]
 )
-def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected_e):  
-    global df_combined
+def update_figure(selected_drainage, selected_shearing, selected_anisotropy, selected_consolidation, selected_availability, selected_density, selected_plasticity, selected_psd,
+                  selected_axial, selected_p, selected_pwp, selected_q, selected_e, click, selected_all_sample, selected_all_test):
     
-    #print("update_figure called with selected values:")
-    #print(f"Axial: {selected_axial}, p: {selected_p}, pwp: {selected_pwp}, q: {selected_q}, e: {selected_e}")
+    # Check if filters and data are properly initialized
+    print(f"Selected filters: {selected_drainage}, {selected_shearing}, {selected_anisotropy}, {selected_consolidation}, {selected_availability},{selected_density},{selected_plasticity},{selected_psd}")
 
-    if df_combined.empty:
-        print("Global dataframe 'df_combined' is empty. Returning empty figures.")
+    df_filtered = retrieve_filtered_data(
+        drainage_types=selected_drainage,
+        shearing_types=selected_shearing,
+        anisotropy_range=selected_anisotropy,
+        consolidation_range=selected_consolidation,
+        availability_types=selected_availability,
+        density_types=selected_density,
+        plasticity_types=selected_plasticity,
+        psd_types = selected_psd
+    )
+    
+    #if not df_filtered:
+    #    print("No data after filtering")
+    #    return {}, {}, {}, {}, {}, {}
+    
+    print(f"Filtered DataFrame: {df_filtered.shape}")  # Debugging log to see if data is passed to the figure generation
+    
+    if df_filtered.empty:
+        print("Filtered dataframe is empty.")
         return {}, {}, {}, {}, {}, {}
 
-    #print("df_combined before filtering:")
-    #print(df_combined.head())
 
-    filtered_df = df_combined[
-        (df_combined["axial_strain"] >= selected_axial[0]) &
-        (df_combined["axial_strain"] <= selected_axial[1]) &
-        (df_combined["p"] >= selected_p[0]) &
-        (df_combined["p"] <= selected_p[1]) &
-        (df_combined["shear_induced_pwp"] >= selected_pwp[0]) &
-        (df_combined["shear_induced_pwp"] <= selected_pwp[1]) &
-        (df_combined["deviator_stress"] >= selected_q[0]) &
-        (df_combined["deviator_stress"] <= selected_q[1]) &
-        (df_combined["void_ratio"] >= selected_e[0]) &
-        (df_combined["void_ratio"] <= selected_e[1])
+    # Filter the data further by the sliders (axial strain, p, pwp, q, and e)
+    filtered_df= df_filtered[
+        (df_filtered["axial_strain"] >= selected_axial[0]) &
+        (df_filtered["axial_strain"] <= selected_axial[1]) &
+        (df_filtered["p"] >= selected_p[0]) &
+        (df_filtered["p"] <= selected_p[1]) &
+        (df_filtered["shear_induced_pwp"] >= selected_pwp[0]) &
+        (df_filtered["shear_induced_pwp"] <= selected_pwp[1]) &
+        (df_filtered["deviator_stress"] >= selected_q[0]) &
+        (df_filtered["deviator_stress"] <= selected_q[1]) &
+        (df_filtered["void_ratio"] >= selected_e[0]) &
+        (df_filtered["void_ratio"] <= selected_e[1])
     ]
+
     if filtered_df.empty:
-        print("Filtered dataframe is empty after applying the filters.")
+        print("Filtered dataframe is empty after applying the sliders.")
         return {}, {}, {}, {}, {}, {}
 
     #print(filtered_df.head())
@@ -622,6 +813,7 @@ def update_figure(selected_axial, selected_p, selected_pwp, selected_q, selected
             yaxis_title="Stress Ratio"
         ).update_layout(showlegend=False)
     
+
     return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig, e_logp_fig, stress_ratio_axial_fig
 
 
@@ -670,5 +862,3 @@ def download_csv(active_cell):
             return dcc.send_bytes(file, f"{test_filename}")
 
 app.run_server(port=port, debug=True)
-
-

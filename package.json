@@ -1,21 +1,44 @@
 {
-  "name": "test",
-  "version": "0.1",
+  "name": "soil-database-explorer",
+  "version": "1.0",
   "description": "Database access app for soil samples",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.uwa.cits3200.group18",
+    "win": {
+      "target": [
+        "portable"
+      ]
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json",
+      "landing.html"
+    ],
+    "extraResources": [
+      {
+        "from": "dist/dash_page.exe",
+        "to": "dash_page.exe"
+      }
+    ]
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CurryduckwithEC/CITS3200-Laboratory-Testing-Database"
   },
-  "keywords": [
-  ],
+  "keywords": [],
   "author": "GitHub",
   "license": "CC0-1.0",
   "bugs": {
     "url": "https://github.com/CurryduckwithEC/CITS3200-Laboratory-Testing-Database/issues"
   },
-  "homepage": "https://github.com/CurryduckwithEC/CITS3200-Laboratory-Testing-Database"
+  "homepage": "https://github.com/CurryduckwithEC/CITS3200-Laboratory-Testing-Database",
+  "devDependencies": {
+    "electron": "^32.1.2"
+  }
 }
