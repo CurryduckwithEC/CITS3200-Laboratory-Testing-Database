@@ -208,11 +208,19 @@ app.whenReady().then(() => {
         console.log(".db path committed, starting Dash...")
         createDashProc(db_path, keyValue)
 
-        // timeout to allow dahs to load
+        // timeout to allow dash to load
         setTimeout(() => {
             console.log("Redirecting to Dash at http://127.0.0.1:" + DASH_PORT);
             mainWindow.loadURL("http://127.0.0.1:" + DASH_PORT);
-        }, 5000); // Delay of 5 seconds
+        }, 2000); // Delay of 2 seconds
+
+        mainWindow.webContents.on("did-fail-load", () => {
+            // timeout to allow dash to load again
+            setTimeout(() => {
+                console.log("Retrying to redirect to Dash at http://127.0.0.1:" + DASH_PORT);
+                mainWindow.loadURL("http://127.0.0.1:" + DASH_PORT);
+            }, 2000); // Delay of 2 seconds
+        })
     })
 
 

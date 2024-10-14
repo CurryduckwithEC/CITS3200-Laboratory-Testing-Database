@@ -1,6 +1,6 @@
 {
   "name": "soil-database-explorer",
-  "version": "1.0",
+  "version": "1.0.1",
   "description": "Database access app for soil samples",
   "main": "main.js",
   "scripts": {

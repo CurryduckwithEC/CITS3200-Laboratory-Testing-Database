@@ -357,7 +357,45 @@ def delete_entry_by_test(test_id=None, test_file_name=None):
         for entry in entries_to_delete:
             session.delete(entry)
             print(f"Deleted entry with ID {entry.entry_id} for test_id {entry.test_id}")
+        session.commit()
+        print("Entries successfully deleted.")
 
+    except Exception as e:
+        session.rollback()
+        print(f"Error occurred: {e}")
+
+    finally:
+        session.close()
+
+# used to find specific test by either test_id or test_file_name and remove it from the database
+def delete_test_by_test(test_id=None, test_file_name=None):
+    engine = create_engine(get_path(), echo=True)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    try:
+        # Build the query to join Entry and Test tables
+        query = session.query(Test)
+        
+        # Filter by test_id if provided
+        if test_id:
+            query = query.filter(Test.test_id == test_id)
+        
+        # Filter by test_file_name if provided
+        if test_file_name:
+            query = query.filter(Test.test_file_name == test_file_name)
+        
+        # Retrieve the matched entries
+        tests_to_delete = query.all()
+
+        if not tests_to_delete:
+            print("No entries found with the given test_id or test_file_name.")
+            return
+
+        # Delete the entries
+        for tests in tests_to_delete:
+            session.delete(tests)
+            print(f"Deleted test_id {tests.test_id}")
         session.commit()
         print("Entries successfully deleted.")
 
