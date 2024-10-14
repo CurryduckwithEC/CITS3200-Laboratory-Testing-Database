@@ -1,8 +1,20 @@
-# Group 18 Project - Database App
-(We need a better name)
+# Group 18 Project - Soil Database Explorer
+This application is a visualiser and database manageer for soil samples. It allows the upload and retreival of test data from excel files and plots it in the various graphs on the dashboard of the app.
 
-(Project description goes here)
-Lorem ipsum dolor sit amet...
+A simple encryption system for data is also included, allowing for simple access control to any distributed databases.
+
+A user guide is included in the repository.
+
+
+## Quickstart for First Use
+
+1. Download a release version of the application from the releses in the repository. 
+2. Download the empty database file named `empty.db` from the repository.
+    - You can rename the database file if desired.
+3. Run the executable, select your database from the landing page using the `Browse` button.
+4. Prepare your data in the format specified in the user guide, an example excel sheet is provided in the repository also.
+5. Upload your data and click refresh.
+
 
 
 ## Instructions for running a production build
@@ -21,26 +33,3 @@ npm install
 ```
 npm start
 ```
-
-## Branch naming standards
-For easy tracking of branches, please use the following structure for branches:
-```
-'branch_type'/descriptive name
-```
-Branch types are as follows:
-```
-feature/
-bugfix/
-hotfix/
-docs/
-stable_X.X.X/
-```
-
-
-## Project structure
-All backend code will be in ```/api```. The functions will be exposed as endpoints in the ```api.py``` file that runs the Zerorpc server which will be connected to in Javascript.
-
-Ensure grouping of functions into appropriate logical separate files (i.e. functions related to parsing of Excel in ```parser.py```)
-
-
-Frontend code can be split into multiple JavaScript files, a plotter.js is probably required in the future. Ensure critical functions are added to the preload to prevent undefined behaviour.
