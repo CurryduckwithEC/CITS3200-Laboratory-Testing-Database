@@ -219,7 +219,7 @@ app.whenReady().then(() => {
             setTimeout(() => {
                 console.log("Retrying to redirect to Dash at http://127.0.0.1:" + DASH_PORT);
                 mainWindow.loadURL("http://127.0.0.1:" + DASH_PORT);
-            }, 2000); // Delay of 5 seconds
+            }, 2000); // Delay of 2 seconds
         })
     })
 
