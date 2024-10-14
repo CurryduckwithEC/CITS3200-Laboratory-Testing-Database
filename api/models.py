@@ -17,7 +17,7 @@ class Entry(Base):
 
     entry_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
-    test_id: Mapped[int] = mapped_column(ForeignKey("test.test_id"))
+    test_id: Mapped[int] = mapped_column(ForeignKey("test.test_id", ondelete='CASCADE'))
     
     time_start_of_stage: Mapped[int] = mapped_column(nullable=False)
     axial_strain: Mapped[float] = mapped_column(nullable=False)

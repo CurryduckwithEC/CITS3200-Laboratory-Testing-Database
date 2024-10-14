@@ -10,7 +10,7 @@ import base64
 import dash_bootstrap_components as dbc
 import dash_table
 
-from datahandler import retrieve_entry_data, change_path, commit_new_entry, retrieve_test_specs, retrieve_filtered_data, change_key
+from datahandler import retrieve_entry_data, change_path, commit_new_entry, retrieve_test_specs, retrieve_filtered_data, change_key, delete_entry_by_test, delete_test_by_test
 from parser import parse_workbook
 
 css_cdn = ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"]
@@ -456,11 +456,16 @@ admin = dbc.Container(children=[
             columns=[
                 {"name": "Test ID", "id":"test_id"},
                 {"name": "File Name", "id": "filename"},
-                {"name": " ", "id": "download"}],  # Define columns
-              data = [
-                  {"test_id": row["test_id"],
+                {"name": " ", "id": "download"},
+                {"name": "Delete", "id": "delete"}    
+            ],  # Define columns
+                data = [
+                  {
+                      "test_id": row["test_id"],
                    "filename":row["test_file_name"],
-                   "download": "Download"}
+                   "download": "Download",
+                   "delete": "Delete"
+                   }
                   for _, row in df_test_specs.iterrows()],  # Convert dataframe to dictionary
                 style_table={'overflowX': 'auto'},  # Allow horizontal scrolling
                 style_header={
@@ -673,6 +678,7 @@ def update_table(n_clicks):
     [
         Input("drainage_checklist", "value"),
         Input("shearing_checklist", "value"),
+        Input("anisotropy_checklist", "value"),
         Input("anisotropy_slider", "value"),
         Input("consolidation_slider", "value"),
         Input("availability_checklist", "value"),
@@ -689,12 +695,16 @@ def update_table(n_clicks):
         Input("checkall_test_checklist", "value")
     ]
 )
-def update_figure(selected_drainage, selected_shearing, selected_anisotropy, selected_consolidation, selected_availability, selected_density, selected_plasticity, selected_psd,
+def update_figure(selected_drainage, selected_shearing, checked_anisotropy, selected_anisotropy, selected_consolidation, selected_availability, selected_density, selected_plasticity, selected_psd,
                   selected_axial, selected_p, selected_pwp, selected_q, selected_e, click, selected_all_sample, selected_all_test):
     
     # Check if filters and data are properly initialized
     print(f"Selected filters: {selected_drainage}, {selected_shearing}, {selected_anisotropy}, {selected_consolidation}, {selected_availability},{selected_density},{selected_plasticity},{selected_psd}")
-
+    if(checked_anisotropy == ['Isotropic']):
+        selected_anisotropy = [1.0, 1.0]
+    if(checked_anisotropy == ['Anisotropic']):
+        if(selected_anisotropy[0] >= 1.0 or selected_anisotropy[1] >= 1.0):
+            selected_anisotropy = [selected_anisotropy[0], 0.999]
     df_filtered = retrieve_filtered_data(
         drainage_types=selected_drainage,
         shearing_types=selected_shearing,
@@ -823,7 +833,8 @@ def create_excel_file(df, specs):
 
 @app.callback(
     Output("download-csv", "data"),
-    Input("data-table", "active_cell")
+    Input("data-table", "active_cell"),
+    prevent_initial_call=True
 )
 def download_csv(active_cell):
     if active_cell: 
@@ -851,5 +862,90 @@ def download_csv(active_cell):
             file = create_excel_file(test_df_d, test_specs_d)
 
             return dcc.send_bytes(file, f"{test_filename}")
+
+@app.callback(
+    Output("data-table", "data", allow_duplicate=True),
+    Input("data-table", "active_cell"),
+    State("data-table", "data"),
+    prevent_initial_call=True
+)
+def update_data_table_on_delete(active_cell, current_data):
+    if active_cell and active_cell["column_id"] == "delete":
+        row_idx = active_cell["row"]
+        test_id_to_delete = current_data[row_idx]["test_id"]
+
+        # Delete entry from the database
+        delete_entry_by_test(test_id=test_id_to_delete)
+        delete_test_by_test(test_id=test_id_to_delete)
+
+        # Update DataTable by removing the deleted entry
+        updated_data = [row for row in current_data if row["test_id"] != test_id_to_delete]
+
+        return updated_data
+
+    return dash.no_update
+
+@app.callback(
+    [
+        Output("axial_deviator_fig", "figure", allow_duplicate=True),
+        Output("axial_pwp_fig", "figure", allow_duplicate=True),
+        Output("q_p_fig", "figure", allow_duplicate=True),
+        Output("axial_vol_fig", "figure", allow_duplicate=True),
+        Output("e_logp_fig", "figure", allow_duplicate=True),
+        Output("stress_ratio_axial_fig", "figure", allow_duplicate=True),
+    ],
+    [
+        Input("drainage_checklist", "value"),
+        Input("shearing_checklist", "value"),
+        Input("anisotropy_checklist", "value"),
+        Input("anisotropy_slider", "value"),
+        Input("consolidation_slider", "value"),
+        Input("availability_checklist", "value"),
+        Input("density_checklist", "value"),
+        Input("plasticity_checklist", "value"),
+        Input("psd_checklist", "value"),
+        Input("axial_slider", "value"),
+        Input("p_slider", "value"),
+        Input("pwp_slider", "value"),
+        Input("q_slider", "value"),
+        Input("e_slider", "value"),
+        Input("refresh-button", "n_clicks"),
+    ],
+    prevent_initial_call=True
+)
+def update_graphs_based_on_filters(selected_drainage, selected_shearing, checked_anisotropy, selected_anisotropy, selected_consolidation, selected_availability,
+                                   selected_density, selected_plasticity, selected_psd, selected_axial, selected_p, selected_pwp,
+                                   selected_q, selected_e, refresh_click):
+    # Filter the data based on the inputs
+    if(checked_anisotropy == ['Isotropic']):
+        selected_anisotropy = [1.0, 1.0]
+    if(checked_anisotropy == ['Anisotropic']):
+        if(selected_anisotropy[0] >= 1.0 or selected_anisotropy[1] >= 1.0):
+            selected_anisotropy = [selected_anisotropy[0], 0.999]
+    df_filtered = retrieve_filtered_data(
+        drainage_types=selected_drainage,
+        shearing_types=selected_shearing,
+        anisotropy_range=selected_anisotropy,
+        consolidation_range=selected_consolidation,
+        availability_types=selected_availability,
+        density_types=selected_density,
+        plasticity_types=selected_plasticity,
+        psd_types=selected_psd
+    )
+
+    # Create the graphs with the filtered data
+    axial_deviator_fig = px.line(df_filtered, x="axial_strain", y=["deviator_stress", "p"])
+    axial_pwp_fig = px.line(df_filtered, x="axial_strain", y="shear_induced_pwp")
+    q_p_fig = px.line(df_filtered, x="p", y="deviator_stress")
+    axial_vol_fig = px.line(df_filtered, x="axial_strain", y="vol_strain")
+    e_logp_fig = px.line(df_filtered, x="p", y="void_ratio", log_x=True)
+    stress_ratio_axial_fig = px.line(df_filtered, x="axial_strain", y=df_filtered["deviator_stress"] / df_filtered["p"])
+
+    return axial_deviator_fig, axial_pwp_fig, q_p_fig, axial_vol_fig, e_logp_fig, stress_ratio_axial_fig
+
+
+
+
+
 
 app.run_server(port=port, debug=True)
