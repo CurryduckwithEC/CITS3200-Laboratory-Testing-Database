@@ -7,8 +7,9 @@ A user guide is included in the repository.
 
 
 ## Quickstart for First Use
+All resources mentioned below are located in the user_resources folder in the repository unless otherwise stated.
 
-1. Download a release version of the application from the releses in the repository. 
+1. Download a release version of the application from the releases section in the repository. 
 2. Download the empty database file named `empty.db` from the repository.
     - You can rename the database file if desired.
 3. Run the executable, select your database from the landing page using the `Browse` button.
