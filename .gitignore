@@ -4,4 +4,5 @@ package-lock*
 **/__pycache__/
 
 *.db
+!empty.db
 .DS_Store
