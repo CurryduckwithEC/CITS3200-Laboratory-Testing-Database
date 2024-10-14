@@ -15,6 +15,7 @@ All resources mentioned below are located in the user_resources folder in the re
 3. Run the executable, select your database from the landing page using the `Browse` button.
 4. Prepare your data in the format specified in the user guide, an example excel sheet is provided in the repository also.
 5. Upload your data and click refresh.
+6. When closing the application, ensure you go into the task manager and end from there. Failure to do this will require extra steps to be taken before launching again. This is covered in the user guide.
 
 
 
